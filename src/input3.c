@@ -34,20 +34,20 @@ All functions in this module are called from newline() in INPUT2.C.
 #define  EXTERN  extern
 #include "vars.h"
 
-/* Defined in enumstxt.h in EPANET.C */
+///* Defined in enumstxt.h in EPANET.C */
 extern char *MixTxt[];
 extern char *Fldname[]; 
+//
+///* Defined in INPUT2.C */
+//extern char      *Tok[MAXTOKS];
+//extern STmplist  *PrevPat;
+//extern STmplist  *PrevCurve;
+//
+//extern STmplist  *PrevCoord;
+//extern int       Ntokens;
 
-/* Defined in INPUT2.C */
-extern char      *Tok[MAXTOKS];
-extern STmplist  *PrevPat;
-extern STmplist  *PrevCurve;
 
-extern STmplist  *PrevCoord;
-extern int       Ntokens;
-
-
-int  juncdata()
+int  juncdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -63,31 +63,40 @@ int  juncdata()
    double    el,y = 0.0;
    Pdemand  demand;
    STmplist *pat;
+   Snode *Node = m->Node;
 
 /* Add new junction to data base */
-   n = Ntokens;
-   if (Nnodes == MaxNodes) return(200);
-   Njuncs++;
-   Nnodes++;
-   if (!addnodeID(Njuncs,Tok[0])) return(215);
+   n = m->Ntokens;
+   if (m->Nnodes == m->MaxNodes)
+     return(200);
+  
+   m->Njuncs++;
+   m->Nnodes++;
+  
+   if (!addnodeID(m, m->Njuncs, m->Tok[0]))
+     return(215);
 
+  
 /* Check for valid data */
-   if (n < 2) return(201);
-   if (!getfloat(Tok[1],&el)) return(202);
-   if (n >= 3  && !getfloat(Tok[2],&y)) return(202);
-   if (n >= 4)
-   {
-      pat = findID(Tok[3],Patlist);
-      if (pat == NULL) return(205);
+   if (n < 2)
+     return(201);
+   if (!getfloat(m->Tok[1],&el))
+     return(202);
+   if (n >= 3  && !getfloat(m->Tok[2],&y))
+     return(202);
+   if (n >= 4) {
+      pat = findID(m->Tok[3],m->Patlist);
+      if (pat == NULL)
+        return(205);
       p = pat->i;
    }
 
 /* Save junction data */
-   Node[Njuncs].El  = el;
-   Node[Njuncs].C0  = 0.0;
-   Node[Njuncs].S   = NULL;
-   Node[Njuncs].Ke  = 0.0;
-   Node[Njuncs].Rpt = 0;
+   Node[m->Njuncs].El  = el;
+   Node[m->Njuncs].C0  = 0.0;
+   Node[m->Njuncs].S   = NULL;
+   Node[m->Njuncs].Ke  = 0.0;
+   Node[m->Njuncs].Rpt = 0;
 
 /* Create a new demand record */
 /*** Updated 6/24/02 ***/
@@ -97,17 +106,17 @@ int  juncdata()
       if (demand == NULL) return(101);
       demand->Base = y;
       demand->Pat = p;
-      demand->next = Node[Njuncs].D;
-      Node[Njuncs].D = demand;
-      NodeDemand[Njuncs] = y;
+      demand->next = Node[m->Njuncs].D;
+      Node[m->Njuncs].D = demand;
+      m->NodeDemand[m->Njuncs] = y;
    }
-   else NodeDemand[Njuncs] = MISSING;
+   else m->NodeDemand[m->Njuncs] = MISSING;
 /*** end of update ***/
    return(0);
 }                        /* end of juncdata */
 
 
-int  tankdata()
+int  tankdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -134,15 +143,23 @@ int  tankdata()
          diam      = 0.0, /* Diameter */
          area;            /* X-sect. area */
    STmplist *t;
+   Snode *Node = m->Node;
+   Stank *Tank = m->Tank;
+   STmplist *Curvelist = m->Curvelist;
+   char **Tok = m->Tok;
 
 /* Add new tank to data base */
-   n = Ntokens;
-   if (Ntanks == MaxTanks
-   ||  Nnodes == MaxNodes) return(200);
-   Ntanks++;
-   Nnodes++;
-   i = MaxJuncs + Ntanks;                    /* i = node index.     */
-   if (!addnodeID(i,Tok[0])) return(215);    /* Add ID to database. */
+   n = m->Ntokens;
+  
+   if (m->Ntanks == m->MaxTanks ||  m->Nnodes == m->MaxNodes)
+     return(200);
+  
+   m->Ntanks++;
+   m->Nnodes++;
+   i = m->MaxJuncs + m->Ntanks;                    /* i = node index.     */
+  
+   if (!addnodeID(m, i, Tok[0]))
+     return(215);    /* Add ID to database. */
 
 /* Check for valid data */
    if (n < 2) return(201);                   /* Too few fields.   */
@@ -151,7 +168,7 @@ int  tankdata()
    {
       if (n == 3)                            /* Pattern supplied  */
       {
-         t = findID(Tok[2],Patlist);
+         t = findID(Tok[2], m->Patlist);
          if (t == NULL) return(205);
          p = t->i;
       }
@@ -177,18 +194,19 @@ int  tankdata()
       }
    }
 
+   int iTank = m->Ntanks;
    Node[i].Rpt           = 0;
    Node[i].El            = el;               /* Elevation.           */
    Node[i].C0            = 0.0;              /* Init. quality.       */
    Node[i].S             = NULL;             /* WQ source data       */     
    Node[i].Ke            = 0.0;              /* Emitter coeff.       */
-   Tank[Ntanks].Node     = i;                /* Node index.          */
-   Tank[Ntanks].H0       = initlevel;        /* Init. level.         */
-   Tank[Ntanks].Hmin     = minlevel;         /* Min. level.          */
-   Tank[Ntanks].Hmax     = maxlevel;         /* Max level.           */
-   Tank[Ntanks].A        = diam;             /* Diameter.            */
-   Tank[Ntanks].Pat      = p;                /* Fixed grade pattern. */
-   Tank[Ntanks].Kb       = MISSING;          /* Reaction coeff.      */
+   Tank[iTank].Node     = i;                /* Node index.          */
+   Tank[iTank].H0       = initlevel;        /* Init. level.         */
+   Tank[iTank].Hmin     = minlevel;         /* Min. level.          */
+   Tank[iTank].Hmax     = maxlevel;         /* Max level.           */
+   Tank[iTank].A        = diam;             /* Diameter.            */
+   Tank[iTank].Pat      = p;                /* Fixed grade pattern. */
+   Tank[iTank].Kb       = MISSING;          /* Reaction coeff.      */
    /*
    *******************************************************************
     NOTE: The min, max, & initial volumes set here are based on a     
@@ -197,19 +215,21 @@ int  tankdata()
    *******************************************************************
    */
    area = PI*SQR(diam)/4.0;
-   Tank[Ntanks].Vmin = area*minlevel;
-   if (minvol > 0.0) Tank[Ntanks].Vmin = minvol;
-   Tank[Ntanks].V0 = Tank[Ntanks].Vmin + area*(initlevel - minlevel);
-   Tank[Ntanks].Vmax = Tank[Ntanks].Vmin + area*(maxlevel - minlevel);
+   Tank[iTank].Vmin = area*minlevel;
+   if (minvol > 0.0) {
+     Tank[iTank].Vmin = minvol;
+   }
+   Tank[iTank].V0 = Tank[iTank].Vmin + area*(initlevel - minlevel);
+   Tank[iTank].Vmax = Tank[iTank].Vmin + area*(maxlevel - minlevel);
 
-   Tank[Ntanks].Vcurve   = vcurve;           /* Volume curve         */
-   Tank[Ntanks].MixModel = MIX1;             /* Completely mixed     */
-   Tank[Ntanks].V1max    = 1.0;              /* Compart. size ratio  */
+   Tank[iTank].Vcurve   = vcurve;           /* Volume curve         */
+   Tank[iTank].MixModel = MIX1;             /* Completely mixed     */
+   Tank[iTank].V1max    = 1.0;              /* Compart. size ratio  */
    return(0);
 }                        /* end of tankdata */
 
 
-int  pipedata()
+int  pipedata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -231,21 +251,28 @@ int  pipedata()
          rcoeff,                 /* Roughness coeff.  */
          lcoeff = 0.0;           /* Minor loss coeff. */
 
+  char **Tok = m->Tok;
+  
 /* Add new pipe to data base */
-   n = Ntokens;
-   if (Nlinks == MaxLinks) return(200);
-   Npipes++;
-   Nlinks++;
-   if (!addlinkID(Nlinks,Tok[0])) return(215);
+   n = m->Ntokens;
+   if (m->Nlinks == m->MaxLinks)
+     return(200);
+  
+   m->Npipes++;
+   m->Nlinks++;
+   if (!addlinkID(m, m->Nlinks, Tok[0])) return(215);
 
 /* Check for valid data */
-   if (n < 6) return(201);
-   if ((j1 = findnode(Tok[1])) == 0 ||
-       (j2 = findnode(Tok[2])) == 0
-      ) return(203);
+   if (n < 6) {
+     return(201);
+   }
+   if ((j1 = findnode(m,Tok[1])) == 0 || (j2 = findnode(m,Tok[2])) == 0) {
+     return(203);
+   }
 
 /*** Updated 10/25/00 ***/
-   if (j1 == j2) return(222);    
+   if (j1 == j2)
+     return(222);
 
    if (!getfloat(Tok[3],&length) ||
        !getfloat(Tok[4],&diam)   ||
@@ -278,6 +305,9 @@ int  pipedata()
    if (lcoeff < 0.0) return(202);
 
 /* Save pipe data */
+   Slink *Link = m->Link;
+   int Nlinks = m->Nlinks;
+  
    Link[Nlinks].N1    = j1;                  /* Start-node index */
    Link[Nlinks].N2    = j2;                  /* End-node index   */
    Link[Nlinks].Len   = length;              /* Length           */
@@ -293,7 +323,7 @@ int  pipedata()
 }                        /* end of pipedata */
 
 
-int  pumpdata()
+int  pumpdata(Model *mod)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -319,24 +349,31 @@ int  pumpdata()
    STmplist *t;                 /* Pattern record   */
 
 /* Add new pump to data base */
-   n = Ntokens;
-   if (Nlinks == MaxLinks ||
-       Npumps == MaxPumps
+   n = mod->Ntokens;
+  char **Tok = mod->Tok;
+  
+   if (mod->Nlinks == mod->MaxLinks ||
+       mod->Npumps == mod->MaxPumps
       ) return(200);
-   Nlinks++;
-   Npumps++;
-   if (!addlinkID(Nlinks,Tok[0])) return(215);
+   mod->Nlinks++;
+   mod->Npumps++;
+   if (!addlinkID(mod, mod->Nlinks, Tok[0])) return(215);
 
 /* Check for valid data */
    if (n < 4) return(201);
-   if ((j1 = findnode(Tok[1])) == 0 ||
-       (j2 = findnode(Tok[2])) == 0
+   if ((j1 = findnode(mod, Tok[1])) == 0 ||
+       (j2 = findnode(mod, Tok[2])) == 0
       ) return(203);
 
 /*** Updated 10/25/00 ***/
    if (j1 == j2) return(222);    
 
 /* Save pump data */
+  Slink *Link = mod->Link;
+  Spump *Pump = mod->Pump;
+  int Nlinks = mod->Nlinks;
+  int Npumps = mod->Npumps;
+  
    Link[Nlinks].N1    = j1;               /* Start-node index.  */
    Link[Nlinks].N2    = j2;               /* End-node index.    */
    Link[Nlinks].Diam  = Npumps;           /* Pump index.        */
@@ -358,15 +395,16 @@ int  pumpdata()
 
 /* If 4-th token is a number then input follows Version 1.x format */
 /* so retrieve pump curve parameters */
-   if (getfloat(Tok[3],&X[0]))
+   if (getfloat(Tok[3],&(mod->X[0])))
    {
       m = 1;
       for (j=4; j<n; j++)
       {
-         if (!getfloat(Tok[j],&X[m])) return(202);
+         if (!getfloat(Tok[j],&(mod->X[m])))
+           return(202);
          m++;
       }
-      return(getpumpcurve(m));          /* Get pump curve params */
+      return(getpumpcurve(mod, m));          /* Get pump curve params */
    }
 
 /* Otherwise input follows Version 2 format */
@@ -383,13 +421,13 @@ int  pumpdata()
       }
       else if (match(Tok[m-1],w_HEAD))      /* Custom pump curve      */
       {
-         t = findID(Tok[m],Curvelist);
+         t = findID(Tok[m],mod->Curvelist);
          if (t == NULL) return(206);
          Pump[Npumps].Hcurve = t->i;
       }
       else if (match(Tok[m-1],w_PATTERN))   /* Speed/status pattern */
       {
-         t = findID(Tok[m],Patlist);
+         t = findID(Tok[m],mod->Patlist);
          if (t == NULL) return(205);
          Pump[Npumps].Upat = t->i;
       }
@@ -406,7 +444,7 @@ int  pumpdata()
 }                        /* end of pumpdata */
 
 
-int  valvedata()
+int  valvedata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -427,20 +465,21 @@ int  valvedata()
          setting,               /* Valve setting      */
          lcoeff = 0.0;          /* Minor loss coeff.  */
    STmplist *t;                 /* Curve record       */
-
+   char **Tok = m->Tok;
+  
 /* Add new valve to data base */
-   n = Ntokens;
-   if (Nlinks == MaxLinks ||
-       Nvalves == MaxValves
+   n = m->Ntokens;
+   if (m->Nlinks == m->MaxLinks ||
+       m->Nvalves == m->MaxValves
       ) return(200);
-   Nvalves++;
-   Nlinks++;
-   if (!addlinkID(Nlinks,Tok[0])) return(215);
+   m->Nvalves++;
+   m->Nlinks++;
+   if (!addlinkID(m,m->Nlinks,Tok[0])) return(215);
 
 /* Check for valid data */
    if (n < 6) return(201);
-   if ((j1 = findnode(Tok[1])) == 0 ||
-       (j2 = findnode(Tok[2])) == 0
+   if ((j1 = findnode(m,Tok[1])) == 0 ||
+       (j2 = findnode(m,Tok[2])) == 0
       ) return(203);
 
 /*** Updated 10/25/00 ***/
@@ -457,7 +496,7 @@ int  valvedata()
    if (diam <= 0.0) return(202);             /* Illegal diameter.*/
    if (type == GPV)                          /* Headloss curve for GPV */
    {
-      t = findID(Tok[5],Curvelist);
+      t = findID(Tok[5],m->Curvelist);
       if (t == NULL) return(206);
       setting = t->i;
 
@@ -472,12 +511,17 @@ int  valvedata()
 
 /* Check that PRV, PSV, or FCV not connected to a tank & */
 /* check for illegal connections between pairs of valves.*/
-   if ((j1 > Njuncs || j2 > Njuncs) &&
+   if ((j1 > m->Njuncs || j2 > m->Njuncs) &&
        (type == PRV || type == PSV || type == FCV)
       ) return(219);
-   if (!valvecheck(type,j1,j2)) return(220);
+   if (!valvecheck(m,type,j1,j2)) return(220);
 
 /* Save valve data */
+  Slink *Link = m->Link;
+  Svalve *Valve = m->Valve;
+  int Nlinks = m->Nlinks;
+  int Nvalves = m->Nvalves;
+  
    Link[Nlinks].N1     = j1;                 /* Start-node index. */
    Link[Nlinks].N2     = j2;                 /* End-node index.   */
    Link[Nlinks].Diam   = diam;               /* Valve diameter.   */
@@ -494,7 +538,7 @@ int  valvedata()
 }                        /* end of valvedata */
 
 
-int  patterndata()
+int  patterndata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -510,13 +554,16 @@ int  patterndata()
    double x;
    SFloatlist *f;
    STmplist   *p;
-   n = Ntokens - 1;
+   char **Tok = m->Tok;
+   STmplist  *PrevPat = m->PrevPat;
+  
+   n = m->Ntokens - 1;
    if (n < 1) return(201);            /* Too few values        */
    if (                               /* Check for new pattern */
           PrevPat != NULL &&
           strcmp(Tok[0],PrevPat->ID) == 0
       ) p = PrevPat;
-   else p = findID(Tok[0],Patlist);
+   else p = findID(Tok[0],m->Patlist);
    if (p == NULL) return(205);
    for (i=1; i<=n; i++)               /* Add multipliers to list */
    {
@@ -527,13 +574,13 @@ int  patterndata()
        f->next = p->x;
        p->x = f;
    }
-   Pattern[p->i].Length += n;         /* Save # multipliers for pattern */
+   m->Pattern[p->i].Length += n;         /* Save # multipliers for pattern */
    PrevPat = p;                       /* Set previous pattern pointer */
    return(0);
 }                        /* end of patterndata */
 
 
-int  curvedata()
+int  curvedata(Model *m)
 /*
 **------------------------------------------------------
 **  Input:   none                                        
@@ -548,14 +595,17 @@ int  curvedata()
    double      x,y;
    SFloatlist *fx, *fy;
    STmplist   *c;
+  
+  char **Tok = m->Tok;
+  STmplist  *PrevCurve = m->PrevCurve;
 
    /* Check for valid curve ID */
-   if (Ntokens < 3) return(201);
+   if (m->Ntokens < 3) return(201);
    if (
           PrevCurve != NULL &&
           strcmp(Tok[0],PrevCurve->ID) == 0
       ) c = PrevCurve;
-   else c = findID(Tok[0],Curvelist);
+   else c = findID(Tok[0],m->Curvelist);
    if (c == NULL) return(205);
 
    /* Check for valid data */
@@ -572,14 +622,14 @@ int  curvedata()
    fy->value = y;
    fy->next = c->y;
    c->y = fy;
-   Curve[c->i].Npts++;
+   m->Curve[c->i].Npts++;
 
    /* Save the pointer to this curve */
    PrevCurve = c;
    return(0);
 }
 
-int  coordata()
+int  coordata(Model *m)
 /*
  **--------------------------------------------------------------
  **  Input:   none
@@ -595,14 +645,17 @@ int  coordata()
 	SFloatlist *fx, *fy;
 	STmplist   *c;
   
+  char **Tok = m->Tok;
+  STmplist  *PrevCoord = m->PrevCoord;
+  
 	/* Check for valid curve ID */
-	if (Ntokens < 3) return(201);
+	if (m->Ntokens < 3) return(201);
   
 	if (
       PrevCoord != NULL &&
       strcmp(Tok[0],PrevCoord->ID) == 0
       ) c = PrevCoord;
-	else c = findID(Tok[0],Coordlist);
+	else c = findID(Tok[0],m->Coordlist);
   
   //	c = findID(Tok[0],Coordlist);
 	if (c == NULL) return(205);
@@ -633,7 +686,7 @@ int  coordata()
   
 }                        /* end of coordata */
 
-int  demanddata()
+int  demanddata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -653,9 +706,13 @@ int  demanddata()
    double y;
    Pdemand demand;
    STmplist *pat;
+  
+  char **Tok = m->Tok;
+  double *NodeDemand = m->NodeDemand;
+  Snode *Node = m->Node;
 
 /* Extract data from tokens */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 2) return(201); 
    if (!getfloat(Tok[1],&y)) return(202);
 
@@ -663,16 +720,16 @@ int  demanddata()
    if (match(Tok[0],w_MULTIPLY))
    {
       if (y <= 0.0) return(202);
-      else Dmult = y;
+      else m->Dmult = y;
       return(0);
    }
 
 /* Otherwise find node (and pattern) being referenced */
-   if ((j = findnode(Tok[0])) == 0) return(208);
-   if (j > Njuncs) return(208);
+   if ((j = findnode(m,Tok[0])) == 0) return(208);
+   if (j > m->Njuncs) return(208);
    if (n >= 3)
    {
-      pat = findID(Tok[2],Patlist);
+      pat = findID(Tok[2],m->Patlist);
       if (pat == NULL)  return(205);
       p = pat->i;
    }
@@ -704,7 +761,7 @@ int  demanddata()
 }                        /* end of demanddata */
 
 
-int  controldata()
+int  controldata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -727,13 +784,17 @@ int  controldata()
    double setting = MISSING,    /* Link setting           */
          time = 0.0,           /* Simulation time        */
          level = 0.0;          /* Pressure or tank level */
-
+  
+  char **Tok = m->Tok;
+  Slink *Link = m->Link;
+  Scontrol *Control = m->Control;
+  
 /* Check for sufficient number of input tokens */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 6) return(201);
 
 /* Check that controlled link exists */
-   k = findlink(Tok[1]);
+   k = findlink(m,Tok[1]);
    if (k == 0) return(204);
    type = Link[k].Type;
    if (type == CV) return(207);         /* Cannot control check valve. */
@@ -775,7 +836,7 @@ int  controldata()
    else
    {
       if (n < 8) return(201);
-      if ((i = findnode(Tok[5])) == 0) return(203);
+      if ((i = findnode(m,Tok[5])) == 0) return(203);
       if      (match(Tok[6],w_BELOW)) type = LOWLEVEL;
       else if (match(Tok[6],w_ABOVE)) type = HILEVEL;
       else return(201);
@@ -797,8 +858,9 @@ int  controldata()
    }
 
 /* Fill in fields of control data structure */
-   Ncontrols++;
-   if (Ncontrols > MaxControls) return(200);
+   m->Ncontrols++;
+  int Ncontrols = m->Ncontrols;
+   if (Ncontrols > m->MaxControls) return(200);
    Control[Ncontrols].Link     = k;
    Control[Ncontrols].Node     = i;
    Control[Ncontrols].Type     = type;
@@ -812,7 +874,7 @@ int  controldata()
 }                        /* end of controldata */
 
 
-int  sourcedata()
+int  sourcedata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -834,10 +896,11 @@ int  sourcedata()
    double c0 = 0;             /* Init. quality */
    STmplist *pat;
    Psource  source;
-
-   n = Ntokens;
+   char **Tok = m->Tok;
+  
+   n = m->Ntokens;
    if (n < 2) return(201);
-   if ((j = findnode(Tok[0])) == 0) return(203);
+   if ((j = findnode(m,Tok[0])) == 0) return(203);
    /* NOTE: Under old format, SourceType not supplied so let  */
    /*       i = index of token that contains quality value.   */
    i = 2;
@@ -850,7 +913,7 @@ int  sourcedata()
 
    if (n > i+1 && strlen(Tok[i+1]) > 0 && strcmp(Tok[i+1], "*") != 0 )         //(2.00.11 - LR)
    {
-       pat = findID(Tok[i+1],Patlist);
+       pat = findID(Tok[i+1],m->Patlist);
        if (pat == NULL) return(205);            /* Illegal pattern. */
        p = pat->i;
    }
@@ -860,12 +923,12 @@ int  sourcedata()
    source->C0 = c0;
    source->Pat = p;
    source->Type = type;
-   Node[j].S = source;
+   m->Node[j].S = source;
    return(0);
 }                        /* end of sourcedata */
 
 
-int  emitterdata()
+int  emitterdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -880,19 +943,20 @@ int  emitterdata()
    int   j,                  /* Node index    */
          n;                  /* # data items  */
    double k;                  /* Flow coeff,   */
-
-   n = Ntokens;
+   char **Tok = m->Tok;
+   n = m->Ntokens;
+  
    if (n < 2) return(201); 
-   if ((j = findnode(Tok[0])) == 0) return(203);
-   if (j > Njuncs) return(209);                 /* Not a junction.*/
+   if ((j = findnode(m,Tok[0])) == 0) return(203);
+   if (j > m->Njuncs) return(209);                 /* Not a junction.*/
    if (!getfloat(Tok[1],&k)) return(202);
    if (k < 0.0) return(202);
-   Node[j].Ke = k;
+   m->Node[j].Ke = k;
    return(0);
 }
 
 
-int  qualdata()
+int  qualdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -908,13 +972,17 @@ int  qualdata()
    int   j,n;
    long  i,i0,i1;
    double c0;
-
+  
+  int Nnodes = m->Nnodes;
+  Snode *Node = m->Node;
+  char **Tok = m->Tok;
+  
    if (Nnodes == 0) return(208);        /* No nodes defined yet */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 2) return(0);
    if (n == 2)                          /* Single node entered  */
    {
-      if ( (j = findnode(Tok[0])) == 0) return(0);
+      if ( (j = findnode(m,Tok[0])) == 0) return(0);
       if (!getfloat(Tok[1],&c0)) return(209);
       Node[j].C0 = c0;
    }
@@ -943,7 +1011,7 @@ int  qualdata()
 }                        /* end of qualdata */
 
 
-int  reactdata()
+int  reactdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -966,20 +1034,28 @@ int  reactdata()
    long  i,i1,i2;
    double y;
 
+  Snode *Node = m->Node;
+  Slink *Link = m->Link;
+  Stank *Tank = m->Tank;
+  int Njuncs = m->Njuncs;
+  int Nnodes = m->Nnodes;
+  int Nlinks = m->Nlinks;
+  char **Tok = m->Tok;
+  
 /* Skip line if insufficient data */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 3) return(0);
 
 /* Process input depending on keyword */
    if (match(Tok[0],w_ORDER))                    /* Reaction order */
    {
       if (!getfloat(Tok[n-1],&y)) return(213);
-      if      (match(Tok[1],w_BULK)) BulkOrder = y;
-      else if (match(Tok[1],w_TANK)) TankOrder = y;
+      if      (match(Tok[1],w_BULK)) m->BulkOrder = y;
+      else if (match(Tok[1],w_TANK)) m->TankOrder = y;
       else if (match(Tok[1],w_WALL))
       {
-         if (y == 0.0) WallOrder = 0.0;
-         else if (y == 1.0) WallOrder = 1.0;
+         if (y == 0.0) m->WallOrder = 0.0;
+         else if (y == 1.0) m->WallOrder = 1.0;
          else return(213);
       }
       else return(213);
@@ -988,21 +1064,21 @@ int  reactdata()
    if (match(Tok[0],w_ROUGHNESS))                /* Roughness factor */
    {
       if (!getfloat(Tok[n-1],&y)) return(213);
-      Rfactor = y;
+      m->Rfactor = y;
       return(0);
    }
    if (match(Tok[0],w_LIMITING))                 /* Limiting potential */
    {
       if (!getfloat(Tok[n-1],&y)) return(213);
       /*if (y < 0.0) return(213);*/
-      Climit = y;
+      m->Climit = y;
       return(0);
    }
    if (match(Tok[0],w_GLOBAL))                   /* Global rates */
    {
       if (!getfloat(Tok[n-1],&y)) return(213);
-      if      (match(Tok[1],w_BULK)) Kbulk = y;
-      else if (match(Tok[1],w_WALL)) Kwall = y;
+      if      (match(Tok[1],w_BULK)) m->Kbulk = y;
+      else if (match(Tok[1],w_WALL)) m->Kwall = y;
       else return(201);
       return(0);
    }
@@ -1016,7 +1092,7 @@ int  reactdata()
       if (!getfloat(Tok[n-1],&y)) return(209);   /* Rate coeff. */
       if (n == 3)
       {
-          if ( (j = findnode(Tok[1])) <= Njuncs) return(0);
+          if ( (j = findnode(m,Tok[1])) <= Njuncs) return(0);
           Tank[j-Njuncs].Kb = y;
       }
       else
@@ -1042,7 +1118,7 @@ int  reactdata()
       if (Nlinks == 0) return(0);
       if (n == 3)                                /* Single link */
       {
-         if ( (j = findlink(Tok[1])) == 0) return(0);
+         if ( (j = findlink(m,Tok[1])) == 0) return(0);
          if (item == 1) Link[j].Kb = y;
          else           Link[j].Kw = y;
       }
@@ -1074,7 +1150,7 @@ int  reactdata()
 }                        /* end of reactdata */
 
 
-int  mixingdata()
+int  mixingdata(Model *m)
 /*
 **-------------------------------------------------------------
 **  Input:   none                                               
@@ -1089,10 +1165,15 @@ int  mixingdata()
    int   i,j,n;
    double v;
 
+  Stank *Tank = m->Tank;
+  int Njuncs = m->Njuncs;
+  int Nnodes = m->Nnodes;
+  char **Tok = m->Tok;
+  
    if (Nnodes == 0) return(208);        /* No nodes defined yet */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 2) return(0);
-   if ( (j = findnode(Tok[0])) <= Njuncs) return(0);
+   if ( (j = findnode(m,Tok[0])) <= Njuncs) return(0);
    if ( (i = findmatch(Tok[1],MixTxt)) < 0) return(201);
    v = 1.0;
    if ( (i == MIX2) &&
@@ -1108,7 +1189,7 @@ int  mixingdata()
 }
 
 
-int  statusdata()
+int  statusdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1126,8 +1207,12 @@ int  statusdata()
    double y = 0.0;
    char  status = ACTIVE;
 
+  Slink *Link = m->Link;
+  int Nlinks = m->Nlinks;
+  char **Tok = m->Tok;
+
    if (Nlinks == 0) return(210);
-   n = Ntokens - 1;
+   n = m->Ntokens - 1;
    if (n < 1) return(201);
 
 /* Check for legal status setting */
@@ -1139,7 +1224,7 @@ int  statusdata()
 /* Single link ID supplied */
    if (n == 1)
    {
-      if ( (j = findlink(Tok[0])) == 0) return(0);
+      if ( (j = findlink(m,Tok[0])) == 0) return(0);
       /* Cannot change status of a Check Valve */
       if (Link[j].Type == CV) return(211);
 
@@ -1148,7 +1233,7 @@ int  statusdata()
       if (Link[j].Type == GPV
       &&  status == ACTIVE)   return(211);
 
-      changestatus(j,status,y);
+      changestatus(m,j,status,y);
    }
 
 /* Range of ID's supplied */
@@ -1160,20 +1245,20 @@ int  statusdata()
          for (j=1; j<=Nlinks; j++)
          {
             i = atol(Link[j].ID);
-            if (i >= i0 && i <= i1) changestatus(j,status,y);
+            if (i >= i0 && i <= i1) changestatus(m,j,status,y);
          }
       }
       else
          for (j=1; j<=Nlinks; j++)
             if ( (strcmp(Tok[0],Link[j].ID) <= 0) &&
                  (strcmp(Tok[1],Link[j].ID) >= 0)
-               ) changestatus(j,status,y);
+               ) changestatus(m,j,status,y);
    }
    return(0);
 }              /* end of statusdata */
 
 
-int  energydata()
+int  energydata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1191,15 +1276,22 @@ int  energydata()
    double y;
    STmplist *t;
 
+  Slink *Link = m->Link;
+  Spump *Pump = m->Pump;
+  STmplist *Patlist = m->Patlist;
+  STmplist *Curvelist = m->Curvelist;
+  char **Tok = m->Tok;
+
+  
 /* Check for sufficient data */
-   n = Ntokens;
+   n = m->Ntokens;
    if (n < 3) return(201);
 
 /* Check first keyword */
    if (match(Tok[0],w_DMNDCHARGE))               /* Demand charge */
    {
       if (!getfloat(Tok[2], &y)) return(213);
-      Dcost = y;
+      m->Dcost = y;
       return(0);
    }
    if (match(Tok[0],w_GLOBAL))                   /* Global parameter */
@@ -1209,10 +1301,10 @@ int  energydata()
    else if (match(Tok[0],w_PUMP))                /* Pump-specific parameter */
    {
       if (n < 4) return(201);
-      k = findlink(Tok[1]);                      /* Check that pump exists */
+      k = findlink(m,Tok[1]);                      /* Check that pump exists */
       if (k == 0) return(216);
       if (Link[k].Type != PUMP) return(216);
-      j = PUMPINDEX(k);
+      j = Link[k].pumpLinkIdx;
    }
    else return(201);
 
@@ -1224,7 +1316,7 @@ int  energydata()
          if (j == 0) return(213);
          else return(217);
       }
-      if (j == 0) Ecost = y;
+      if (j == 0) m->Ecost = y;
       else Pump[j].Ecost = y;
       return(0);
    }    
@@ -1236,7 +1328,7 @@ int  energydata()
          if (j == 0) return(213);
          else return(217);
       }
-      if (j == 0) Epat = t->i;
+      if (j == 0) m->Epat = t->i;
       else Pump[j].Epat = t->i;
       return(0);
    }
@@ -1246,7 +1338,7 @@ int  energydata()
       {
          if (!getfloat(Tok[n-1], &y)) return(213);
          if (y <= 0.0) return(213);
-         Epump = y;
+         m->Epump = y;
       }
       else
       {
@@ -1260,7 +1352,7 @@ int  energydata()
 }
 
 
-int  reportdata()
+int  reportdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1285,7 +1377,10 @@ int  reportdata()
    int    i,j,n;
    double  y;
 
-   n = Ntokens - 1;
+  SField *Field = m->Field;
+  char **Tok = m->Tok;
+
+   n = m->Ntokens - 1;
    if (n < 1) return(201);
 
 /* Value for page size */
@@ -1293,32 +1388,32 @@ int  reportdata()
    {
       if (!getfloat(Tok[n],&y))   return(213);
       if (y < 0.0 || y > 255.0) return(213);
-      PageSize = (int) y;
+      m->PageSize = (int) y;
       return(0);
    }
 
 /* Request that status reports be written */
    if (match(Tok[0],w_STATUS))
    {
-      if (match(Tok[n],w_NO))   Statflag = FALSE;
-      if (match(Tok[n],w_YES))  Statflag = TRUE;
-      if (match(Tok[n],w_FULL)) Statflag = FULL;
+      if (match(Tok[n],w_NO))   m->Statflag = FALSE;
+      if (match(Tok[n],w_YES))  m->Statflag = TRUE;
+      if (match(Tok[n],w_FULL)) m->Statflag = FULL;
       return(0);
    }
 
 /* Request summary report */
    if (match(Tok[0],w_SUMMARY))
    {
-      if (match(Tok[n],w_NO))  Summaryflag = FALSE;
-      if (match(Tok[n],w_YES)) Summaryflag = TRUE;
+      if (match(Tok[n],w_NO))  m->Summaryflag = FALSE;
+      if (match(Tok[n],w_YES)) m->Summaryflag = TRUE;
       return(0);
    }
 
 /* Request error/warning message reporting */
    if (match(Tok[0],w_MESSAGES))
    {
-      if (match(Tok[n],w_NO))  Messageflag = FALSE;
-      if (match(Tok[n],w_YES)) Messageflag = TRUE;
+      if (match(Tok[n],w_NO))  m->Messageflag = FALSE;
+      if (match(Tok[n],w_YES)) m->Messageflag = TRUE;
       return(0);
    }
    
@@ -1326,25 +1421,25 @@ int  reportdata()
 /* Request an energy usage report */
    if (match(Tok[0],w_ENERGY))
    {
-      if (match(Tok[n],w_NO))  Energyflag = FALSE;
-      if (match(Tok[n],w_YES)) Energyflag = TRUE;
+      if (match(Tok[n],w_NO))  m->Energyflag = FALSE;
+      if (match(Tok[n],w_YES)) m->Energyflag = TRUE;
       return(0);
    }
 
 /* Particular reporting nodes specified */
    if (match(Tok[0],w_NODE))
    {
-      if      (match(Tok[n],w_NONE)) Nodeflag = 0;  /* No nodes */
-      else if (match(Tok[n],w_ALL))  Nodeflag = 1;  /* All nodes */
+      if      (match(Tok[n],w_NONE)) m->Nodeflag = 0;  /* No nodes */
+      else if (match(Tok[n],w_ALL))  m->Nodeflag = 1;  /* All nodes */
       else
       {
-         if (Nnodes == 0) return(208);
+         if (m->Nnodes == 0) return(208);
          for (i=1; i<=n; i++)
          {
-            if ( (j = findnode(Tok[i])) == 0) return(208);
-            Node[j].Rpt = 1;
+            if ( (j = findnode(m,Tok[i])) == 0) return(208);
+            m->Node[j].Rpt = 1;
          }
-         Nodeflag = 2;
+         m->Nodeflag = 2;
       }
       return(0);
    }
@@ -1352,17 +1447,17 @@ int  reportdata()
 /* Particular reporting links specified */
    if (match(Tok[0],w_LINK))
    {
-      if      (match(Tok[n],w_NONE)) Linkflag = 0;
-      else if (match(Tok[n],w_ALL))  Linkflag = 1;
+      if      (match(Tok[n],w_NONE)) m->Linkflag = 0;
+      else if (match(Tok[n],w_ALL))  m->Linkflag = 1;
       else
       {
-         if (Nlinks == 0) return(210);
+         if (m->Nlinks == 0) return(210);
          for (i=1; i<=n; i++)
          {
-            if ( (j = findlink(Tok[i])) == 0) return(210);
-            Link[j].Rpt = 1;
+            if ( (j = findlink(m,Tok[i])) == 0) return(210);
+            m->Link[j].Rpt = 1;
          }
-         Linkflag = 2;
+         m->Linkflag = 2;
       }
       return(0);
    }
@@ -1376,7 +1471,7 @@ int  reportdata()
 /*****************************************************************/            //(2.00.11 - LR)
    {
       if (i > FRICTION) return(201);
-      if (Ntokens == 1 || match(Tok[1],w_YES))
+      if (m->Ntokens == 1 || match(Tok[1],w_YES))
       {
          Field[i].Enabled = TRUE;
          return(0);
@@ -1386,7 +1481,7 @@ int  reportdata()
          Field[i].Enabled = FALSE;
          return(0);
       }
-      if (Ntokens < 3) return(201);
+      if (m->Ntokens < 3) return(201);
       if      (match(Tok[1],w_BELOW))  j = LOW;   /* Get relation operator */
       else if (match(Tok[1],w_ABOVE))  j = HI;    /* or precision keyword  */
       else if (match(Tok[1],w_PRECISION)) j = PREC;
@@ -1404,7 +1499,7 @@ int  reportdata()
 /* Name of external report file */
    if (match(Tok[0],w_FILE))
    {
-      strncpy(Rpt2Fname,Tok[1],MAXFNAME);
+      strncpy(m->Rpt2Fname,Tok[1],MAXFNAME);
       return(0);
    }
 
@@ -1413,7 +1508,7 @@ int  reportdata()
 }                        /* end of reportdata */
 
 
-int  timedata()
+int  timedata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1437,19 +1532,21 @@ int  timedata()
    int    n;
    long   t;
    double  y;
+  char **Tok = m->Tok;
 
-   n = Ntokens - 1;
+  
+   n = m->Ntokens - 1;
    if (n < 1) return(201);
 
 /* Check if setting time statistic flag */
    if (match(Tok[0],w_STATISTIC))
    {
-      if      (match(Tok[n],w_NONE))  Tstatflag = SERIES;
-      else if (match(Tok[n],w_NO))    Tstatflag = SERIES;
-      else if (match(Tok[n],w_AVG))   Tstatflag = AVG;
-      else if (match(Tok[n],w_MIN))   Tstatflag = MIN;
-      else if (match(Tok[n],w_MAX))   Tstatflag = MAX;
-      else if (match(Tok[n],w_RANGE)) Tstatflag = RANGE;
+      if      (match(Tok[n],w_NONE))  m->Tstatflag = SERIES;
+      else if (match(Tok[n],w_NO))    m->Tstatflag = SERIES;
+      else if (match(Tok[n],w_AVG))   m->Tstatflag = AVG;
+      else if (match(Tok[n],w_MIN))   m->Tstatflag = MIN;
+      else if (match(Tok[n],w_MAX))   m->Tstatflag = MAX;
+      else if (match(Tok[n],w_RANGE)) m->Tstatflag = RANGE;
       else return(201);
       return(0);
    }
@@ -1471,30 +1568,30 @@ int  timedata()
    }
    t = (long)(3600.0*y+0.5);
 /* Process the value assigned to the matched parameter */
-   if      (match(Tok[0],w_DURATION))  Dur = t;      /* Simulation duration */
-   else if (match(Tok[0],w_HYDRAULIC)) Hstep = t;    /* Hydraulic time step */
-   else if (match(Tok[0],w_QUALITY))   Qstep = t;    /* Quality time step   */
-   else if (match(Tok[0],w_RULE))      Rulestep = t; /* Rule time step      */
+   if      (match(Tok[0],w_DURATION))  m->Dur = t;      /* Simulation duration */
+   else if (match(Tok[0],w_HYDRAULIC)) m->Hstep = t;    /* Hydraulic time step */
+   else if (match(Tok[0],w_QUALITY))   m->Qstep = t;    /* Quality time step   */
+   else if (match(Tok[0],w_RULE))      m->Rulestep = t; /* Rule time step      */
    else if (match(Tok[0],w_MINIMUM))   return(0);    /* Not used anymore    */
    else if (match(Tok[0],w_PATTERN))
    {
-      if (match(Tok[1],w_TIME))       Pstep = t;     /* Pattern time step   */
-      else if (match(Tok[1],w_START)) Pstart = t;    /* Pattern start time  */
+      if (match(Tok[1],w_TIME))       m->Pstep = t;     /* Pattern time step   */
+      else if (match(Tok[1],w_START)) m->Pstart = t;    /* Pattern start time  */
       else return(201);
    }
    else if (match(Tok[0],w_REPORT))
    {
-      if      (match(Tok[1],w_TIME))  Rstep = t;     /* Reporting time step  */
-      else if (match(Tok[1],w_START)) Rstart = t;    /* Reporting start time */
+      if      (match(Tok[1],w_TIME))  m->Rstep = t;     /* Reporting time step  */
+      else if (match(Tok[1],w_START)) m->Rstart = t;    /* Reporting start time */
       else return(201);
    }                                                 /* Simulation start time*/
-   else if (match(Tok[0],w_START))    Tstart = t % SECperDAY; 
+   else if (match(Tok[0],w_START))    m->Tstart = t % SECperDAY;
    else return(201);
    return(0);
 }                        /* end of timedata */
 
 
-int  optiondata()
+int  optiondata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1505,14 +1602,14 @@ int  optiondata()
 {
    int i,n;
 
-   n = Ntokens - 1;
-   i = optionchoice(n);         /* Option is a named choice    */
+   n = m->Ntokens - 1;
+   i = optionchoice(m,n);         /* Option is a named choice    */
    if (i >= 0) return(i);
-   return(optionvalue(n));      /* Option is a numerical value */
+   return(optionvalue(m,n));      /* Option is a numerical value */
 }                        /* end of optiondata */
 
 
-int  optionchoice(int n)
+int  optionchoice(Model *m, int n)
 /*
 **--------------------------------------------------------------
 **  Input:   n = index of last input token saved in Tok[]          
@@ -1532,83 +1629,85 @@ int  optionchoice(int n)
 **--------------------------------------------------------------
 */
 {
+  char **Tok = m->Tok;
+
   /* Check if 1st token matches a parameter name and */
   /* process the input for the matched parameter     */
    if (n < 0) return(201);
    if (match(Tok[0],w_UNITS))
    {
       if (n < 1) return(0);
-      else if (match(Tok[1],w_CFS))  Flowflag = CFS;
-      else if (match(Tok[1],w_GPM))  Flowflag = GPM;
-      else if (match(Tok[1],w_AFD))  Flowflag = AFD;
-      else if (match(Tok[1],w_MGD))  Flowflag = MGD;
-      else if (match(Tok[1],w_IMGD)) Flowflag = IMGD;
-      else if (match(Tok[1],w_LPS))  Flowflag = LPS;
-      else if (match(Tok[1],w_LPM))  Flowflag = LPM;
-      else if (match(Tok[1],w_CMH))  Flowflag = CMH;
-      else if (match(Tok[1],w_CMD))  Flowflag = CMD;
-      else if (match(Tok[1],w_MLD))  Flowflag = MLD;
-      else if (match(Tok[1],w_SI))   Flowflag = LPS;
+      else if (match(Tok[1],w_CFS))  m->Flowflag = CFS;
+      else if (match(Tok[1],w_GPM))  m->Flowflag = GPM;
+      else if (match(Tok[1],w_AFD))  m->Flowflag = AFD;
+      else if (match(Tok[1],w_MGD))  m->Flowflag = MGD;
+      else if (match(Tok[1],w_IMGD)) m->Flowflag = IMGD;
+      else if (match(Tok[1],w_LPS))  m->Flowflag = LPS;
+      else if (match(Tok[1],w_LPM))  m->Flowflag = LPM;
+      else if (match(Tok[1],w_CMH))  m->Flowflag = CMH;
+      else if (match(Tok[1],w_CMD))  m->Flowflag = CMD;
+      else if (match(Tok[1],w_MLD))  m->Flowflag = MLD;
+      else if (match(Tok[1],w_SI))   m->Flowflag = LPS;
       else return(201);
    }
    else if (match(Tok[0],w_PRESSURE))
    {
       if (n < 1) return(0);
-      else if (match(Tok[1],w_PSI))    Pressflag = PSI;
-      else if (match(Tok[1],w_KPA))    Pressflag = KPA;
-      else if (match(Tok[1],w_METERS)) Pressflag = METERS;
+      else if (match(Tok[1],w_PSI))    m->Pressflag = PSI;
+      else if (match(Tok[1],w_KPA))    m->Pressflag = KPA;
+      else if (match(Tok[1],w_METERS)) m->Pressflag = METERS;
       else return(201);
    }
    else if (match(Tok[0],w_HEADLOSS))
    {
       if (n < 1) return(0);
-      else if (match(Tok[1],w_HW)) Formflag = HW;
-      else if (match(Tok[1],w_DW)) Formflag = DW;
-      else if (match(Tok[1],w_CM)) Formflag = CM;
+      else if (match(Tok[1],w_HW)) m->Formflag = HW;
+      else if (match(Tok[1],w_DW)) m->Formflag = DW;
+      else if (match(Tok[1],w_CM)) m->Formflag = CM;
       else return(201);
    }
    else if (match(Tok[0],w_HYDRAULIC))
    {
       if (n < 2) return(0);
-      else if (match(Tok[1],w_USE))  Hydflag = USE;
-      else if (match(Tok[1],w_SAVE)) Hydflag = SAVE;
+      else if (match(Tok[1],w_USE))  m->Hydflag = USE;
+      else if (match(Tok[1],w_SAVE)) m->Hydflag = SAVE;
       else return(201);
-      strncpy(HydFname,Tok[2],MAXFNAME);
+      strncpy(m->HydFname,Tok[2],MAXFNAME);
    }
    else if (match(Tok[0],w_QUALITY))
    {
       if (n < 1) return(0);
-      else if (match(Tok[1],w_NONE))  Qualflag = NONE;
-      else if (match(Tok[1],w_CHEM))  Qualflag = CHEM;
-      else if (match(Tok[1],w_AGE))   Qualflag = AGE;
-      else if (match(Tok[1],w_TRACE)) Qualflag = TRACE;
+      else if (match(Tok[1],w_NONE))  m->Qualflag = NONE;
+      else if (match(Tok[1],w_CHEM))  m->Qualflag = CHEM;
+      else if (match(Tok[1],w_AGE))   m->Qualflag = AGE;
+      else if (match(Tok[1],w_TRACE)) m->Qualflag = TRACE;
       else
       {
-         Qualflag = CHEM;
-         strncpy(ChemName,Tok[1],MAXID);
-         if (n >= 2) strncpy(ChemUnits,Tok[2],MAXID);
+         m->Qualflag = CHEM;
+         strncpy(m->ChemName,Tok[1],MAXID);
+         if (n >= 2) strncpy(m->ChemUnits,Tok[2],MAXID);
       }
-      if (Qualflag == TRACE)                  /* Source tracing option */
+      if (m->Qualflag == TRACE)                  /* Source tracing option */
       {
       /* Copy Trace Node ID to Tok[0] for error reporting */
          strcpy(Tok[0],"");
          if (n < 2) return(212);
          strcpy(Tok[0],Tok[2]);
-         TraceNode = findnode(Tok[2]);
-         if (TraceNode == 0) return(212);
-         strncpy(ChemName,u_PERCENT,MAXID);
-         strncpy(ChemUnits,Tok[2],MAXID);
+         m->TraceNode = findnode(m,Tok[2]);
+         if (m->TraceNode == 0) return(212);
+         strncpy(m->ChemName,u_PERCENT,MAXID);
+         strncpy(m->ChemUnits,Tok[2],MAXID);
       }
-      if (Qualflag == AGE)
+      if (m->Qualflag == AGE)
       {
-         strncpy(ChemName,w_AGE,MAXID);
-         strncpy(ChemUnits,u_HOURS,MAXID);
+         strncpy(m->ChemName,w_AGE,MAXID);
+         strncpy(m->ChemUnits,u_HOURS,MAXID);
       }
    }
    else if (match(Tok[0],w_MAP))
    {
       if (n < 1) return(0);
-      strncpy(MapFname,Tok[1],MAXFNAME);        /* Map file name */
+      strncpy(m->MapFname,Tok[1],MAXFNAME);        /* Map file name */
    }
    else if (match(Tok[0],w_VERIFY))
    {
@@ -1617,25 +1716,25 @@ int  optionchoice(int n)
    else if (match(Tok[0],w_UNBALANCED))         /* Unbalanced option */
    {
       if (n < 1) return(0);
-      if (match(Tok[1],w_STOP)) ExtraIter = -1;
+      if (match(Tok[1],w_STOP)) m->ExtraIter = -1;
       else if (match(Tok[1],w_CONTINUE))
       {
-         if (n >= 2) ExtraIter = atoi(Tok[2]);
-         else ExtraIter = 0;
+         if (n >= 2) m->ExtraIter = atoi(Tok[2]);
+         else m->ExtraIter = 0;
       }
       else return(201);
    }
    else if (match(Tok[0],w_PATTERN))            /* Pattern option */
    {
       if (n < 1) return(0);
-      strncpy(DefPatID,Tok[1],MAXID);
+      strncpy(m->DefPatID,Tok[1],MAXID);
    }
    else return(-1);
    return(0);
 }                        /* end of optionchoice */
 
 
-int  optionvalue(int n)
+int  optionvalue(Model *m, int n)
 /*
 **------------------------------------------------------------- 
 **  Input:   *line = line read from input file                   
@@ -1663,6 +1762,8 @@ int  optionvalue(int n)
 {
    int    nvalue = 1;   /* Index of token with numerical value */
    double  y;
+  char **Tok = m->Tok;
+
 
 /* Check for obsolete SEGMENTS keyword */
    if (match(Tok[0],w_SEGMENTS)) return(0);
@@ -1679,7 +1780,7 @@ int  optionvalue(int n)
    if (match(Tok[0],w_TOLERANCE))
    {
       if (y < 0.0) return(213);
-      Ctol = y;         /* Quality tolerance*/
+      m->Ctol = y;         /* Quality tolerance*/
       return(0);
    }
 
@@ -1687,14 +1788,14 @@ int  optionvalue(int n)
    if (match(Tok[0],w_DIFFUSIVITY))
    {
       if (y < 0.0) return(213);
-      Diffus = y;
+      m->Diffus = y;
       return(0);
    }
 
 /* Check for Damping Limit option */                                           //(2.00.12 - LR)
    if (match(Tok[0],w_DAMPLIMIT))
    {
-      DampLimit = y;
+      m->DampLimit = y;
       return(0);
    }
 
@@ -1702,32 +1803,32 @@ int  optionvalue(int n)
    if (y <= 0.0) return(213);
 
 /* Assign value to specified option */
-   if      (match(Tok[0],w_VISCOSITY))   Viscos = y;       /* Viscosity */
-   else if (match(Tok[0],w_SPECGRAV))    SpGrav = y;       /* Spec. gravity */
-   else if (match(Tok[0],w_TRIALS))      MaxIter = (int)y; /* Max. trials */
+   if      (match(Tok[0],w_VISCOSITY))   m->Viscos = y;       /* Viscosity */
+   else if (match(Tok[0],w_SPECGRAV))    m->SpGrav = y;       /* Spec. gravity */
+   else if (match(Tok[0],w_TRIALS))      m->MaxIter = (int)y; /* Max. trials */
    else if (match(Tok[0],w_ACCURACY))                      /* Accuracy */
    {
       y = MAX(y,1.e-5);                                  
       y = MIN(y,1.e-1);
-      Hacc = y;
+      m->Hacc = y;
    }
-   else if (match(Tok[0],w_HTOL))        Htol = y;
-   else if (match(Tok[0],w_QTOL))        Qtol = y;
+   else if (match(Tok[0],w_HTOL))        m->Htol = y;
+   else if (match(Tok[0],w_QTOL))        m->Qtol = y;
    else if (match(Tok[0],w_RQTOL))
    {
       if (y >= 1.0) return(213);
-      RQtol = y;
+      m->RQtol = y;
    }
-   else if (match(Tok[0],w_CHECKFREQ))   CheckFreq = (int)y;
-   else if (match(Tok[0],w_MAXCHECK))    MaxCheck = (int)y;
-   else if (match(Tok[0],w_EMITTER))     Qexp = 1.0/y;
-   else if (match(Tok[0],w_DEMAND))      Dmult = y;
+   else if (match(Tok[0],w_CHECKFREQ))   m->CheckFreq = (int)y;
+   else if (match(Tok[0],w_MAXCHECK))    m->MaxCheck = (int)y;
+   else if (match(Tok[0],w_EMITTER))     m->Qexp = 1.0/y;
+   else if (match(Tok[0],w_DEMAND))      m->Dmult = y;
    else return(201);
    return(0);
 }                        /* end of optionvalue */
 
 
-int  getpumpcurve(int n)
+int  getpumpcurve(Model *m, int n)
 /*
 **--------------------------------------------------------
 **  Input:   n = number of parameters for pump curve
@@ -1746,39 +1847,41 @@ int  getpumpcurve(int n)
 {
    double a,b,c,h0,h1,h2,q1,q2;
 
+  int Npumps = m->Npumps;
+  
    if (n == 1)                /* Const. HP curve       */
    {
-      if (X[0] <= 0.0) return(202);
-      Pump[Npumps].Ptype = CONST_HP;
-      Link[Nlinks].Km = X[0];
+      if (m->X[0] <= 0.0) return(202);
+      m->Pump[Npumps].Ptype = CONST_HP;
+      m->Link[m->Nlinks].Km = m->X[0];
    }
    else
    {
       if (n == 2)             /* Generic power curve   */
       {
-         q1 = X[1];
-         h1 = X[0];
+         q1 = m->X[1];
+         h1 = m->X[0];
          h0 = 1.33334*h1;
          q2 = 2.0*q1;
          h2 = 0.0;
       }
       else if (n >= 5)        /* 3-pt. power curve     */
       {
-         h0 = X[0];
-         h1 = X[1];
-         q1 = X[2];
-         h2 = X[3];
-         q2 = X[4];
+         h0 = m->X[0];
+         h1 = m->X[1];
+         q1 = m->X[2];
+         h2 = m->X[3];
+         q2 = m->X[4];
       }
       else return(202);
-      Pump[Npumps].Ptype = POWER_FUNC;
+      m->Pump[Npumps].Ptype = POWER_FUNC;
       if (!powercurve(h0,h1,h2,q1,q2,&a,&b,&c)) return(206);
-      Pump[Npumps].H0 = -a;
-      Pump[Npumps].R  = -b;
-      Pump[Npumps].N  = c;
-      Pump[Npumps].Q0 = q1;
-      Pump[Npumps].Qmax  = pow((-a/b),(1.0/c));
-      Pump[Npumps].Hmax  = h0;
+      m->Pump[Npumps].H0 = -a;
+      m->Pump[Npumps].R  = -b;
+      m->Pump[Npumps].N  = c;
+      m->Pump[Npumps].Q0 = q1;
+      m->Pump[Npumps].Qmax  = pow((-a/b),(1.0/c));
+      m->Pump[Npumps].Hmax  = h0;
    }
    return(0);
 }
@@ -1821,7 +1924,7 @@ int  powercurve(double h0, double h1, double h2, double q1,
 }
 
 
-int  valvecheck(int type, int j1, int j2)
+int  valvecheck(Model *m, int type, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **  Input:   type = valve type                                   
@@ -1834,8 +1937,12 @@ int  valvecheck(int type, int j1, int j2)
 {
    int  k, vk, vj1, vj2, vtype;
 
+  Slink *Link = m->Link;
+  Svalve *Valve = m->Valve;
+  int Nvalves = m->Nvalves;
+  
    /* Examine each existing valve */
-   for (k=1; k<=Nvalves; k++)
+   for (k=1; k <= Nvalves; k++)
    {
       vk = Valve[k].Link;
       vj1 = Link[vk].N1;
@@ -1876,7 +1983,7 @@ int  valvecheck(int type, int j1, int j2)
 }                   /* End of valvecheck */
 
 
-void  changestatus(int j, char status, double y)
+void  changestatus(Model *m, int j, char status, double y)
 /*
 **--------------------------------------------------------------
 **  Input:   j      = link index                                   
@@ -1892,6 +1999,8 @@ void  changestatus(int j, char status, double y)
 **--------------------------------------------------------------
 */
 {
+  Slink *Link = m->Link;
+  
    if (Link[j].Type == PIPE || Link[j].Type == GPV)
    {
       if (status != ACTIVE) Link[j].Stat = status;
