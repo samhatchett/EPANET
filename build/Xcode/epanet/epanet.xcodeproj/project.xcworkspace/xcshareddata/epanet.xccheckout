@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>15BB4104-5E0F-4517-AD04-0325033C1131</string>
+	<key>IDESourceControlProjectName</key>
+	<string>epanet</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FFF659EE-AF0C-4E8B-B14A-A985192E0DB0</key>
+		<string>https://github.com/samhatchett/epanet.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>build/Xcode/epanet/epanet.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FFF659EE-AF0C-4E8B-B14A-A985192E0DB0</key>
+		<string>../../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/samhatchett/epanet.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FFF659EE-AF0C-4E8B-B14A-A985192E0DB0</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FFF659EE-AF0C-4E8B-B14A-A985192E0DB0</string>
+			<key>IDESourceControlWCCName</key>
+			<string>epanet</string>
+		</dict>
+	</array>
+</dict>
+</plist>
