@@ -36,48 +36,6 @@ AUTHOR:     L. Rossman
 #define  EXTERN  extern
 #include "vars.h"
 
-struct      Premise         /* Rule Premise Clause */
-{
-   int      logop;          /* Logical operator */
-   int      object;         /* Node or link */
-   int      index;          /* Object's index */
-   int      variable;       /* Pressure, flow, etc. */
-   int      relop;          /* Relational operator */
-   int      status;         /* Variable's status */
-   double    value;          /* Variable's value */
-   struct   Premise *next;
-};
-
-struct     Action           /* Rule Action Clause */
-{
-   int     link;            /* Link index */
-   int     status;          /* Link's status */
-   double   setting;         /* Link's setting */
-   struct  Action *next;
-};
-
-struct      aRule           /* Control Rule Structure */
-{
-   char     label[MAXID+1];    /* Rule character label */
-   double    priority;          /* Priority level */
-   struct   Premise  *Pchain;  /* Linked list of premises */
-   struct   Action   *Tchain;  /* Linked list of actions if true */
-   struct   Action   *Fchain;  /* Linked list of actions if false */
-   struct   aRule    *next;
-};
-
-struct      ActItem         /* Action list item */
-{
-   int      ruleindex;        /* Index of rule action belongs to */
-   struct   Action   *action; /* An action structure */
-   struct   ActItem  *next;     
-};
-
-struct  aRule *Rule;        /* Array of rules */
-struct  ActItem *ActList;   /* Linked list of action items */
-int     RuleState;          /* State of rule interpreter */
-long    Time1;              /* Start of rule evaluation time interval (sec) */
-struct  Premise *Plast;     /* Previous premise clause */
 
 enum    Rulewords      {r_RULE,r_IF,r_AND,r_OR,r_THEN,r_ELSE,r_PRIORITY,r_ERROR};
 char    *Ruleword[]  = {w_RULE,w_IF,w_AND,w_OR,w_THEN,w_ELSE,w_PRIORITY,NULL};
@@ -102,32 +60,32 @@ enum    Values         {IS_NUMBER,IS_OPEN,IS_CLOSED,IS_ACTIVE};
 char    *Value[]     = {"XXXX",   w_OPEN, w_CLOSED, w_ACTIVE,NULL};
 
 /* External variables declared in INPUT2.C */
-extern char      *Tok[MAXTOKS];
-extern int       Ntokens;
+//extern char      *Tok[MAXTOKS];
+//extern int       Ntokens;
 
 /*
 **   Local function prototypes are defined here and not in FUNCS.H 
 **   because some of them utilize the Premise and Action structures
 **   defined locally in this module.
 */
-void    newrule(void);
-int     newpremise(int);
-int     newaction(void);
-int     newpriority(void);
-int     evalpremises(int);
-void    updateactlist(int, struct Action *);
-int     checkaction(int, struct Action *);
-int     checkpremise(struct Premise *);
-int     checktime(struct Premise *);
-int     checkstatus(struct Premise *);
-int     checkvalue(struct Premise *);
-int     takeactions(void);
-void    clearactlist(void);
-void    clearrules(void);
-void    ruleerrmsg(int);
+void    newrule(Model *m);
+int     newpremise(Model *m, int);
+int     newaction(Model *m);
+int     newpriority(Model *m);
+int     evalpremises(Model *m, int);
+void    updateactlist(Model *m, int, struct Action *);
+int     checkaction(Model *m, int, struct Action *);
+int     checkpremise(Model *m, struct Premise *);
+int     checktime(Model *m, struct Premise *);
+int     checkstatus(Model *m, struct Premise *);
+int     checkvalue(Model *m, struct Premise *);
+int     takeactions(Model *m);
+void    clearactlist(Model *m);
+void    clearrules(Model *m);
+void    ruleerrmsg(Model *m, int);
 
 
-void initrules()
+void initrules(Model *m)
 /*
 **--------------------------------------------------------------
 **    Initializes rule base.
@@ -135,12 +93,12 @@ void initrules()
 **--------------------------------------------------------------
 */
 {
-   RuleState = r_PRIORITY;
-   Rule = NULL;
+   m->RuleState = r_PRIORITY;
+   m->Rule = NULL;
 }
 
 
-void addrule(char *tok)
+void addrule(Model *m, char *tok)
 /*
 **--------------------------------------------------------------
 **    Updates rule count if RULE keyword found in line of input.
@@ -148,11 +106,11 @@ void addrule(char *tok)
 **--------------------------------------------------------------
 */
 {
-   if (match(tok,w_RULE)) MaxRules++;
+   if (match(tok,w_RULE)) m->MaxRules++;
 }
 
 
-int  allocrules()
+int  allocrules(Model *m)
 /*
 **--------------------------------------------------------------
 **    Allocates memory for rule-based controls.
@@ -160,13 +118,14 @@ int  allocrules()
 **--------------------------------------------------------------
 */
 {
-   Rule = (struct aRule *) calloc(MaxRules+1,sizeof(struct aRule));
-   if (Rule == NULL) return(101);
+   m->Rule = (struct aRule *) calloc(m->MaxRules + 1,sizeof(struct aRule));
+   if (m->Rule == NULL)
+     return(101);
    else return(0);
 }
 
 
-void freerules()
+void freerules(Model *m)
 /*
 **--------------------------------------------------------------
 **    Frees memory used for rule-based controls.
@@ -174,12 +133,12 @@ void freerules()
 **--------------------------------------------------------------
 */
 {
-   clearrules();
-   free(Rule);
+   clearrules(m);
+   free(m->Rule);
 }
 
 
-int checkrules(long dt)
+int checkrules(Model *m, long dt)
 /*
 **-----------------------------------------------------
 **    Checks which rules should fire at current time.
@@ -191,31 +150,35 @@ int checkrules(long dt)
        r;    /* Number of actions actually taken */
 
    /* Start of rule evaluation time interval */
-   Time1 = Htime - dt + 1;
+   m->Time1 = m->Htime - dt + 1;
 
    /* Iterate through each rule */
-   ActList = NULL;
+   m->ActList = NULL;
    r = 0;
-   for (i=1; i<=Nrules; i++)
+   for (i=1; i <= m->Nrules; i++)
    {
       /* If premises true, add THEN clauses to action list. */
-      if (evalpremises(i) == TRUE) updateactlist(i,Rule[i].Tchain);
+      if (evalpremises(m,i) == TRUE)
+        updateactlist(m,i,m->Rule[i].Tchain);
 
       /* If premises false, add ELSE actions to list. */
       else
       {
-          if (Rule[i].Fchain != NULL) updateactlist(i,Rule[i].Fchain);
+          if (m->Rule[i].Fchain != NULL)
+            updateactlist(m,i,m->Rule[i].Fchain);
       }
    }
 
    /* Execute actions then clear list. */
-   if (ActList != NULL) r = takeactions();
-   clearactlist();
+   if (m->ActList != NULL)
+     r = takeactions(m);
+  
+   clearactlist(m);
    return(r);
 }
 
 
-int  ruledata()
+int  ruledata(Model *m)
 /*
 **--------------------------------------------------------------
 **    Parses a line from [RULES] section of input.
@@ -228,58 +191,58 @@ int  ruledata()
           err;
 
    /* Exit if current rule has an error */
-   if (RuleState == r_ERROR) return(0);
+   if (m->RuleState == r_ERROR) return(0);
 
    /* Find the key word that begins the rule statement */
    err = 0;
-   key = findmatch(Tok[0],Ruleword);
+   key = findmatch(m->Tok[0],Ruleword);
    switch (key)
    {
       case -1:     err = 201;      /* Unrecognized keyword */
                    break;
-      case r_RULE: Nrules++;
-                   newrule();
-                   RuleState = r_RULE;
+      case r_RULE: m->Nrules++;
+                   newrule(m);
+                   m->RuleState = r_RULE;
                    break;
-      case r_IF:   if (RuleState != r_RULE)
+      case r_IF:   if (m->RuleState != r_RULE)
                    {
                       err = 221;   /* Mis-placed IF clause */
                       break;
                    }
-                   RuleState = r_IF;
-                   err = newpremise(r_AND);
+                   m->RuleState = r_IF;
+                   err = newpremise(m,r_AND);
                    break;
-      case r_AND:  if (RuleState == r_IF) err = newpremise(r_AND);
-                   else if (RuleState == r_THEN || RuleState == r_ELSE)
-                      err = newaction();
+      case r_AND:  if (m->RuleState == r_IF) err = newpremise(m,r_AND);
+                   else if (m->RuleState == r_THEN || m->RuleState == r_ELSE)
+                      err = newaction(m);
                    else err = 221;
                    break;
-      case r_OR:   if (RuleState == r_IF) err = newpremise(r_OR);
+      case r_OR:   if (m->RuleState == r_IF) err = newpremise(m,r_OR);
                    else err = 221;
                    break;
-      case r_THEN: if (RuleState != r_IF)
+      case r_THEN: if (m->RuleState != r_IF)
                    {
                       err = 221;   /* Mis-placed THEN clause */
                       break;
                    }
-                   RuleState = r_THEN;
-                   err = newaction();
+                   m->RuleState = r_THEN;
+                   err = newaction(m);
                    break;
-      case r_ELSE: if (RuleState != r_THEN)
+      case r_ELSE: if (m->RuleState != r_THEN)
                    {
                       err = 221;   /* Mis-placed ELSE clause */
                       break;
                    }
-                   RuleState = r_ELSE;
-                   err = newaction();
+                   m->RuleState = r_ELSE;
+                   err = newaction(m);
                    break;
-      case r_PRIORITY: if (RuleState != r_THEN && RuleState != r_ELSE)
+      case r_PRIORITY: if (m->RuleState != r_THEN && m->RuleState != r_ELSE)
                        {
                           err = 221;
                           break;
                        }
-                       RuleState = r_PRIORITY;
-                       err = newpriority();
+                       m->RuleState = r_PRIORITY;
+                       err = newpriority(m);
                        break;
       default:         err = 201;
    }
@@ -287,15 +250,15 @@ int  ruledata()
    /* Set RuleState to r_ERROR if errors found */
    if (err)
    {
-      RuleState = r_ERROR;
-      ruleerrmsg(err);
+      m->RuleState = r_ERROR;
+      ruleerrmsg(m,err);
       err = 200;
    }
    return(err);
 }
 
 
-void  clearactlist()
+void  clearactlist(Model *m)
 /*
 **----------------------------------------------------------
 **    Clears memory used for action list
@@ -304,7 +267,7 @@ void  clearactlist()
 {
    struct ActItem *a;
    struct ActItem *anext;
-   a = ActList;
+   a = m->ActList;
    while (a != NULL)
    {
       anext = a->next;
@@ -314,7 +277,7 @@ void  clearactlist()
 }
 
 
-void  clearrules()
+void  clearrules(Model *m)
 /*
 **-----------------------------------------------------------
 **    Clears memory used for premises & actions for all rules
@@ -326,23 +289,23 @@ void  clearrules()
    struct Action  *a;
    struct Action  *anext;
    int i;
-   for (i=1; i<=Nrules; i++)
+   for (i=1; i <= m->Nrules; i++)
    {
-      p = Rule[i].Pchain;
+      p = m->Rule[i].Pchain;
       while (p != NULL)
       {
          pnext = p->next;
          free(p);
          p = pnext;
       }
-      a = Rule[i].Tchain;
+      a = m->Rule[i].Tchain;
       while (a != NULL)
       {
          anext = a->next;
          free(a);
          a = anext;
       }
-      a = Rule[i].Fchain;
+      a = m->Rule[i].Fchain;
       while (a != NULL)
       {
          anext = a->next;
@@ -353,23 +316,24 @@ void  clearrules()
 }
 
 
-void  newrule()
+void  newrule(Model *m)
 /*
 **----------------------------------------------------------
 **    Adds new rule to rule base
 **----------------------------------------------------------
 */
 {
-   strncpy(Rule[Nrules].label, Tok[1], MAXID);
-   Rule[Nrules].Pchain = NULL;
-   Rule[Nrules].Tchain = NULL;
-   Rule[Nrules].Fchain = NULL;
-   Rule[Nrules].priority = 0.0;
-   Plast = NULL;
+  struct aRule *Rule = m->Rule;
+   strncpy(Rule[m->Nrules].label, m->Tok[1], MAXID);
+   Rule[m->Nrules].Pchain = NULL;
+   Rule[m->Nrules].Tchain = NULL;
+   Rule[m->Nrules].Fchain = NULL;
+   Rule[m->Nrules].priority = 0.0;
+   m->Plast = NULL;
 }
 
 
-int  newpremise(int logop)
+int  newpremise(Model *mod, int logop)
 /*
 **--------------------------------------------------------------------
 **   Adds new premise to current rule.
@@ -387,19 +351,19 @@ int  newpremise(int logop)
    struct Premise *p;
 
    /* Check for correct number of tokens */
-   if (Ntokens != 5 && Ntokens != 6) return(201);
+   if (mod->Ntokens != 5 && mod->Ntokens != 6) return(201);
 
    /* Find network object & id if present */
-   i = findmatch(Tok[1],Object);
+   i = findmatch(mod->Tok[1],Object);
    if (i == r_SYSTEM)
    { 
       j = 0;
-      v = findmatch(Tok[2],Varword);
+      v = findmatch(mod->Tok[2],Varword);
       if (v != r_DEMAND && v != r_TIME && v != r_CLOCKTIME) return(201);
    }
    else
    {
-      v = findmatch(Tok[3],Varword);
+      v = findmatch(mod->Tok[3],Varword);
       if (v < 0) return(201);
       switch (i) 
       {
@@ -416,7 +380,7 @@ int  newpremise(int logop)
       i = k;
       if (i == r_NODE)
       {
-         j = findnode(Tok[2]);
+         j = findnode(mod,mod->Tok[2]);
          if (j == 0) return(203);
          switch (v)
          {
@@ -428,14 +392,14 @@ int  newpremise(int logop)
 
 /*** Updated 9/7/00 ***/
             case r_FILLTIME:
-            case r_DRAINTIME: if (j <= Njuncs) return(201); break;
+            case r_DRAINTIME: if (j <= mod->Njuncs) return(201); break;
 
             default: return(201);
          }
       }
       else
       {
-         j = findlink(Tok[2]);
+         j = findlink(mod,mod->Tok[2]);
          if (j == 0) return(204);
          switch (v)
          {
@@ -448,10 +412,14 @@ int  newpremise(int logop)
    }
 
    /* Parse relational operator (r) and check for synonyms */
-   if (i == r_SYSTEM) m = 3;
-   else m = 4;
-   k = findmatch(Tok[m],Operator);
-   if (k < 0) return(201);
+   if (i == r_SYSTEM)
+     m = 3;
+   else
+     m = 4;
+  
+   k = findmatch(mod->Tok[m],Operator);
+   if (k < 0)
+     return(201);
    switch(k)
    {
       case IS:    r = EQ; break;
@@ -466,16 +434,16 @@ int  newpremise(int logop)
    x = MISSING;
    if (v == r_TIME || v == r_CLOCKTIME)
    {
-      if (Ntokens == 6)
-         x = hour(Tok[4],Tok[5])*3600.;
+      if (mod->Ntokens == 6)
+         x = hour(mod->Tok[4],mod->Tok[5])*3600.;
       else
-         x = hour(Tok[4],"")*3600.;
+         x = hour(mod->Tok[4],"")*3600.;
       if (x < 0.0) return(202);
    }
-   else if ((k = findmatch(Tok[Ntokens-1],Value)) > IS_NUMBER) s = k;
+   else if ((k = findmatch(mod->Tok[mod->Ntokens-1],Value)) > IS_NUMBER) s = k;
    else
    {
-      if (!getfloat(Tok[Ntokens-1],&x)) return(202);
+      if (!getfloat(mod->Tok[mod->Ntokens-1],&x)) return(202);
       if (v == r_FILLTIME || v == r_DRAINTIME) x = x*3600.0;                   //(2.00.11 - LR)
    }
 
@@ -494,14 +462,16 @@ int  newpremise(int logop)
 
    /* Add premise to current rule's premise list */
    p->next = NULL;
-   if (Plast == NULL) Rule[Nrules].Pchain = p;
-   else Plast->next = p;
-   Plast = p;
+   if (mod->Plast == NULL)
+     mod->Rule[mod->Nrules].Pchain = p;
+   else
+     mod->Plast->next = p;
+   mod->Plast = p;
    return(0);
 }
 
 
-int  newaction()
+int  newaction(Model *m)
 /*
 **----------------------------------------------------------
 **   Adds new action to current rule.
@@ -517,11 +487,14 @@ int  newaction()
    double x;
    struct Action *a;
 
+  Slink *Link = m->Link;
+  struct aRule *Rule = m->Rule;
+  
    /* Check for correct number of tokens */
-   if (Ntokens != 6) return(201);
+   if (m->Ntokens != 6) return(201);
 
    /* Check that link exists */
-   j = findlink(Tok[2]);
+   j = findlink(m,m->Tok[2]);
    if (j == 0) return(204);
 
 /***  Updated 9/7/00  ***/
@@ -531,10 +504,10 @@ int  newaction()
    /* Find value for status or setting */
    s = -1;
    x = MISSING;
-   if ((k = findmatch(Tok[5],Value)) > IS_NUMBER) s = k;
+   if ((k = findmatch(m->Tok[5],Value)) > IS_NUMBER) s = k;
    else
    {
-      if (!getfloat(Tok[5],&x)) return(202);
+      if (!getfloat(m->Tok[5],&x)) return(202);
       if (x < 0.0) return(202);
    }
 
@@ -559,21 +532,21 @@ int  newaction()
    a->setting = x;
 
    /* Add action to current rule's action list */
-   if (RuleState == r_THEN)
+   if (m->RuleState == r_THEN)
    {
-     a->next = Rule[Nrules].Tchain;
-     Rule[Nrules].Tchain = a;
+     a->next = Rule[m->Nrules].Tchain;
+     Rule[m->Nrules].Tchain = a;
    }
    else
    {
-      a->next = Rule[Nrules].Fchain;
-      Rule[Nrules].Fchain = a;
+      a->next = Rule[m->Nrules].Fchain;
+      Rule[m->Nrules].Fchain = a;
    }
    return(0);
 }
 
 
-int  newpriority()
+int  newpriority(Model *m)
 /*
 **---------------------------------------------------
 **    Adds priority rating to current rule
@@ -581,13 +554,15 @@ int  newpriority()
 */
 {
     double x;
-    if (!getfloat(Tok[1],&x)) return(202);
-    Rule[Nrules].priority = x;
+    if (!getfloat(m->Tok[1],&x))
+      return(202);
+  
+    m->Rule[m->Nrules].priority = x;
     return(0);
 }
 
 
-int  evalpremises(int i)
+int  evalpremises(Model *m, int i)
 /*
 **----------------------------------------------------------
 **    Checks if premises to rule i are true
@@ -598,20 +573,20 @@ int  evalpremises(int i)
     struct Premise *p;
 
     result = TRUE;
-    p = Rule[i].Pchain;
+    p = m->Rule[i].Pchain;
     while (p != NULL)
     {
         if (p->logop == r_OR)
         {
             if (result == FALSE)
             {
-                result = checkpremise(p);
+                result = checkpremise(m,p);
             }
         }
         else
         {
             if (result == FALSE) return(FALSE);
-            result = checkpremise(p);
+            result = checkpremise(m,p);
         }
         p = p->next;
     }
@@ -619,7 +594,7 @@ int  evalpremises(int i)
 }
 
  
-int  checkpremise(struct Premise *p)
+int  checkpremise(Model *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if a particular premise is true
@@ -627,15 +602,15 @@ int  checkpremise(struct Premise *p)
 */
 {
     if (p->variable == r_TIME || p->variable == r_CLOCKTIME)
-       return(checktime(p));
+       return(checktime(m,p));
     else if (p->status > IS_NUMBER)
-       return(checkstatus(p));
+       return(checkstatus(m,p));
     else
-       return(checkvalue(p));
+       return(checkvalue(m,p));
 }
 
 
-int  checktime(struct Premise *p)
+int  checktime(Model *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on system time holds
@@ -648,13 +623,13 @@ int  checktime(struct Premise *p)
    /* Get start and end of rule evaluation time interval */ 
    if (p->variable == r_TIME)
    {
-        t1 = Time1;
-        t2 = Htime;
+        t1 = m->Time1;
+        t2 = m->Htime;
    }
    else if (p->variable == r_CLOCKTIME)
    {
-        t1 = (Time1 + Tstart) % SECperDAY;
-        t2 = (Htime + Tstart) % SECperDAY;
+        t1 = (m->Time1 + m->Tstart) % SECperDAY;
+        t2 = (m->Htime + m->Tstart) % SECperDAY;
    }
    else return(0);
 
@@ -690,7 +665,7 @@ int  checktime(struct Premise *p)
 }
 
 
-int  checkstatus(struct Premise *p)
+int  checkstatus(Model *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on link status holds
@@ -704,7 +679,7 @@ int  checkstatus(struct Premise *p)
         case IS_OPEN:
         case IS_CLOSED:
         case IS_ACTIVE:
-                i = LinkStatus[p->index];
+                i = m->LinkStatus[p->index];
                 if      (i <= CLOSED) j = IS_CLOSED;
                 else if (i == ACTIVE) j = IS_ACTIVE;
                 else                  j = IS_OPEN;
@@ -717,7 +692,7 @@ int  checkstatus(struct Premise *p)
 }
 
 
-int  checkvalue(struct Premise *p)
+int  checkvalue(Model *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if numerical condition on a variable is true.
@@ -728,14 +703,25 @@ int  checkvalue(struct Premise *p)
     int   i,j,v;
     double x,
           tol = 1.e-3;
-
+  
+  double *NodeDemand = m->NodeDemand;
+  double *NodeHead = m->NodeHead;
+  double *Ucf = m->Ucf;
+  Snode *Node = m->Node;
+  Slink *Link = m->Link;
+  Stank *Tank = m->Tank;
+  double *LinkFlows = m->LinkFlows;
+  double *LinkSetting = m->LinkSetting;
+  int Njuncs = m->Njuncs;
+  double Dsystem = m->Dsystem;
+  
     i = p->index;
     v = p->variable;
     switch (v)
     {
 
 /*** Updated 10/25/00 ***/
-        case r_DEMAND:    if (p->object == r_SYSTEM) x = Dsystem*Ucf[DEMAND];
+        case r_DEMAND:    if (p->object == r_SYSTEM) x = Dsystem * Ucf[DEMAND];
                           else x = NodeDemand[i]*Ucf[DEMAND];
                           break;
 
@@ -746,7 +732,7 @@ int  checkvalue(struct Premise *p)
                           break;
         case r_LEVEL:     x = (NodeHead[i]-Node[i].El)*Ucf[HEAD];
                           break;
-        case r_FLOW:      x = ABS(Q[i])*Ucf[FLOW];
+        case r_FLOW:      x = ABS(LinkFlows[i])*Ucf[FLOW];
                           break;
         case r_SETTING:   if (LinkSetting[i] == MISSING) return(0);
                           x = LinkSetting[i];
@@ -787,7 +773,7 @@ int  checkvalue(struct Premise *p)
 }
 
 
-void  updateactlist(int i, struct Action *actions)
+void  updateactlist(Model *m, int i, struct Action *actions)
 /*
 **---------------------------------------------------
 **    Adds rule's actions to action list
@@ -796,21 +782,22 @@ void  updateactlist(int i, struct Action *actions)
 {
    struct ActItem *item;
    struct Action *a;
+  
 
    /* Iterate through each action of Rule i */
    a = actions;
    while (a != NULL)
    {
       /* Add action to list if not already on it */
-      if (!checkaction(i,a))
+      if (!checkaction(m,i,a))
       {
          item = (struct ActItem *) malloc(sizeof(struct ActItem));
          if (item != NULL)
          {
             item->action = a;
             item->ruleindex = i;
-            item->next = ActList;
-            ActList = item;
+            item->next = m->ActList;
+            m->ActList = item;
          }
       }
       a = a->next;
@@ -818,7 +805,7 @@ void  updateactlist(int i, struct Action *actions)
 }
 
 
-int  checkaction(int i, struct Action *a)
+int  checkaction(Model *m, int i, struct Action *a)
 /*
 **-----------------------------------------------------------
 **    Checks if an action is already on the Action List
@@ -831,7 +818,7 @@ int  checkaction(int i, struct Action *a)
 
    /* Search action list for link named in action */
    k = a->link;                 /* Action applies to link k */
-   item = ActList;
+   item = m->ActList;
    while (item != NULL)
    {
       a1 = item->action;
@@ -841,7 +828,7 @@ int  checkaction(int i, struct Action *a)
       /* If link on list then replace action if rule has higher priority. */
       if (k1 == k)
       {
-         if (Rule[i].priority > Rule[i1].priority)
+         if (m->Rule[i].priority > m->Rule[i1].priority)
          {
             item->action = a;
             item->ruleindex = i;
@@ -854,7 +841,7 @@ int  checkaction(int i, struct Action *a)
 }
 
 
-int  takeactions()
+int  takeactions(Model *m)
 /*
 **-----------------------------------------------------------
 **    Implements actions on action list
@@ -867,9 +854,15 @@ int  takeactions()
     int    k, s, n;
     double  tol = 1.e-3,
            v, x;
+  
+  struct aRule *Rule = m->Rule;
+  double *Ucf = m->Ucf;
+  Slink *Link = m->Link;
+  double *LinkSetting = m->LinkSetting;
+  char *LinkStatus = m->LinkStatus;
 
     n = 0;
-    item = ActList;
+    item = m->ActList;
     while (item != NULL)
     {
         flag = FALSE;
@@ -882,14 +875,14 @@ int  takeactions()
         /* Switch link from closed to open */
         if (a->status == IS_OPEN && s <= CLOSED)
         {
-            setlinkstatus(k, 1, &LinkStatus[k], &LinkSetting[k]);
+            setlinkstatus(m, k, 1, &LinkStatus[k], &LinkSetting[k]);
             flag = TRUE;
         }
 
         /* Switch link from not closed to closed */ 
         else if (a->status == IS_CLOSED && s > CLOSED)
         {
-            setlinkstatus(k, 0, &LinkStatus[k], &LinkSetting[k]);
+            setlinkstatus(m, k, 0, &LinkStatus[k], &LinkSetting[k]);
             flag = TRUE;
         }
 
@@ -905,7 +898,7 @@ int  takeactions()
             }
             if (ABS(x-v) > tol)
             {
-                setlinksetting(k, x, &LinkStatus[k], &LinkSetting[k]);
+                setlinksetting(m, k, x, &LinkStatus[k], &LinkSetting[k]);
                 flag = TRUE;
             }
         }
@@ -914,7 +907,8 @@ int  takeactions()
         if (flag == TRUE)
         {
            n++;
-           if (Statflag) writeruleaction(k,Rule[item->ruleindex].label);
+           if (m->Statflag)
+             writeruleaction(m,k,Rule[item->ruleindex].label);
         }
 
         /* Move to next action on list */
@@ -924,7 +918,7 @@ int  takeactions()
 }
 
 
-void  ruleerrmsg(int err)
+void  ruleerrmsg(Model *m, int err)
 /*
 **-----------------------------------------------------------
 **    Reports error message
@@ -934,6 +928,11 @@ void  ruleerrmsg(int err)
    int    i;
    char   label[81];
    char   fmt[256];
+  
+  char *Msg = m->Msg;
+  int Nrules = m->Nrules;
+  struct aRule *Rule = m->Rule;
+  
    switch (err)
    {
       case 201:   strcpy(fmt,R_ERR201);  break;
@@ -957,14 +956,14 @@ void  ruleerrmsg(int err)
    sprintf(Msg,fmt);
    strcat(Msg,label);
    strcat(Msg,":");
-   writeline(Msg);
-   strcpy(fmt,Tok[0]);
-   for (i=1; i<Ntokens; i++)
+   writeline(m,Msg);
+   strcpy(fmt,m->Tok[0]);
+   for (i=1; i < m->Ntokens; i++)
    {
       strcat(fmt," ");
-      strcat(fmt,Tok[i]);
+      strcat(fmt,m->Tok[i]);
    }
-   writeline(fmt);
+   writeline(m,fmt);
 }
    
 /***************** END OF RULES.C ******************/   

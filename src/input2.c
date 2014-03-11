@@ -40,22 +40,22 @@ The following utility functions are all called from INPUT3.C
 #include "vars.h"
 
 #define   MAXERRS     10  /* Max. input errors reported        */
-
-int    Ntokens,           /* Number of tokens in input line    */
-       Ntitle;            /* Number of title lines             */
-char   *Tok[MAXTOKS];     /* Array of token strings            */
-
-                          /* Used in INPUT3.C: */
-STmplist  *PrevPat;       /* Pointer to pattern list element   */
-STmplist  *PrevCurve;     /* Pointer to curve list element     */
-STmplist  *PrevCoord;     /* Pointer to coordinate list element     */
+// moved to Model*
+//int    Ntokens,           /* Number of tokens in input line    */
+//       Ntitle;            /* Number of title lines             */
+//char   *Tok[MAXTOKS];     /* Array of token strings            */
+//
+//                          /* Used in INPUT3.C: */
+//STmplist  *PrevPat;       /* Pointer to pattern list element   */
+//STmplist  *PrevCurve;     /* Pointer to curve list element     */
+//STmplist  *PrevCoord;     /* Pointer to coordinate list element     */
 
                           /* Defined in enumstxt.h in EPANET.C */
 extern char *SectTxt[];   /* Input section keywords            */
 extern char *RptSectTxt[];
 
 
-int  netsize()
+int  netsize(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -70,23 +70,23 @@ int  netsize()
    int   errcode = 0;         /* Error code                   */
 
 /* Initialize network component counts */
-   MaxJuncs    = 0;
-   MaxTanks    = 0;
-   MaxPipes    = 0;
-   MaxPumps    = 0;
-   MaxValves   = 0;
-   MaxControls = 0;
-   MaxRules    = 0;
-   MaxCurves   = 0;
+   m->MaxJuncs    = 0;
+   m->MaxTanks    = 0;
+   m->MaxPipes    = 0;
+   m->MaxPumps    = 0;
+   m->MaxValves   = 0;
+   m->MaxControls = 0;
+   m->MaxRules    = 0;
+   m->MaxCurves   = 0;
    sect        = -1;
-   MaxCoords   = 0;
+   m->MaxCoords   = 0;
   
 /* Add a default pattern 0 */
-   MaxPats = -1;
-   addpattern("");
+   m->MaxPats = -1;
+   addpattern(m,"");
 
 /* Make pass through data file counting number of each component */
-   while (fgets(line,MAXLINE,InFile) != NULL)
+   while (fgets(line,MAXLINE,m->InFile) != NULL)
    {
    /* Skip blank lines & those beginning with a comment */
       tok = strtok(line,SEPSTR);
@@ -109,17 +109,17 @@ int  netsize()
    /* Add to count of current component */
       switch(sect)
      {
-       case _JUNCTIONS:  MaxJuncs++;    break;
+       case _JUNCTIONS:  m->MaxJuncs++;    break;
        case _RESERVOIRS:
-       case _TANKS:      MaxTanks++;    break;
-       case _PIPES:      MaxPipes++;    break;
-       case _PUMPS:      MaxPumps++;    break;
-       case _VALVES:     MaxValves++;   break;
-       case _CONTROLS:   MaxControls++; break;
-       case _RULES:      addrule(tok);  break; /* See RULES.C */
-       case _PATTERNS:   errcode = addpattern(tok);
+       case _TANKS:      m->MaxTanks++;    break;
+       case _PIPES:      m->MaxPipes++;    break;
+       case _PUMPS:      m->MaxPumps++;    break;
+       case _VALVES:     m->MaxValves++;   break;
+       case _CONTROLS:   m->MaxControls++; break;
+       case _RULES:      addrule(m,tok);  break; /* See RULES.C */
+       case _PATTERNS:   errcode = addpattern(m,tok);
          break;
-       case _CURVES:     errcode = addcurve(tok);
+       case _CURVES:     errcode = addcurve(m,tok);
          break;
 //       case _COORDS:     errcode = addcoord(tok); //06.02.2010-woohn
 //         break;
@@ -127,19 +127,22 @@ int  netsize()
       if (errcode) break;
    }
 
-   MaxNodes = MaxJuncs + MaxTanks;
-   MaxLinks = MaxPipes + MaxPumps + MaxValves;
-   if (MaxPats < 1) MaxPats = 1;
+   m->MaxNodes = m->MaxJuncs + m->MaxTanks;
+   m->MaxLinks = m->MaxPipes + m->MaxPumps + m->MaxValves;
+   if (m->MaxPats < 1)
+     m->MaxPats = 1;
    if (!errcode)
    {
-      if (MaxJuncs < 1) errcode = 223;       /* Not enough nodes */
-      else if (MaxTanks == 0) errcode = 224; /* No tanks */
+      if (m->MaxJuncs < 1)
+        errcode = 223;       /* Not enough nodes */
+      else if (m->MaxTanks == 0)
+        errcode = 224; /* No tanks */
    }
    return(errcode);
 }                        /*  End of netsize  */
 
 
-int  readdata()
+int  readdata(Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -155,57 +158,57 @@ int  readdata()
          inperr,errsum;       /* Error code & total error count  */
 
 /* Allocate input buffer */
-   X = (double *) calloc(MAXTOKS, sizeof(double));
-   ERRCODE(MEMCHECK(X));
+   m->X = (double *) calloc(MAXTOKS, sizeof(double));
+   ERRCODE(MEMCHECK(m->X));
 
    if (!errcode)
    {
 
    /* Initialize number of network components */
-      Ntitle    = 0;
-      Nnodes    = 0;
-      Njuncs    = 0;
-      Ntanks    = 0;
-      Nlinks    = 0;
-      Npipes    = 0;
-      Npumps    = 0;
-      Nvalves   = 0;
-      Ncontrols = 0;
-      Nrules    = 0;
-      Ncurves   = MaxCurves;
-      Npats     = MaxPats;
-      PrevPat   = NULL;
-      PrevCurve = NULL;
-      PrevCoord = NULL;
+      m->Ntitle    = 0;
+      m->Nnodes    = 0;
+      m->Njuncs    = 0;
+      m->Ntanks    = 0;
+      m->Nlinks    = 0;
+      m->Npipes    = 0;
+      m->Npumps    = 0;
+      m->Nvalves   = 0;
+      m->Ncontrols = 0;
+      m->Nrules    = 0;
+      m->Ncurves   = m->MaxCurves;
+      m->Npats     = m->MaxPats;
+      m->PrevPat   = NULL;
+      m->PrevCurve = NULL;
+      m->PrevCoord = NULL;
 
       sect      = -1;
       errsum    = 0;
 
    /* Read each line from input file. */
-      while (fgets(line,MAXLINE,InFile) != NULL)
+      while (fgets(line,MAXLINE,m->InFile) != NULL)
       {
 
       /* Make copy of line and scan for tokens */
          strcpy(wline,line);
-         Ntokens = gettokens(wline);
+         m->Ntokens = gettokens(wline, m->Tok, MAXTOKS);
 
        /* Skip blank lines and comments */
-         if (Ntokens == 0) continue;
-         if (*Tok[0] == ';') continue;
+         if (m->Ntokens == 0) continue;
+         if (*(m->Tok[0]) == ';') continue;
 
       /* Check if max. length exceeded */
          if (strlen(line) >= MAXLINE)
          {
-            sprintf(Msg,ERR214);
-            writeline(Msg);
-            writeline(line);
+            sprintf(m->Msg,ERR214);
+            writeline(m,m->Msg);
+            writeline(m,line);
             errsum++;
          }
 
       /* Check if at start of a new input section */
-         if (*Tok[0] == '[')
+         if (*(m->Tok[0]) == '[')
          {
-            newsect = findmatch(Tok[0],SectTxt);
+            newsect = findmatch(m->Tok[0],SectTxt);
             if (newsect >= 0)
             {
                sect = newsect;
@@ -214,7 +217,7 @@ int  readdata()
             }
             else
             {
-                inperrmsg(201,sect,line);
+                inperrmsg(m,201,sect,line);
                 errsum++;
                 break;
             }
@@ -223,10 +226,10 @@ int  readdata()
       /* Otherwise process next line of input in current section */
          else
          {
-            inperr = newline(sect,line);
+            inperr = newline(m,sect,line);
             if (inperr > 0)
             {
-               inperrmsg(inperr,sect,line);
+               inperrmsg(m,inperr,sect,line);
                errsum++;
             }
          }
@@ -240,22 +243,22 @@ int  readdata()
    }
 
 /* Check for unlinked nodes */
-   if (!errcode) errcode = unlinked();
+   if (!errcode) errcode = unlinked(m);
 
 /* Get pattern & curve data from temp. lists */
-   if (!errcode) errcode = getpatterns();
-   if (!errcode) errcode = getcurves();
+   if (!errcode) errcode = getpatterns(m);
+   if (!errcode) errcode = getcurves(m);
    //if (!errcode) errcode = getcoords();
-   if (!errcode) errcode = getpumpparams();
+   if (!errcode) errcode = getpumpparams(m);
 
 /* Free input buffer */
-   free(X);
+   free(m->X);
    return(errcode);
 
 }                        /*  End of readdata  */
 
 
-int  newline(int sect, char *line)
+int  newline(Model *m, int sect, char *line)
 /*
 **--------------------------------------------------------------
 **  Input:   sect  = current section of input file
@@ -268,36 +271,36 @@ int  newline(int sect, char *line)
    int n;
    switch (sect)
    {
-       case _TITLE:       if (Ntitle < 3)
+       case _TITLE:       if (m->Ntitle < 3)
                           {
                              n = (int)strlen(line);
                              if (line[n-1] == 10) line[n-1] = ' ';
-                             strncpy(Title[Ntitle],line,MAXMSG);
-                             Ntitle++;
+                             strncpy(m->Title[m->Ntitle],line,MAXMSG);
+                             m->Ntitle++;
                           }
                           return(0);
-       case _JUNCTIONS:   return(juncdata());
+       case _JUNCTIONS:   return(juncdata(m));
        case _RESERVOIRS:
-       case _TANKS:       return(tankdata());
-       case _PIPES:       return(pipedata());
-       case _PUMPS:       return(pumpdata());
-       case _VALVES:      return(valvedata());
-       case _PATTERNS:    return(patterndata());
-       case _CURVES:      return(curvedata());
-       case _DEMANDS:     return(demanddata());
-       case _CONTROLS:    return(controldata());
-       case _RULES:       return(ruledata());   /* See RULES.C */
-       case _SOURCES:     return(sourcedata());
-       case _EMITTERS:    return(emitterdata());
-       case _QUALITY:     return(qualdata());
-       case _STATUS:      return(statusdata());
+       case _TANKS:       return(tankdata(m));
+       case _PIPES:       return(pipedata(m));
+       case _PUMPS:       return(pumpdata(m));
+       case _VALVES:      return(valvedata(m));
+       case _PATTERNS:    return(patterndata(m));
+       case _CURVES:      return(curvedata(m));
+       case _DEMANDS:     return(demanddata(m));
+       case _CONTROLS:    return(controldata(m));
+       case _RULES:       return(ruledata(m));   /* See RULES.C */
+       case _SOURCES:     return(sourcedata(m));
+       case _EMITTERS:    return(emitterdata(m));
+       case _QUALITY:     return(qualdata(m));
+       case _STATUS:      return(statusdata(m));
        case _ROUGHNESS:   return(0);
-       case _ENERGY:      return(energydata());
-       case _REACTIONS:   return(reactdata());
-       case _MIXING:      return(mixingdata());
-       case _REPORT:      return(reportdata());
-       case _TIMES:       return(timedata());
-       case _OPTIONS:     return(optiondata());
+       case _ENERGY:      return(energydata(m));
+       case _REACTIONS:   return(reactdata(m));
+       case _MIXING:      return(mixingdata(m));
+       case _REPORT:      return(reportdata(m));
+       case _TIMES:       return(timedata(m));
+       case _OPTIONS:     return(optiondata(m));
 
    /* Data in these sections are not used for any computations */
        case _COORDS:      return (0); //return(coordata());
@@ -310,7 +313,7 @@ int  newline(int sect, char *line)
 }                        /* end of newline */
 
 
-int  getpumpparams(void)
+int  getpumpparams(Model *mod)
 /*
 **-------------------------------------------------------------
 **  Input:   none
@@ -323,7 +326,13 @@ int  getpumpparams(void)
    double a,b,c,
 	      h0 = 0.0, h1 = 0.0, h2 = 0.0, q1 = 0.0, q2 = 0.0;
 
-   for (i=1; i<=Npumps; i++)
+  Spump *Pump = mod->Pump;
+  int Npumps = mod->Npumps;
+  Slink *Link = mod->Link;
+  Scurve *Curve = mod->Curve;
+  char *Msg = mod->Msg;
+  
+   for (i=1; i <= Npumps; i++)
    {
       k = Pump[i].Link;
       if (Pump[i].Ptype == CONST_HP)      /* Constant Hp pump */
@@ -344,7 +353,7 @@ int  getpumpparams(void)
          if (j == 0)
          {                                /* Error: No head curve */
             sprintf(Msg,ERR226,Link[k].ID);
-            writeline(Msg);
+            writeline(mod,Msg);
             return(200);
          }
          n = Curve[j].Npts;
@@ -375,7 +384,7 @@ int  getpumpparams(void)
             if (!powercurve(h0,h1,h2,q1,q2,&a,&b,&c))
             {                             /* Error: Invalid curve */ 
                sprintf(Msg,ERR227,Link[k].ID);
-               writeline(Msg);
+               writeline(mod,Msg);
                return(200);
             }
             else
@@ -398,7 +407,7 @@ int  getpumpparams(void)
             if (Curve[j].Y[m] >= Curve[j].Y[m-1])
             {                             /* Error: Invalid curve */
                sprintf(Msg,ERR227,Link[k].ID);
-               writeline(Msg);
+               writeline(mod,Msg);
                return(200);
             }
          }
@@ -411,7 +420,7 @@ int  getpumpparams(void)
 }
 
 
-int   addnodeID(int n, char *id)
+int   addnodeID(Model *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = node index
@@ -421,14 +430,14 @@ int   addnodeID(int n, char *id)
 **--------------------------------------------------------------
 */
 {
-    if (findnode(id)) return(0);         /* see EPANET.C */
-    strncpy(Node[n].ID, id, MAXID);
-    ENHashTableInsert(NodeHashTable, Node[n].ID, n);        /* see HASH.C */
+    if (findnode(m, id)) return(0);         /* see EPANET.C */
+    strncpy(m->Node[n].ID, id, MAXID);
+    ENHashTableInsert(m->NodeHashTable, m->Node[n].ID, n);        /* see HASH.C */
     return(1);
 }
 
 
-int   addlinkID(int n, char *id)
+int   addlinkID(Model *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = link index
@@ -438,14 +447,14 @@ int   addlinkID(int n, char *id)
 **--------------------------------------------------------------
 */
 {
-    if (findlink(id)) return(0);         /* see EPANET.C */
-    strncpy(Link[n].ID, id, MAXID);
-    ENHashTableInsert(LinkHashTable, Link[n].ID, n);        /* see HASH.C */
+    if (findlink(m,id)) return(0);         /* see EPANET.C */
+    strncpy(m->Link[n].ID, id, MAXID);
+    ENHashTableInsert(m->LinkHashTable, m->Link[n].ID, n);        /* see HASH.C */
     return(1);
 }
 
 
-int  addpattern(char *id)
+int  addpattern(Model *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = pattern ID label
@@ -457,33 +466,33 @@ int  addpattern(char *id)
    STmplist *p;
 
 /* Check if ID is same as last one processed */
-   if (Patlist != NULL && strcmp(id,Patlist->ID) == 0) return(0);
+   if (m->Patlist != NULL && strcmp(id, m->Patlist->ID) == 0) return(0);
 
 /* Check that pattern was not already created */
-   if (findID(id,Patlist) == NULL)
+   if (findID(id,m->Patlist) == NULL)
    {
 
    /* Update pattern count & create new list element */
-      (MaxPats)++;
+      (m->MaxPats)++;
       p = (STmplist *) malloc(sizeof(STmplist));
       if (p == NULL) return(101);
 
    /* Initialize list element properties */
       else
       {
-         p->i = MaxPats;
+         p->i = m->MaxPats;
          strncpy(p->ID,id,MAXID);
          p->x = NULL;
          p->y = NULL;
-         p->next = Patlist;
-         Patlist = p;
+         p->next = m->Patlist;
+         m->Patlist = p;
       }
    }
    return(0);
 }
 
 
-int  addcurve(char *id)
+int  addcurve(Model *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = curve ID label
@@ -494,22 +503,24 @@ int  addcurve(char *id)
 {
    STmplist *c;
 
+  STmplist *Curvelist = m->Curvelist;
+  
 /* Check if ID is same as last one processed */
-   if (Curvelist != NULL && strcmp(id,Curvelist->ID) == 0) return(0);
+   if (Curvelist != NULL && strcmp(id,Curvelist->ID) == 0)
+     return(0);
 
 /* Check that curve was not already created */
-   if (findID(id,Curvelist) == NULL)
-   {
+   if (findID(id,Curvelist) == NULL) {
 
    /* Update curve count & create new list element */
-      (MaxCurves)++;
+      (m->MaxCurves)++;
       c = (STmplist *) malloc(sizeof(STmplist));
       if (c == NULL) return(101);
 
    /* Initialize list element properties */
       else
       {
-         c->i = MaxCurves;
+         c->i = m->MaxCurves;
          strncpy(c->ID,id,MAXID);
          c->x = NULL;
          c->y = NULL;
@@ -520,7 +531,7 @@ int  addcurve(char *id)
    return(0);
 }
 
-int  addcoord(char *id)
+int  addcoord(Model *m, char *id)
 /*
  **-------------------------------------------------------------
  **  Input:   id = curve ID label
@@ -531,6 +542,8 @@ int  addcoord(char *id)
 {
 	STmplist *c;
   
+  STmplist *Coordlist = m->Coordlist;
+  
 	/* Check if ID is same as last one processed */
 	if (Coordlist != NULL && strcmp(id,Coordlist->ID) == 0) return(0);
   
@@ -539,7 +552,7 @@ int  addcoord(char *id)
 	{
     
 		/* Update coordinate count & create new list element */
-		(MaxCoords)++;
+		(m->MaxCoords)++;
 		c = (STmplist *) malloc(sizeof(STmplist));
 		if (c == NULL) {
       return(101);
@@ -580,7 +593,7 @@ STmplist *findID(char *id, STmplist *list)
 }
 
 
-int  unlinked()
+int  unlinked(Model *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -595,23 +608,23 @@ int  unlinked()
    int   i,err, errcode;
    errcode = 0;
    err = 0;
-   marked   = (char *) calloc(Nnodes+1,sizeof(char));
+   marked   = (char *) calloc(m->Nnodes+1,sizeof(char));
    ERRCODE(MEMCHECK(marked));
    if (!errcode)
    {
-      memset(marked,0,(Nnodes+1)*sizeof(char));
-      for (i=1; i<=Nlinks; i++)            /* Mark end nodes of each link */
+      memset(marked,0,(m->Nnodes+1)*sizeof(char));
+      for (i=1; i <= m->Nlinks; i++)            /* Mark end nodes of each link */
       {
-         marked[Link[i].N1]++;
-         marked[Link[i].N2]++;
+         marked[m->Link[i].N1]++;
+         marked[m->Link[i].N2]++;
       }
-      for (i=1; i<=Njuncs; i++)            /* Check each junction  */
+      for (i=1; i <= m->Njuncs; i++)            /* Check each junction  */
       {
          if (marked[i] == 0)               /* If not marked then error */
          {
             err++;
-            sprintf(Msg,ERR233,Node[i].ID);
-            writeline(Msg);
+            sprintf(m->Msg,ERR233, m->Node[i].ID);
+            writeline(m,m->Msg);
          }
          if (err >= MAXERRS) break;
       }
@@ -622,7 +635,7 @@ int  unlinked()
 }                        /* End of unlinked */
 
 
-int     getpatterns(void)
+int     getpatterns(Model *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -635,8 +648,10 @@ int     getpatterns(void)
    SFloatlist *f;
    STmplist *pat;
 
+  Spattern *Pattern = m->Pattern;
+  
 /* Start at head of list */
-   pat = Patlist;
+   pat = m->Patlist;
 
 /* Traverse list of patterns */
    while (pat != NULL)
@@ -646,9 +661,10 @@ int     getpatterns(void)
       i = pat->i;
 
    /* Check if this is the default pattern */
-      if (strcmp(pat->ID, DefPatID) == 0) DefPat = i;
-      if (i >= 0 && i <= MaxPats)
-      {
+      if (strcmp(pat->ID, m->DefPatID) == 0)
+        m->DefPat = i;
+     
+      if (i >= 0 && i <= m->MaxPats) {
       /* Save pattern ID */
          strcpy(Pattern[i].ID, pat->ID);
 
@@ -679,7 +695,7 @@ int     getpatterns(void)
 }
 
 
-int     getcurves(void)
+int     getcurves(Model *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -694,7 +710,10 @@ int     getcurves(void)
    STmplist *c;
 
 /* Start at head of curve list */
-   c = Curvelist;
+   c = m->Curvelist;
+  Scurve *Curve = m->Curve;
+  int MaxCurves = m->MaxCurves;
+  char *Msg = m->Msg;
 
 /* Traverse list of curves */
    while (c != NULL)
@@ -710,7 +729,7 @@ int     getcurves(void)
          if (Curve[i].Npts <= 0)
          {
             sprintf(Msg,ERR230,c->ID);
-            writeline(Msg);
+            writeline(m,Msg);
             return(200);
          }
 
@@ -731,7 +750,7 @@ int     getcurves(void)
             if (fx->value >= x)
             {
                sprintf(Msg,ERR230,c->ID);
-               writeline(Msg);
+               writeline(m,Msg);
                return(200);
             }
             x = fx->value;
@@ -749,7 +768,7 @@ int     getcurves(void)
    return(0);
 }
 
-int getcoords(void)
+int getcoords(Model *m)
 /*
  **-----------------------------------------------------------
  **  Input:   none
@@ -764,13 +783,17 @@ int getcoords(void)
 	STmplist *coordinateList;
   
 	/* Start at head of coordinate list */
-	coordinateList = Coordlist;
+	coordinateList = m->Coordlist;
+  
+  Scoord *Coord = m->Coord;
+  int MaxNodes = m->MaxNodes;
+  char *Msg = m->Msg;
   
 	/* Traverse list of coordinates */
 	while (coordinateList != NULL)
 	{
 		// BAD! ---> i = coordinateList->i;
-    i = findnode(coordinateList->ID);
+    i = findnode(m,coordinateList->ID);
 		if (i >= 1 && i <= MaxNodes)
 		{
 			/* Save coordinate ID */
@@ -790,7 +813,7 @@ int getcoords(void)
 				if (xFloatList->value >= x)
 				{
 					sprintf(Msg,ERR230,coordinateList->ID);
-					writeline(Msg);
+					writeline(m,Msg);
 					return(200);
 				}
 				x = xFloatList->value;
@@ -864,7 +887,7 @@ int  match(char *str, char *substr)
 /*** Updated 10/25/00 ***/
 /* The gettokens function has been totally re-written. */
 
-int  gettokens(char *s)
+int  gettokens(char *s, char** Tok, int maxToks)
 /*
 **--------------------------------------------------------------
 **  Input:   *s = string to be tokenized
@@ -882,7 +905,7 @@ int  gettokens(char *s)
    char *c;
 
 /* Begin with no tokens */
-   for (n=0; n<MAXTOKS; n++) Tok[n] = NULL;
+   for (n=0; n<maxToks; n++) Tok[n] = NULL;
    n = 0;
 
 /* Truncate s at start of comment */
@@ -989,7 +1012,7 @@ int  getfloat(char *s, double *y)
 }
 
 
-int  setreport(char *s)
+int  setreport(Model *m, char *s)
 /*
 **-----------------------------------------------------------
 **  Input:   *s = report format command 
@@ -1000,12 +1023,12 @@ int  setreport(char *s)
 **-----------------------------------------------------------
 */
 {
-   Ntokens = gettokens(s);
-   return(reportdata());
+   m->Ntokens = gettokens(s, m->Tok, MAXTOKS);
+   return(reportdata(m));
 }
 
 
-void  inperrmsg(int err, int sect, char *line)
+void  inperrmsg(Model *m, int err, int sect, char *line)
 /*
 **-------------------------------------------------------------
 **  Input:   err     = error code
@@ -1022,8 +1045,8 @@ void  inperrmsg(int err, int sect, char *line)
 /* Retrieve ID label of object with input error */
 /* (No ID used for CONTROLS or REPORT sections).*/
    if (sect == _CONTROLS || sect == _REPORT) strcpy(id,"");
-   else if (sect == _ENERGY) strcpy(id,Tok[1]);
-   else strcpy(id,Tok[0]);
+   else if (sect == _ENERGY) strcpy(id,m->Tok[1]);
+   else strcpy(id,m->Tok[0]);
 
 /* Copy error messge to string variable fmt */
    switch (err)
@@ -1056,14 +1079,15 @@ void  inperrmsg(int err, int sect, char *line)
       default:    return;
    }
 
+  char Msg[MAXMSG + 1];
 /* Write error message to Report file */
    sprintf(Msg,fmt,RptSectTxt[sect],id);
-   writeline(Msg);
+   writeline(m,Msg);
 
 /* Echo input line for syntax errors, and   */
 /* errors in CONTROLS and OPTIONS sections. */
-   if (sect == _CONTROLS || err == 201 || err == 213) writeline(line);
-   else writeline("");
+   if (sect == _CONTROLS || err == 201 || err == 213) writeline(m,line);
+   else writeline(m,"");
 }
 
 /********************** END OF INPUT2.C ************************/
