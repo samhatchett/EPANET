@@ -158,11 +158,11 @@ int  savehyd(Model *m, long *htime)
    INT4 t;
    int errcode = 0;
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   FILE *HydFile = m->HydFile;
@@ -307,11 +307,11 @@ int  readhyd(Model *m, long *hydtime)
 */
 {
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   FILE *HydFile = m->HydFile;
@@ -398,8 +398,8 @@ int  nodeoutput(Model *m, int j, REAL4 *x, double ucf)
 {
    int   i;
 
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *NodeQual = m->NodeQual;
   Snode *Node = m->Node;
   int Nnodes = m->Nnodes;
@@ -442,13 +442,13 @@ int  linkoutput(Model *m, int j, REAL4 *x, double ucf)
    int i;
    double a,h,q,f;
 
-  double *NodeHead = m->NodeHead;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
   double *PipeRateCoeff = m->PipeRateCoeff;
-  char *LinkStatus = m->LinkStatus;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nlinks = m->Nlinks;
   FILE *TmpOutFile = m->TmpOutFile;
   char Qualflag = m->Qualflag;
@@ -596,11 +596,11 @@ int  savetimestat(Model *m, REAL4 *x, char objtype)
 */
 {
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *NodeQual = m->NodeQual;
   double *Ucf = m->Ucf;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   int Nperiods = m->Nperiods;

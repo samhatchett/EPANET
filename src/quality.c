@@ -257,8 +257,8 @@ int runqual(Model *m, long *t)
         
         for (int i=1; i<= m->Nlinks; ++i)
         {
-          if (m->LinkStatus[i] <= CLOSED) {
-            m->QLinkFlow[i-1] = m->LinkFlows[i];
+          if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+            m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
           }
         }
 
@@ -272,8 +272,8 @@ int runqual(Model *m, long *t)
         
         for (int i=1; i<= m->Nlinks; ++i)
         {
-          if (m->LinkStatus[i] <= CLOSED) {
-            m->QLinkFlow[i-1] = m->LinkFlows[i];
+          if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+            m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
           }
         }
 
@@ -323,14 +323,14 @@ int nextqual(Model *m, long *tstep)
       if (m->Tank[i].A != 0) { // skip reservoirs again
         int n = m->Tank[i].Node;
         m->Tank[i].V = m->QTankVolumes[i-1];
-        m->NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
       }
     }
     
     // restore the previous step's pipe link flows
     for (int i=1; i <= m->Nlinks; i++) {
-      if (m->LinkStatus[i] <= CLOSED) {
-        m->LinkFlows[i] = 0.0;
+      if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+        m->hydraulics.LinkFlows[i] = 0.0;
       }
     }
 
@@ -359,13 +359,13 @@ int nextqual(Model *m, long *tstep)
       if (m->Tank[i].A != 0) { // skip reservoirs again
         int n = m->Tank[i].Node;
         m->Tank[i].V = tankVolumes[i-1];
-        m->NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
       }
     }
     
     for (int i=1; i <= m->Nlinks; ++i) {
-      if (m->LinkStatus[i] <= CLOSED) {
-        m->LinkFlows[i] = m->QLinkFlow[i-1];
+      if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+        m->hydraulics.LinkFlows[i] = m->QLinkFlow[i-1];
       }
     }
     
@@ -586,7 +586,7 @@ void  initsegs(Model *m)
 
       /* Establish flow direction */
      m->FlowDir[k] = '+';
-     if (m->LinkFlows[k] < 0.) {
+     if (m->hydraulics.LinkFlows[k] < 0.) {
        m->FlowDir[k] = '-';
      }
 
@@ -655,10 +655,10 @@ void  reorientsegs(Model *m)
 
       /* Find new flow direction */
      newdir = '+';
-     if (m->LinkFlows[k] == 0.0) {
+     if (m->hydraulics.LinkFlows[k] == 0.0) {
        newdir = m->FlowDir[k];
      }
-     else if (m->LinkFlows[k] < 0.0) {
+     else if (m->hydraulics.LinkFlows[k] < 0.0) {
        newdir = '-';
      }
 
@@ -850,7 +850,7 @@ void accumulate(Model *m, long dt)
    {
       i = UP_NODE(m,k);               /* Upstream node */
       j = DOWN_NODE(m,k);             /* Downstream node */
-      v = ABS(m->LinkFlows[k])*dt;             /* Flow volume */
+      v = ABS(m->hydraulics.LinkFlows[k])*dt;             /* Flow volume */
 
 ////  Start of deprecated code segment  ////                                   //(2.00.12 - LR)
          
@@ -930,7 +930,7 @@ void updatenodes(Model *m, long dt)
 {
   int i;
   
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   int Njuncs = m->Njuncs;
   char Qualflag = m->Qualflag;
@@ -975,7 +975,7 @@ void sourceinput(Model *m, long dt)
    double qout, qcutoff;
    Psource source;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Snode *Node = m->Node;
   Stank *Tank = m->Tank;
@@ -1096,7 +1096,7 @@ void release(Model *m, long dt)
 
   
   double *NodeQual = m->NodeQual;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
   int Nlinks = m->Nlinks;
   double *TempQual = m->TempQual;
 
@@ -1268,7 +1268,7 @@ void  tankmix1(Model *m, int i, long dt)
     double cin;
     double c, cmax, vold, vin;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   
@@ -1321,7 +1321,7 @@ void  tankmix2(Model *m, int i, long dt)
             v1max;      /* Full mixing zone volume */
    Pseg     seg1,seg2;  /* Compartment segments */
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1413,7 +1413,7 @@ void  tankmix3(Model *m, int i, long dt)
    double cin,vsum,csum;
    Pseg  seg;
   
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1515,7 +1515,7 @@ void  tankmix4(Model *m, int i, long dt)
    double vin, vnet, cin, vsum, csum, vseg;
    Pseg  seg, tmpseg;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1707,7 +1707,7 @@ double piperate(Model *m, int k)
   
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
 
    d = Link[k].Diam;                    /* Pipe diameter, ft */
 

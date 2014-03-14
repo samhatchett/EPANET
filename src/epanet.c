@@ -195,7 +195,7 @@ int   main(int argc, char *argv[])
        writecon(FMT01);
        errcode = ENepanet(f1,f2,f3,NULL);
        if (errcode > 0) writecon(FMT11);
-       else if (Warnflag > 0) writecon(FMT10);
+       else if (en_defaultModel.Warnflag > 0) writecon(FMT10);
        else writecon(FMT09);
     }
     return(0);
@@ -571,7 +571,7 @@ int DLLEXPORT ENinitH(int flag)
    }
 
 /* Initialize hydraulics */
-   inithyd(fflag);
+   inithyd(m,fflag);
    if (m->Statflag > 0) writeheader(m,STATHDR,0);
    return(errcode);
 }
@@ -1575,15 +1575,15 @@ int DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value)
          break;                                                                //(2.00.11 - LR)
          
       case EN_DEMAND:
-         v = m->NodeDemand[index] * m->Ucf[FLOW];
+         v = m->hydraulics.NodeDemand[index] * m->Ucf[FLOW];
          break;
 
       case EN_HEAD:
-         v = m->NodeHead[index] * m->Ucf[HEAD];
+         v = m->hydraulics.NodeHead[index] * m->Ucf[HEAD];
          break;
 
       case EN_PRESSURE:
-         v = (m->NodeHead[index] - m->Node[index].El) * m->Ucf[PRESSURE];
+         v = (m->hydraulics.NodeHead[index] - m->Node[index].El) * m->Ucf[PRESSURE];
          break;
 
       case EN_QUALITY:
@@ -1650,7 +1650,7 @@ int DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value)
 
       case EN_TANKVOLUME:
          if (index <= m->Njuncs) return(251);
-         v = tankvolume(m, tankIndex, m->NodeHead[index]) * m->Ucf[VOLUME];
+         v = tankvolume(m, tankIndex, m->hydraulics.NodeHead[index]) * m->Ucf[VOLUME];
          break;
 
       default: return(251);
@@ -1833,19 +1833,19 @@ int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
       case EN_FLOW:
 
 /*** Updated 10/25/00 ***/
-         if (m->LinkStatus[index] <= CLOSED) v = 0.0;
-         else v = m->LinkFlows[index] * m->Ucf[FLOW];
+         if (m->hydraulics.LinkStatus[index] <= CLOSED) v = 0.0;
+         else v = m->hydraulics.LinkFlows[index] * m->Ucf[FLOW];
          break;
 
       case EN_VELOCITY:
          if (m->Link[index].Type == PUMP) v = 0.0;
 
 /*** Updated 11/19/01 ***/
-         else if (m->LinkStatus[index] <= CLOSED) v = 0.0;
+         else if (m->hydraulics.LinkStatus[index] <= CLOSED) v = 0.0;
 
          else
          {
-            q = ABS(m->LinkFlows[index]);
+            q = ABS(m->hydraulics.LinkFlows[index]);
             a = PI*SQR(m->Link[index].Diam)/4.0;
             v = q/a * m->Ucf[VELOCITY];
          }
@@ -1854,18 +1854,18 @@ int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
       case EN_HEADLOSS:
 
 /*** Updated 11/19/01 ***/
-         if (m->LinkStatus[index] <= CLOSED) v = 0.0;
+         if (m->hydraulics.LinkStatus[index] <= CLOSED) v = 0.0;
 
          else
          {
-            h = m->NodeHead[m->Link[index].N1] - m->NodeHead[m->Link[index].N2];
+            h = m->hydraulics.NodeHead[m->Link[index].N1] - m->hydraulics.NodeHead[m->Link[index].N2];
             if (m->Link[index].Type != PUMP) h = ABS(h);
             v = h * m->Ucf[HEADLOSS];
          }
          break;
 
       case EN_STATUS:
-         if (m->LinkStatus[index] <= CLOSED) v = 0.0;
+         if (m->hydraulics.LinkStatus[index] <= CLOSED) v = 0.0;
          else v = 1.0;
          break;
 
@@ -1873,11 +1873,11 @@ int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
          if (m->Link[index].Type == PIPE || m->Link[index].Type == CV) {
             return(ENgetlinkvalue(index, EN_ROUGHNESS, value));
          }
-         if (m->LinkSetting[index] == MISSING) {
+         if (m->hydraulics.LinkSetting[index] == MISSING) {
            v = 0.0;
          }
          else {
-           v = m->LinkSetting[index];
+           v = m->hydraulics.LinkSetting[index];
          }
          switch (m->Link[index].Type)
          {
@@ -2079,7 +2079,7 @@ int DLLEXPORT ENsetnodevalue(int index, int code, EN_API_FLOAT_TYPE v)
             m->Tank[tankIndex].Hmin += value;
             m->Tank[tankIndex].Hmax += value;
             m->Node[index].El += value;
-            m->NodeHead[index] += value;
+            m->hydraulics.NodeHead[index] += value;
          }
          break;
 
@@ -2168,7 +2168,7 @@ int DLLEXPORT ENsetnodevalue(int index, int code, EN_API_FLOAT_TYPE v)
             m->Tank[tankIndex].Hmin = m->Tank[tankIndex].H0;
             m->Tank[tankIndex].Hmax = m->Tank[tankIndex].H0;
             m->Node[index].El = m->Tank[tankIndex].H0;
-            m->NodeHead[index] = m->Tank[tankIndex].H0;
+            m->hydraulics.NodeHead[index] = m->Tank[tankIndex].H0;
          }
          else
          {
@@ -2179,7 +2179,7 @@ int DLLEXPORT ENsetnodevalue(int index, int code, EN_API_FLOAT_TYPE v)
             m->Tank[tankIndex].V0 = tankvolume(m, tankIndex, m->Tank[tankIndex].H0);
            // Resetting Volume in addition to initial volume
             m->Tank[tankIndex].V = m->Tank[tankIndex].V0;
-            m->NodeHead[index] = m->Tank[tankIndex].H0;
+            m->hydraulics.NodeHead[index] = m->Tank[tankIndex].H0;
          }
          break;
 
@@ -2338,7 +2338,7 @@ int DLLEXPORT ENsetlinkvalue(int index, int code, EN_API_FLOAT_TYPE v)
          if (code == EN_INITSTATUS)
            setlinkstatus(m, index, s, &m->Link[index].Stat, &m->Link[index].Kc);
          else
-           setlinkstatus(m, index, s, &m->LinkStatus[index], &m->LinkSetting[index]);
+           setlinkstatus(m, index, s, &m->hydraulics.LinkStatus[index], &m->hydraulics.LinkSetting[index]);
          break;
 
       case EN_INITSETTING:
@@ -2365,7 +2365,7 @@ int DLLEXPORT ENsetlinkvalue(int index, int code, EN_API_FLOAT_TYPE v)
             if (code == EN_INITSETTING)
               setlinksetting(m, index, value, &m->Link[index].Stat, &m->Link[index].Kc);
             else
-              setlinksetting(m, index, value, &m->LinkStatus[index], &m->LinkSetting[index]);
+              setlinksetting(m, index, value, &m->hydraulics.LinkStatus[index], &m->hydraulics.LinkSetting[index]);
          }
          break;
 
@@ -2988,14 +2988,14 @@ void initpointers(Model *m)
 **----------------------------------------------------------------
 */
 {
-   m->NodeDemand        = NULL;
+   m->hydraulics.NodeDemand        = NULL;
    m->NodeQual = NULL;
-   m->NodeHead        = NULL;
-   m->LinkFlows        = NULL;
+   m->hydraulics.NodeHead        = NULL;
+   m->hydraulics.LinkFlows        = NULL;
    m->PipeRateCoeff        = NULL;
-   m->LinkStatus        = NULL;
-   m->LinkSetting        = NULL;
-   m->OldStat  = NULL;
+   m->hydraulics.LinkStatus        = NULL;
+   m->hydraulics.LinkSetting        = NULL;
+   m->hydraulics.OldStat  = NULL;
 
    m->Node     = NULL;
    m->Link     = NULL;
@@ -3012,17 +3012,17 @@ void initpointers(Model *m)
    m->Curvelist = NULL;
    m->Coordlist = NULL;
    m->Adjlist  = NULL;
-   m->Aii      = NULL;
-   m->Aij      = NULL;
-   m->F        = NULL;
-   m->P        = NULL;
-   m->Y        = NULL;
-   m->Order    = NULL;
-   m->Row      = NULL;
-   m->Ndx      = NULL;
-   m->XLNZ     = NULL;
-   m->NZSUB    = NULL;
-   m->LNZ      = NULL;
+   m->hydraulics.solver.Aii      = NULL;
+   m->hydraulics.solver.Aij      = NULL;
+   m->hydraulics.solver.F        = NULL;
+   m->hydraulics.solver.P        = NULL;
+   m->hydraulics.solver.Y        = NULL;
+   m->hydraulics.solver.Order    = NULL;
+   m->hydraulics.solver.Row      = NULL;
+   m->hydraulics.solver.Ndx      = NULL;
+   m->hydraulics.solver.XLNZ     = NULL;
+   m->hydraulics.solver.NZSUB    = NULL;
+   m->hydraulics.solver.LNZ      = NULL;
    m->NodeHashTable      = NULL;
    m->LinkHashTable      = NULL;
    initrules(m);
@@ -3057,13 +3057,13 @@ int  allocdata(Model *m)
    {
       n = m->MaxNodes + 1;
       m->Node = (Snode *)  calloc(n, sizeof(Snode));
-      m->NodeDemand   = (double *) calloc(n, sizeof(double));
+      m->hydraulics.NodeDemand   = (double *) calloc(n, sizeof(double));
       m->NodeQual = (double *) calloc(n, sizeof(double));
-      m->NodeHead    = (double *) calloc(n, sizeof(double));
+      m->hydraulics.NodeHead    = (double *) calloc(n, sizeof(double));
       ERRCODE(MEMCHECK(m->Node));
-      ERRCODE(MEMCHECK(m->NodeDemand));
+      ERRCODE(MEMCHECK(m->hydraulics.NodeDemand));
       ERRCODE(MEMCHECK(m->NodeQual));
-      ERRCODE(MEMCHECK(m->NodeHead));
+      ERRCODE(MEMCHECK(m->hydraulics.NodeHead));
    }
 
 /* Allocate memory for network links */
@@ -3071,13 +3071,13 @@ int  allocdata(Model *m)
    {
       n = m->MaxLinks + 1;
       m->Link = (Slink *) calloc(n, sizeof(Slink));
-      m->LinkFlows    = (double *) calloc(n, sizeof(double));
-      m->LinkSetting    = (double *) calloc(n, sizeof(double));
-      m->LinkStatus    = (char  *) calloc(n, sizeof(char));
+      m->hydraulics.LinkFlows    = (double *) calloc(n, sizeof(double));
+      m->hydraulics.LinkSetting    = (double *) calloc(n, sizeof(double));
+      m->hydraulics.LinkStatus    = (char  *) calloc(n, sizeof(char));
       ERRCODE(MEMCHECK(m->Link));
-      ERRCODE(MEMCHECK(m->LinkFlows));
-      ERRCODE(MEMCHECK(m->LinkSetting));
-      ERRCODE(MEMCHECK(m->LinkStatus));
+      ERRCODE(MEMCHECK(m->hydraulics.LinkFlows));
+      ERRCODE(MEMCHECK(m->hydraulics.LinkSetting));
+      ERRCODE(MEMCHECK(m->hydraulics.LinkStatus));
    } 
 
 /* Allocate memory for tanks, sources, pumps, valves,   */
@@ -3190,12 +3190,12 @@ void  freedata(Model *m)
     Psource source;
 
 /* Free memory for computed results */
-    free(m->NodeDemand);
+    free(m->hydraulics.NodeDemand);
     free(m->NodeQual);
-    free(m->NodeHead);
-    free(m->LinkFlows);
-    free(m->LinkSetting);
-    free(m->LinkStatus);
+    free(m->hydraulics.NodeHead);
+    free(m->hydraulics.LinkFlows);
+    free(m->hydraulics.LinkSetting);
+    free(m->hydraulics.LinkStatus);
 
 /* Free memory for node data */
     if (m->Node != NULL)

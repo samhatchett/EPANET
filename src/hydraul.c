@@ -45,7 +45,7 @@ AUTHOR:     L. Rossman
      writehydwarn() -- see REPORT.C
 *******************************************************************
 */
-
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #ifndef __APPLE__
@@ -108,7 +108,7 @@ int  openhyd(Model *m)
 
 
 /*** Updated 3/1/01 ***/
-void inithyd(int initflag)
+void inithyd(Model *m, int initflag)
 /*
 **--------------------------------------------------------------
 **  Input:   initflag > 0 if link flows should be re-initialized
@@ -118,49 +118,48 @@ void inithyd(int initflag)
 **--------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
    int i,j;
 
    /* Initialize tanks */
    for (i=1; i <= m->Ntanks; i++)
    {
       m->Tank[i].V = m->Tank[i].V0;
-      m->NodeHead[m->Tank[i].Node] = m->Tank[i].H0;
+      m->hydraulics.NodeHead[m->Tank[i].Node] = m->Tank[i].H0;
 
 /*** Updated 10/25/00 ***/
-      m->NodeDemand[m->Tank[i].Node] = 0.0;
+      m->hydraulics.NodeDemand[m->Tank[i].Node] = 0.0;
 
-      m->OldStat[m->Nlinks+i] = TEMPCLOSED;
+      m->hydraulics.OldStat[m->Nlinks+i] = TEMPCLOSED;
    }
 
    /* Initialize emitter flows */
-   memset(m->EmitterFlows,0,(m->Nnodes+1)*sizeof(double));
+   memset(m->hydraulics.EmitterFlows,0,(m->Nnodes+1)*sizeof(double));
    for (i=1; i <= m->Njuncs; i++)
-      if (m->Node[i].Ke > 0.0) m->EmitterFlows[i] = 1.0;
+      if (m->Node[i].Ke > 0.0) m->hydraulics.EmitterFlows[i] = 1.0;
 
    /* Initialize links */
    for (i=1; i <= m->Nlinks; i++)
    {
    /* Initialize status and setting */
-      m->LinkStatus[i] = m->Link[i].Stat;
-      m->LinkSetting[i] = m->Link[i].Kc;
+      m->hydraulics.LinkStatus[i] = m->Link[i].Stat;
+      m->hydraulics.LinkSetting[i] = m->Link[i].Kc;
 
       /* Start active control valves in ACTIVE position */                     //(2.00.11 - LR)
       if (
            (m->Link[i].Type == PRV || m->Link[i].Type == PSV
             || m->Link[i].Type == FCV)                                            //(2.00.11 - LR)
             && (m->Link[i].Kc != MISSING)
-         ) m->LinkStatus[i] = ACTIVE;                                                      //(2.00.11 - LR)
+         ) m->hydraulics.LinkStatus[i] = ACTIVE;                                                      //(2.00.11 - LR)
 
 /*** Updated 3/1/01 ***/
       /* Initialize flows if necessary */
-      if (m->LinkStatus[i] <= CLOSED) m->LinkFlows[i] = QZERO;
-      else if (ABS(m->LinkFlows[i]) <= QZERO || initflag > 0) {
-         initlinkflow(m,i, m->LinkStatus[i], m->LinkSetting[i]);
+      if (m->hydraulics.LinkStatus[i] <= CLOSED) m->hydraulics.LinkFlows[i] = QZERO;
+      else if (ABS(m->hydraulics.LinkFlows[i]) <= QZERO || initflag > 0) {
+         initlinkflow(m,i, m->hydraulics.LinkStatus[i], m->hydraulics.LinkSetting[i]);
       }
 
       /* Save initial status */
-      m->OldStat[i] = m->LinkStatus[i];
+      m->hydraulics.OldStat[i] = m->hydraulics.LinkStatus[i];
    }
 
    /* Reset pump energy usage */
@@ -300,22 +299,22 @@ int  allocmatrix(Model *m)
 */
 {
    int errcode = 0;
-   m->Aii = (double *) calloc(m->Nnodes+1,sizeof(double));
-   m->Aij = (double *) calloc(m->Ncoeffs+1,sizeof(double));
-   m->F   = (double *) calloc(m->Nnodes+1,sizeof(double));
-   m->EmitterFlows   = (double *) calloc(m->Nnodes+1,sizeof(double));
-   m->P   = (double *) calloc(m->Nlinks+1,sizeof(double));
-   m->Y   = (double *) calloc(m->Nlinks+1,sizeof(double));
+   m->hydraulics.solver.Aii = (double *) calloc(m->Nnodes+1,sizeof(double));
+   m->hydraulics.solver.Aij = (double *) calloc(m->Ncoeffs+1,sizeof(double));
+   m->hydraulics.solver.F   = (double *) calloc(m->Nnodes+1,sizeof(double));
+   m->hydraulics.EmitterFlows   = (double *) calloc(m->Nnodes+1,sizeof(double));
+   m->hydraulics.solver.P   = (double *) calloc(m->Nlinks+1,sizeof(double));
+   m->hydraulics.solver.Y   = (double *) calloc(m->Nlinks+1,sizeof(double));
    m->X   = (double *) calloc(MAX((m->Nnodes+1),(m->Nlinks+1)),sizeof(double));
-   m->OldStat = (char *) calloc(m->Nlinks+m->Ntanks+1, sizeof(char));
-   ERRCODE(MEMCHECK(m->Aii));
-   ERRCODE(MEMCHECK(m->Aij));
-   ERRCODE(MEMCHECK(m->F));
-   ERRCODE(MEMCHECK(m->EmitterFlows));
-   ERRCODE(MEMCHECK(m->P));
-   ERRCODE(MEMCHECK(m->Y));
+   m->hydraulics.OldStat = (char *) calloc(m->Nlinks+m->Ntanks+1, sizeof(char));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Aii));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Aij));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.F));
+   ERRCODE(MEMCHECK(m->hydraulics.EmitterFlows));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.P));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Y));
    ERRCODE(MEMCHECK(m->X));
-   ERRCODE(MEMCHECK(m->OldStat));
+   ERRCODE(MEMCHECK(m->hydraulics.OldStat));
    return(errcode);
 }                               /* end of allocmatrix */
 
@@ -329,14 +328,14 @@ void  freematrix(Model *m)
 **--------------------------------------------------------------
 */
 {  
-   free(m->Aii);
-   free(m->Aij);
-   free(m->F);
-   free(m->EmitterFlows);
-   free(m->P);
-   free(m->Y);
+   free(m->hydraulics.solver.Aii);
+   free(m->hydraulics.solver.Aij);
+   free(m->hydraulics.solver.F);
+   free(m->hydraulics.EmitterFlows);
+   free(m->hydraulics.solver.P);
+   free(m->hydraulics.solver.Y);
    free(m->X);
-   free(m->OldStat);
+   free(m->hydraulics.OldStat);
 }                               /* end of freematrix */
 
 
@@ -355,14 +354,14 @@ void  initlinkflow(Model *m, int i, char s, double k)
 {
   
   if (s == CLOSED) {
-    m->LinkFlows[i] = QZERO;
+    m->hydraulics.LinkFlows[i] = QZERO;
   }
   else if (m->Link[i].Type == PUMP) {
-    int pumpIndex = ROUND(m->Link[(i)].Diam);
-    m->LinkFlows[i] = k * m->Pump[pumpIndex].Q0;
+    int pumpIndex = m->Link[i].pumpLinkIdx;
+    m->hydraulics.LinkFlows[i] = k * m->Pump[pumpIndex].Q0;
   }
   else {
-    m->LinkFlows[i] = PI*SQR(m->Link[i].Diam)/4.0;
+    m->hydraulics.LinkFlows[i] = PI*SQR(m->Link[i].Diam)/4.0;
   }
 }
 
@@ -391,9 +390,9 @@ void  setlinkflow(Model *m, int k, double dh)
        /* use approx. inverse of formula. */
           if (m->Formflag == DW)
           {
-             x = -log(m->LinkSetting[k]/3.7/m->Link[k].Diam);
+             x = -log(m->hydraulics.LinkSetting[k]/3.7/m->Link[k].Diam);
              y = sqrt(ABS(dh)/m->Link[k].R/1.32547);
-             m->LinkFlows[k] = x*y;
+             m->hydraulics.LinkFlows[k] = x*y;
           }
 
        /* For Hazen-Williams or Manning formulas: */
@@ -402,12 +401,12 @@ void  setlinkflow(Model *m, int k, double dh)
           {
              x = ABS(dh) / m->Link[k].R;
              y = 1.0 / m->Hexp;
-             m->LinkFlows[k] = pow(x,y);
+             m->hydraulics.LinkFlows[k] = pow(x,y);
           }
 
        /* Change sign of flow to match sign of headloss */
        if (dh < 0.0) {
-         m->LinkFlows[k] = -(m->LinkFlows[k]);
+         m->hydraulics.LinkFlows[k] = -(m->hydraulics.LinkFlows[k]);
        }
          break;
 
@@ -420,23 +419,23 @@ void  setlinkflow(Model *m, int k, double dh)
        /* For custom pump curve, interpolate from curve */
           if (m->Pump[p].Ptype == CUSTOM)
           {
-             dh = -dh * m->Ucf[HEAD] / SQR(m->LinkSetting[k]);
+             dh = -dh * m->Ucf[HEAD] / SQR(m->hydraulics.LinkSetting[k]);
              i = m->Pump[p].Hcurve;
             double curvePoint = interp(m->Curve[i].Npts,
                                        m->Curve[i].Y,
                                        m->Curve[i].X,
                                        dh);
-             m->LinkFlows[k] = curvePoint * m->LinkSetting[k] / m->Ucf[FLOW];
+             m->hydraulics.LinkFlows[k] = curvePoint * m->hydraulics.LinkSetting[k] / m->Ucf[FLOW];
           }
 
        /* Otherwise use inverse of power curve */
           else
           {
-             h0 = -SQR(m->LinkSetting[k])*m->Pump[p].H0;
-             x = pow(m->LinkSetting[k], 2.0 - m->Pump[p].N);
+             h0 = -SQR(m->hydraulics.LinkSetting[k])*m->Pump[p].H0;
+             x = pow(m->hydraulics.LinkSetting[k], 2.0 - m->Pump[p].N);
              x = ABS(h0-dh)/(m->Pump[p].R*x),
              y = 1.0/m->Pump[p].N;
-             m->LinkFlows[k] = pow(x,y);
+             m->hydraulics.LinkFlows[k] = pow(x,y);
           }
           break;
    }
@@ -629,7 +628,7 @@ void  demands(Model *m)
          }
          sum += djunc;
       }
-      m->NodeDemand[i] = sum;
+      m->hydraulics.NodeDemand[i] = sum;
    }
 
    /* Update head at fixed grade nodes with time patterns. */
@@ -642,7 +641,7 @@ void  demands(Model *m)
          {
             k = p % (long) m->Pattern[j].Length;
             i = m->Tank[n].Node;
-            m->NodeHead[i] = m->Node[i].El * m->Pattern[j].F[k];
+            m->hydraulics.NodeHead[i] = m->Node[i].El * m->Pattern[j].F[k];
          }
       }
    }
@@ -655,7 +654,7 @@ void  demands(Model *m)
       {
          i = m->Pump[n].Link;
          k = p % (long) m->Pattern[j].Length;
-         setlinksetting(m, i, m->Pattern[j].F[k], &m->LinkStatus[i], &m->LinkSetting[i]);
+         setlinksetting(m, i, m->Pattern[j].F[k], &m->hydraulics.LinkStatus[i], &m->hydraulics.LinkSetting[i]);
       }
    }
 }                        /* End of demands */
@@ -688,8 +687,8 @@ int  controls(Model *m)
       /* Link is controlled by tank level */
       if ((n = control->Node) > 0 && n > m->Njuncs)
       {
-         h = m->NodeHead[n];
-         vplus = ABS(m->NodeDemand[n]);
+         h = m->hydraulics.NodeHead[n];
+         vplus = ABS(m->hydraulics.NodeDemand[n]);
          v1 = tankvolume(m, n - m->Njuncs, h);
          v2 = tankvolume(m, n - m->Njuncs, m->Control[i].Grade);
          if (control->Type == LOWLEVEL && v1 <= v2 + vplus)
@@ -713,16 +712,16 @@ int  controls(Model *m)
       /* Update link status & pump speed or valve setting */
       if (reset == 1)
       {
-         if (m->LinkStatus[k] <= CLOSED) s1 = CLOSED;
+         if (m->hydraulics.LinkStatus[k] <= CLOSED) s1 = CLOSED;
          else                s1 = OPEN;
          s2 = control->Status;
-         k1 = m->LinkSetting[k];
+         k1 = m->hydraulics.LinkSetting[k];
          k2 = k1;
          if (m->Link[k].Type > PIPE) k2 = control->Setting;
          if (s1 != s2 || k1 != k2)
          {
-            m->LinkStatus[k] = s2;
-            m->LinkSetting[k] = k2;
+            m->hydraulics.LinkStatus[k] = s2;
+            m->hydraulics.LinkSetting[k] = k2;
            if (m->Statflag) {
              writecontrolaction(m,k,i);
            }
@@ -794,8 +793,8 @@ void  tanktimestep(Model *m, long *tstep)
    {
       if (m->Tank[i].A == 0.0) continue;           /* Skip reservoirs     */
       n = m->Tank[i].Node;
-      h = m->NodeHead[n];                                 /* Current tank grade  */
-      q = m->NodeDemand[n];                                 /* Flow into tank      */
+      h = m->hydraulics.NodeHead[n];                                 /* Current tank grade  */
+      q = m->hydraulics.NodeDemand[n];                                 /* Flow into tank      */
       if (ABS(q) <= QZERO) continue;
       if (q > 0.0 && h < m->Tank[i].Hmax)
       {
@@ -833,8 +832,8 @@ void  controltimestep(Model *m, long *tstep)
       if ( (n = control->Node) > 0)           /* Node control:       */
       {
          if ((j = n - m->Njuncs) <= 0) continue;     /* Node is a tank      */
-         h = m->NodeHead[n];                              /* Current tank grade  */
-         q = m->NodeDemand[n];                              /* Flow into tank      */
+         h = m->hydraulics.NodeHead[n];                              /* Current tank grade  */
+         q = m->hydraulics.NodeDemand[n];                              /* Flow into tank      */
          if (ABS(q) <= QZERO) {
            continue;
          }
@@ -871,8 +870,8 @@ void  controltimestep(Model *m, long *tstep)
          /* Check if rule actually changes link status or setting */
          k = control->Link;
          if (
-              (m->Link[k].Type > PIPE && m->LinkSetting[k] != control->Setting) ||
-              (m->LinkStatus[k] != control->Status)
+              (m->Link[k].Type > PIPE && m->hydraulics.LinkSetting[k] != control->Setting) ||
+              (m->hydraulics.LinkStatus[k] != control->Status)
             )
             *tstep = t;
       }
@@ -997,10 +996,10 @@ void  addenergy(Model *mod, long hstep)
      
       /* Skip closed pumps */
       k = pump->Link;
-      if (mod->LinkStatus[k] <= CLOSED) {
+      if (mod->hydraulics.LinkStatus[k] <= CLOSED) {
         continue;
       }
-      q = MAX(QZERO, ABS(mod->LinkFlows[k]));
+      q = MAX(QZERO, ABS(mod->hydraulics.LinkFlows[k]));
 
       /* Find pump-specific energy cost */
       if (pump->Ecost > 0.0) {
@@ -1048,7 +1047,7 @@ void  getenergy(Model *m, int k, double *kw, double *eff)
 
 /*** Updated 6/24/02 ***/
    /* No energy if link is closed */
-   if (m->LinkStatus[k] <= CLOSED)
+   if (m->hydraulics.LinkStatus[k] <= CLOSED)
    {
       *kw = 0.0;
       *eff = 0.0;
@@ -1057,13 +1056,13 @@ void  getenergy(Model *m, int k, double *kw, double *eff)
 /*** End of update ***/
 
    /* Determine flow and head difference */
-   q = ABS(m->LinkFlows[k]);
-   dh = ABS(m->NodeHead[m->Link[k].N1] - m->NodeHead[m->Link[k].N2]);
+   q = ABS(m->hydraulics.LinkFlows[k]);
+   dh = ABS(m->hydraulics.NodeHead[m->Link[k].N1] - m->hydraulics.NodeHead[m->Link[k].N2]);
 
    /* For pumps, find effic. at current flow */
    if (m->Link[k].Type == PUMP)
    {
-      j = ROUND(m->Link[k].pumpLinkIdx);
+      j = m->Link[k].pumpLinkIdx;
       e = m->Epump;
       if ( (i = m->Pump[j].Ecurve) > 0) {
          e = interp(m->Curve[i].Npts,
@@ -1104,18 +1103,18 @@ void  tanklevels(Model *m, long tstep)
 
       /* Update the tank's volume & water elevation */
       n = m->Tank[i].Node;
-      dv = m->NodeDemand[n]*tstep;
+      dv = m->hydraulics.NodeDemand[n]*tstep;
       m->Tank[i].V += dv;
 
       /*** Updated 6/24/02 ***/
       /* Check if tank full/empty within next second */
-      if (m->Tank[i].V + m->NodeDemand[n] >= m->Tank[i].Vmax) {
+      if (m->Tank[i].V + m->hydraulics.NodeDemand[n] >= m->Tank[i].Vmax) {
         m->Tank[i].V = m->Tank[i].Vmax;
       }
-      else if (m->Tank[i].V - m->NodeDemand[n] <= m->Tank[i].Vmin) {
+      else if (m->Tank[i].V - m->hydraulics.NodeDemand[n] <= m->Tank[i].Vmin) {
         m->Tank[i].V = m->Tank[i].Vmin;
       }
-      m->NodeHead[n] = tankgrade(m, i,m->Tank[i].V);
+      m->hydraulics.NodeHead[n] = tankgrade(m, i,m->Tank[i].V);
    }
 }                       /* End of tanklevels */
 
@@ -1230,9 +1229,15 @@ int  netsolve(Model *m, int *iter, double *relerr)
   
    /* Repeat iterations until convergence or trial limit is exceeded. */
    /* (ExtraIter used to increase trials in case of status cycling.)  */
-   if (m->Statflag == FULL) writerelerr(m,0,0);
+  
+   if (m->Statflag == FULL)
+     writerelerr(m,0,0);
+
    maxtrials = m->MaxIter;
-   if (m->ExtraIter > 0) maxtrials += m->ExtraIter;
+  
+   if (m->ExtraIter > 0)
+     maxtrials += m->ExtraIter;
+  
    *iter = 1;
    while (*iter <= maxtrials)
    {
@@ -1243,7 +1248,7 @@ int  netsolve(Model *m, int *iter, double *relerr)
       ** Solution for H is returned in F from call to linsolve().
       */
       newcoeffs(m);
-      errcode = linsolve(m, m->Njuncs, m->Aii, m->Aij, m->F);
+      errcode = linsolve(m, m->Njuncs, m->hydraulics.solver.Aii, m->hydraulics.solver.Aij, m->hydraulics.solver.F);
 
       /* Take action depending on error code */
       if (errcode < 0) break;    /* Memory allocation problem */
@@ -1251,14 +1256,15 @@ int  netsolve(Model *m, int *iter, double *relerr)
       {
          /* If control valve causing problem, fix its status & continue, */
          /* otherwise end the iterations with no solution.               */
-         if (badvalve(m, m->Order[errcode])) continue;
+         if (badvalve(m, m->hydraulics.solver.Order[errcode])) continue;
          else break;
       }
 
       /* Update current solution. */
       /* (Row[i] = row of solution matrix corresponding to node i). */
       for (i=1; i <= m->Njuncs; i++) {
-        m->NodeHead[i] = m->F[m->Row[i]];   /* Update heads */
+        double head = m->hydraulics.solver.F[m->hydraulics.solver.Row[i]];
+        m->hydraulics.NodeHead[i] = head;   /* Update heads */
       }
       newerr = newflows(m);                          /* Update flows */
       *relerr = newerr;
@@ -1310,13 +1316,13 @@ int  netsolve(Model *m, int *iter, double *relerr)
    if (errcode < 0) errcode = 101;      /* Memory allocation error */
    else if (errcode > 0)
    {
-      writehyderr(m,m->Order[errcode]);      /* Ill-conditioned eqns. error */
+      writehyderr(m,m->hydraulics.solver.Order[errcode]);      /* Ill-conditioned eqns. error */
       errcode = 110;
    }
 
    /* Add any emitter flows to junction demands */
    for (i=1; i <= m->Njuncs; i++) {
-     m->NodeDemand[i] += m->EmitterFlows[i];
+     m->hydraulics.NodeDemand[i] += m->hydraulics.EmitterFlows[i];
    }
    return(errcode);
 }                        /* End of netsolve */
@@ -1347,7 +1353,7 @@ int  badvalve(Model *m, int n)
              m->Link[k].Type == PSV ||
              m->Link[k].Type == FCV)
          {
-            if (m->LinkStatus[k] == ACTIVE)
+            if (m->hydraulics.LinkStatus[k] == ACTIVE)
             {
                if (m->Statflag == FULL)
                {
@@ -1355,10 +1361,10 @@ int  badvalve(Model *m, int n)
                   writeline(m,m->Msg);
                }
               if (m->Link[k].Type == FCV) {
-                m->LinkStatus[k] = XFCV;
+                m->hydraulics.LinkStatus[k] = XFCV;
               }
               else {
-                m->LinkStatus[k] = XPRESSURE;
+                m->hydraulics.LinkStatus[k] = XPRESSURE;
               }
                return(1);
             }
@@ -1390,21 +1396,21 @@ int  valvestatus(Model *m)
    for (i=1; i <= m->Nvalves; i++)                   /* Examine each valve   */
    {
       k = m->Valve[i].Link;                        /* Link index of valve  */
-      if (m->LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
+      if (m->hydraulics.LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
       n1 = m->Link[k].N1;                          /* Start & end nodes    */
       n2 = m->Link[k].N2;
-      s  = m->LinkStatus[k];                                /* Save current status  */
+      s  = m->hydraulics.LinkStatus[k];                                /* Save current status  */
 
 //      if (s != CLOSED                           /* No change if flow is */  //(2.00.11 - LR)
 //      && ABS(Q[k]) < Qtol) continue;            /* negligible.          */  //(2.00.11 - LR)
 
       switch (m->Link[k].Type)                     /* Evaluate new status: */
       {
-         case PRV:  hset = m->Node[n2].El + m->LinkSetting[k];
-                    m->LinkStatus[k] = prvstatus(m,k,s,hset,m->NodeHead[n1],m->NodeHead[n2]);
+         case PRV:  hset = m->Node[n2].El + m->hydraulics.LinkSetting[k];
+                    m->hydraulics.LinkStatus[k] = prvstatus(m,k,s,hset,m->hydraulics.NodeHead[n1],m->hydraulics.NodeHead[n2]);
                     break;
-         case PSV:  hset = m->Node[n1].El + m->LinkSetting[k];
-                    m->LinkStatus[k] = psvstatus(m,k,s,hset,m->NodeHead[n1],m->NodeHead[n2]);
+         case PSV:  hset = m->Node[n1].El + m->hydraulics.LinkSetting[k];
+                    m->hydraulics.LinkStatus[k] = psvstatus(m,k,s,hset,m->hydraulics.NodeHead[n1],m->hydraulics.NodeHead[n2]);
                     break;
 
 ////  FCV status checks moved back into the linkstatus() function ////           //(2.00.12 - LR)
@@ -1419,10 +1425,10 @@ int  valvestatus(Model *m)
       /* This strategy improves convergence. */
 
       /* Check for status change */
-      if (s != m->LinkStatus[k])
+      if (s != m->hydraulics.LinkStatus[k])
       {
          if (m->Statflag == FULL)
-           writestatchange(m,k,s,m->LinkStatus[k]);
+           writestatchange(m,k,s,m->hydraulics.LinkStatus[k]);
          change = TRUE;
       }
    }
@@ -1455,25 +1461,25 @@ int  linkstatus(Model *m)
    {
       n1 = m->Link[k].N1;
       n2 = m->Link[k].N2;
-      dh = m->NodeHead[n1] - m->NodeHead[n2];
+      dh = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
 
       /* Re-open temporarily closed links (status = XHEAD or TEMPCLOSED) */
-      status = m->LinkStatus[k];
+      status = m->hydraulics.LinkStatus[k];
      if (status == XHEAD || status == TEMPCLOSED) {
-       m->LinkStatus[k] = OPEN;
+       m->hydraulics.LinkStatus[k] = OPEN;
      }
 
       /* Check for status changes in CVs and pumps */
      if (m->Link[k].Type == CV) {
-       m->LinkStatus[k] = cvstatus(m,m->LinkStatus[k],dh,m->LinkFlows[k]);
+       m->hydraulics.LinkStatus[k] = cvstatus(m,m->hydraulics.LinkStatus[k],dh,m->hydraulics.LinkFlows[k]);
      }
-     if (m->Link[k].Type == PUMP && m->LinkStatus[k] >= OPEN && m->LinkSetting[k] > 0.0) {                 //(2.00.11 - LR)
-         m->LinkStatus[k] = pumpstatus(m,k,-dh);
+     if (m->Link[k].Type == PUMP && m->hydraulics.LinkStatus[k] >= OPEN && m->hydraulics.LinkSetting[k] > 0.0) {                 //(2.00.11 - LR)
+         m->hydraulics.LinkStatus[k] = pumpstatus(m,k,-dh);
      }
 
       /* Check for status changes in non-fixed FCVs */
-      if (m->Link[k].Type == FCV && m->LinkSetting[k] != MISSING)                              //(2.00.12 - LR)//
-         m->LinkStatus[k] = fcvstatus(m,k,status, m->NodeHead[n1], m->NodeHead[n2]);                               //(2.00.12 - LR)//
+      if (m->Link[k].Type == FCV && m->hydraulics.LinkSetting[k] != MISSING)                              //(2.00.12 - LR)//
+         m->hydraulics.LinkStatus[k] = fcvstatus(m,k,status, m->hydraulics.NodeHead[n1], m->hydraulics.NodeHead[n2]);                               //(2.00.12 - LR)//
 
       /* Check for flow into (out of) full (empty) tanks */
      if (n1 > m->Njuncs || n2 > m->Njuncs) {
@@ -1481,11 +1487,11 @@ int  linkstatus(Model *m)
      }
 
       /* Note change in link status; do not revise link flow */                //(2.00.11 - LR)
-      if (status != m->LinkStatus[k])
+      if (status != m->hydraulics.LinkStatus[k])
       {
          change = TRUE;
         if (m->Statflag == FULL) {
-          writestatchange(m,k,status,m->LinkStatus[k]);
+          writestatchange(m,k,status,m->hydraulics.LinkStatus[k]);
         }
 
          //if (S[k] <= CLOSED) Q[k] = QZERO;                                   //(2.00.11 - LR)
@@ -1546,7 +1552,7 @@ char  pumpstatus(Model *m, int k, double dh)
     hmax = BIG;
   }
   else {
-    hmax = SQR(m->LinkSetting[k]) * m->Pump[p].Hmax;
+    hmax = SQR(m->hydraulics.LinkSetting[k]) * m->Pump[p].Hmax;
   }
   if (dh > hmax + m->Htol) {
     return(XHEAD);
@@ -1577,13 +1583,13 @@ char  prvstatus(Model *m, int k, char s, double hset, double h1, double h2)
    double htol = m->Htol;
 
    status = s;
-   if (m->LinkSetting[k] == MISSING) return(status);       /* Status fixed by user */
-   hml = m->Link[k].Km*SQR(m->LinkFlows[k]);                /* Head loss when open  */
+   if (m->hydraulics.LinkSetting[k] == MISSING) return(status);       /* Status fixed by user */
+   hml = m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
 
 /*** Status rules below have changed. ***/                                     //(2.00.11 - LR)
 
   
-  int isTooLargeNegative = (m->LinkFlows[k] < -(m->Qtol));
+  int isTooLargeNegative = (m->hydraulics.LinkFlows[k] < -(m->Qtol));
   
    switch (s)
    {
@@ -1648,22 +1654,22 @@ char  psvstatus(Model *m, int k, char s, double hset, double h1, double h2)
    double htol = m->Htol;
 
    status = s;
-  if (m->LinkSetting[k] == MISSING) {
+  if (m->hydraulics.LinkSetting[k] == MISSING) {
     return(status);       /* Status fixed by user */
   }
-   hml = m->Link[k].Km*SQR(m->LinkFlows[k]);                /* Head loss when open  */
+   hml = m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
 
 /*** Status rules below have changed. ***/                                     //(2.00.11 - LR)
 
    switch (s)
    {
       case ACTIVE:
-         if (m->LinkFlows[k] < -(m->Qtol))            status = CLOSED;
+         if (m->hydraulics.LinkFlows[k] < -(m->Qtol))            status = CLOSED;
          else if (h2+hml > hset+htol) status = OPEN;                           //(2.00.11 - LR)
          else                         status = ACTIVE;
          break;
       case OPEN:
-         if (m->LinkFlows[k] < -(m->Qtol))            status = CLOSED;
+         if (m->hydraulics.LinkFlows[k] < -(m->Qtol))            status = CLOSED;
          else if (h1 < hset-htol)     status = ACTIVE;                         //(2.00.11 - LR)
          else                         status = OPEN;
          break;
@@ -1674,7 +1680,7 @@ char  psvstatus(Model *m, int k, char s, double hset, double h1, double h2)
          else                         status = CLOSED;
          break;
       case XPRESSURE:
-         if (m->LinkFlows[k] < -(m->Qtol))            status = CLOSED;
+         if (m->hydraulics.LinkFlows[k] < -(m->Qtol))            status = CLOSED;
          break;
    }
    return(status);
@@ -1706,10 +1712,10 @@ char  fcvstatus(Model *m, int k, char s, double h1, double h2)
    if (h1 - h2 < -(m->Htol)) {
      status = XFCV;
    }
-   else if ( m->LinkFlows[k] < -(m->Qtol) ) {
+   else if ( m->hydraulics.LinkFlows[k] < -(m->Qtol) ) {
      status = XFCV;                          //(2.00.11 - LR)
    }
-   else if (s == XFCV && m->LinkFlows[k] >= m->LinkSetting[k]) {
+   else if (s == XFCV && m->hydraulics.LinkFlows[k] >= m->hydraulics.LinkSetting[k]) {
      status = ACTIVE;
    }
    return(status);
@@ -1733,7 +1739,7 @@ void  tankstatus(Model *m, int k, int n1, int n2)
    double h,q;
 
    /* Make node n1 be the tank */
-   q = m->LinkFlows[k];
+   q = m->hydraulics.LinkFlows[k];
    i = n1 - m->Njuncs;
    if (i <= 0)
    {
@@ -1744,46 +1750,46 @@ void  tankstatus(Model *m, int k, int n1, int n2)
       n2 = n;
       q = -q;
    }
-   h = m->NodeHead[n1] - m->NodeHead[n2];
+   h = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
 
    /* Skip reservoirs & closed links */
-   if (m->Tank[i].A == 0.0 || m->LinkStatus[k] <= CLOSED) return;
+   if (m->Tank[i].A == 0.0 || m->hydraulics.LinkStatus[k] <= CLOSED) return;
 
    /* If tank full, then prevent flow into it */
-   if (m->NodeHead[n1] >= m->Tank[i].Hmax - m->Htol)
+   if (m->hydraulics.NodeHead[n1] >= m->Tank[i].Hmax - m->Htol)
    {
 
       /* Case 1: Link is a pump discharging into tank */
       if ( m->Link[k].Type == PUMP )
       {
         if (m->Link[k].N2 == n1) {
-          m->LinkStatus[k] = TEMPCLOSED;
+          m->hydraulics.LinkStatus[k] = TEMPCLOSED;
         }
       }
 
       /* Case 2: Downstream head > tank head */
       /* (i.e., an open outflow check valve would close) */
       else if (cvstatus(m, OPEN, h, q) == CLOSED) {
-        m->LinkStatus[k] = TEMPCLOSED;
+        m->hydraulics.LinkStatus[k] = TEMPCLOSED;
       }
    }
 
    /* If tank empty, then prevent flow out of it */
-   if (m->NodeHead[n1] <= m->Tank[i].Hmin + m->Htol)
+   if (m->hydraulics.NodeHead[n1] <= m->Tank[i].Hmin + m->Htol)
    {
 
       /* Case 1: Link is a pump discharging from tank */
       if ( m->Link[k].Type == PUMP)
       {
         if (m->Link[k].N1 == n1) {
-          m->LinkStatus[k] = TEMPCLOSED;
+          m->hydraulics.LinkStatus[k] = TEMPCLOSED;
         }
       }
 
       /* Case 2: Tank head > downstream head */
       /* (i.e., a closed outflow check valve would open) */
       else if (cvstatus(m, CLOSED, h, q) == OPEN) {
-        m->LinkStatus[k] = TEMPCLOSED;
+        m->hydraulics.LinkStatus[k] = TEMPCLOSED;
       }
    }
 }                        /* End of tankstatus */
@@ -1818,10 +1824,10 @@ int  pswitch(Model *m)
       {
          /* Determine if control conditions are satisfied */
          if (m->Control[i].Type == LOWLEVEL
-             && m->NodeHead[n] <= m->Control[i].Grade + m->Htol )
+             && m->hydraulics.NodeHead[n] <= m->Control[i].Grade + m->Htol )
              reset = 1;
          if (m->Control[i].Type == HILEVEL
-             && m->NodeHead[n] >= m->Control[i].Grade - m->Htol )
+             && m->hydraulics.NodeHead[n] >= m->Control[i].Grade - m->Htol )
              reset = 1;
       }
 
@@ -1829,31 +1835,31 @@ int  pswitch(Model *m)
       if (reset == 1)
       {
          change = 0;
-         s = m->LinkStatus[k];
+         s = m->hydraulics.LinkStatus[k];
          if (m->Link[k].Type == PIPE)
          {
             if (s != m->Control[i].Status) change = 1;
          }
          if (m->Link[k].Type == PUMP)
          {
-            if (m->LinkSetting[k] != m->Control[i].Setting) change = 1;
+            if (m->hydraulics.LinkSetting[k] != m->Control[i].Setting) change = 1;
          }
          if (m->Link[k].Type >= PRV)
          {
-            if (m->LinkSetting[k] != m->Control[i].Setting) change = 1;
-            else if (m->LinkSetting[k] == MISSING &&
+            if (m->hydraulics.LinkSetting[k] != m->Control[i].Setting) change = 1;
+            else if (m->hydraulics.LinkSetting[k] == MISSING &&
                      s != m->Control[i].Status) change = 1;
          }
 
          /* If a change occurs, update status & setting */
          if (change)
          {
-            m->LinkStatus[k] = m->Control[i].Status;
+            m->hydraulics.LinkStatus[k] = m->Control[i].Status;
            if (m->Link[k].Type > PIPE) {
-             m->LinkSetting[k] = m->Control[i].Setting;
+             m->hydraulics.LinkSetting[k] = m->Control[i].Setting;
            }
            if (m->Statflag == FULL) {
-             writestatchange(m,k,s,m->LinkStatus[k]);
+             writestatchange(m,k,s,m->hydraulics.LinkStatus[k]);
            }
 
             /* Re-set flow if status has changed */
@@ -1883,7 +1889,7 @@ double newflows(Model *m)
 
    /* Initialize net inflows (i.e., demands) at tanks */
    for (n = m->Njuncs+1; n <= m->Nnodes; n++) {
-     m->NodeDemand[n] = 0.0;
+     m->hydraulics.NodeDemand[n] = 0.0;
    }
 
    /* Initialize sum of flows & corrections */
@@ -1904,8 +1910,8 @@ double newflows(Model *m)
 
       n1 = m->Link[k].N1;
       n2 = m->Link[k].N2;
-      dh = m->NodeHead[n1] - m->NodeHead[n2];
-      dq = m->Y[k] - m->P[k]*dh;
+      dh = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
+      dq = m->hydraulics.solver.Y[k] - m->hydraulics.solver.P[k]*dh;
 
       /* Adjust flow change by the relaxation factor */                        //(2.00.11 - LR)
       dq *= m->RelaxFactor;                                                       //(2.00.11 - LR)
@@ -1914,21 +1920,21 @@ double newflows(Model *m)
       if (m->Link[k].Type == PUMP)
       {
          n = m->Link[(k)].pumpLinkIdx;
-         if (m->Pump[n].Ptype == CONST_HP && dq > m->LinkFlows[k]) {
-           dq = m->LinkFlows[k]/2.0;
+         if (m->Pump[n].Ptype == CONST_HP && dq > m->hydraulics.LinkFlows[k]) {
+           dq = m->hydraulics.LinkFlows[k]/2.0;
          }
       }
-      m->LinkFlows[k] -= dq;
+      m->hydraulics.LinkFlows[k] -= dq;
 
       /* Update sum of absolute flows & flow corrections */
-      qsum += ABS(m->LinkFlows[k]);
+      qsum += ABS(m->hydraulics.LinkFlows[k]);
       dqsum += ABS(dq);
 
       /* Update net flows to tanks */
-      if ( m->LinkStatus[k] > CLOSED )                                                     //(2.00.12 - LR)
+      if ( m->hydraulics.LinkStatus[k] > CLOSED )                                                     //(2.00.12 - LR)
       {
-         if (n1 > m->Njuncs) m->NodeDemand[n1] -= m->LinkFlows[k];
-         if (n2 > m->Njuncs) m->NodeDemand[n2] += m->LinkFlows[k];
+         if (n1 > m->Njuncs) m->hydraulics.NodeDemand[n1] -= m->hydraulics.LinkFlows[k];
+         if (n2 > m->Njuncs) m->hydraulics.NodeDemand[n2] += m->hydraulics.LinkFlows[k];
       }
 
    }
@@ -1938,8 +1944,8 @@ double newflows(Model *m)
    {
       if (m->Node[k].Ke == 0.0) continue;
       dq = emitflowchange(m,k);
-      m->EmitterFlows[k] -= dq;
-      qsum += ABS(m->EmitterFlows[k]);
+      m->hydraulics.EmitterFlows[k] -= dq;
+      qsum += ABS(m->hydraulics.EmitterFlows[k]);
       dqsum += ABS(dq);
    }
 
@@ -1959,12 +1965,12 @@ void   newcoeffs(Model *m)
 **--------------------------------------------------------------
 */
 {
-   memset(m->Aii,0,(m->Nnodes+1)*sizeof(double));   /* Reset coeffs. to 0 */
-   memset(m->Aij,0,(m->Ncoeffs+1)*sizeof(double));
-   memset(m->F,0,(m->Nnodes+1)*sizeof(double));
+   memset(m->hydraulics.solver.Aii,0,(m->Nnodes+1)*sizeof(double));   /* Reset coeffs. to 0 */
+   memset(m->hydraulics.solver.Aij,0,(m->Ncoeffs+1)*sizeof(double));
+   memset(m->hydraulics.solver.F,0,(m->Nnodes+1)*sizeof(double));
    memset(m->X,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->P,0,(m->Nlinks+1)*sizeof(double));
-   memset(m->Y,0,(m->Nlinks+1)*sizeof(double));
+   memset(m->hydraulics.solver.P,0,(m->Nlinks+1)*sizeof(double));
+   memset(m->hydraulics.solver.Y,0,(m->Nlinks+1)*sizeof(double));
    linkcoeffs(m);                            /* Compute link coeffs.  */
    emittercoeffs(m);                         /* Compute emitter coeffs.*/
    nodecoeffs(m);                            /* Compute node coeffs.  */
@@ -1989,6 +1995,10 @@ void  linkcoeffs(Model *m)
       n1 = m->Link[k].N1;           /* Start node of link */
       n2 = m->Link[k].N2;           /* End node of link   */
 
+      int row1 = m->hydraulics.solver.Row[n1];
+      int row2 = m->hydraulics.solver.Row[n2];
+     
+     
       /* Compute P[k] = 1 / (dh/dQ) and Y[k] = h * P[k]   */
       /* for each link k (where h = link head loss).      */
       /* FCVs, PRVs, and PSVs with non-fixed status       */
@@ -2006,7 +2016,9 @@ void  linkcoeffs(Model *m)
          case PRV:
          case PSV:   /* If valve status fixed then treat as pipe */
                      /* otherwise ignore the valve for now. */
-                     if (m->LinkSetting[k] == MISSING) valvecoeff(m,k);  //pipecoeff(k);      //(2.00.11 - LR)
+                     if (m->hydraulics.LinkSetting[k] == MISSING) {
+                       valvecoeff(m,k);  //pipecoeff(k);      //(2.00.11 - LR)
+                     }
                      else continue;
                      break;
          default:    continue;                  
@@ -2014,22 +2026,48 @@ void  linkcoeffs(Model *m)
 
       /* Update net nodal inflows (X), solution matrix (A) and RHS array (F) */
       /* (Use covention that flow out of node is (-), flow into node is (+)) */
-      m->X[n1] -= m->LinkFlows[k];
-      m->X[n2] += m->LinkFlows[k];
-      m->Aij[m->Ndx[k]] -= m->P[k];              /* Off-diagonal coeff. */
+      m->X[n1] -= m->hydraulics.LinkFlows[k];
+      m->X[n2] += m->hydraulics.LinkFlows[k];
+      m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];              /* Off-diagonal coeff. */
       if (n1 <= m->Njuncs)                 /* Node n1 is junction */
       {
-         m->Aii[m->Row[n1]] += m->P[k];          /* Diagonal coeff. */
-         m->F[m->Row[n1]] += m->Y[k];            /* RHS coeff.      */
+         m->hydraulics.solver.Aii[row1] += m->hydraulics.solver.P[k];          /* Diagonal coeff. */
+         double rhs = m->hydraulics.solver.Y[k];
+         m->hydraulics.solver.F[row1] += rhs;            /* RHS coeff.      */
       }
-      else m->F[m->Row[n2]] += (m->P[k] * m->NodeHead[n1]);  /* Node n1 is a tank   */
+      else {
+        m->hydraulics.solver.F[row2] += (m->hydraulics.solver.P[k] * m->hydraulics.NodeHead[n1]);  /* Node n1 is a tank   */
+      }
       if (n2 <= m->Njuncs)                 /* Node n2 is junction */
       {
-         m->Aii[m->Row[n2]] += m->P[k];          /* Diagonal coeff. */
-         m->F[m->Row[n2]] -= m->Y[k];            /* RHS coeff.      */
+         m->hydraulics.solver.Aii[row2] += m->hydraulics.solver.P[k];          /* Diagonal coeff. */
+         double rhs = m->hydraulics.solver.Y[k];
+         m->hydraulics.solver.F[row2] -= rhs;            /* RHS coeff.      */
       }
-      else  m->F[m->Row[n1]] += (m->P[k] * m->NodeHead[n2]); /* Node n2 is a tank   */
+      else { /* Node n2 is a tank   */
+        double rhs = (m->hydraulics.solver.P[k] * m->hydraulics.NodeHead[n2]);
+        m->hydraulics.solver.F[row1] += rhs;
+      }
+     
+     // check for nans
+     int nank;
+     for (nank=1; nank <= m->Nnodes; nank++)
+     {
+       double f = m->hydraulics.solver.F[nank];
+       //fprintf(stdout, "%f", f);
+       if (isnan(f)) {
+         // is nan
+         //fprintf(stdout, "  <------------   nan");
+       }
+       if (isinf(f)) {
+         // is nan
+         //fprintf(stdout, "  <------------  INF");
+       }
+       //fprintf(stdout, "\n");
+     }
+     
    }
+
 }                        /* End of linkcoeffs */
 
 
@@ -2049,8 +2087,8 @@ void  nodecoeffs(Model *m)
    /* flow imbalance & add imbalance to RHS array F.    */
    for (i=1; i <= m->Njuncs; i++)
    {
-      m->X[i] -= m->NodeDemand[i];
-      m->F[m->Row[i]] += m->X[i];
+      m->X[i] -= m->hydraulics.NodeDemand[i];
+      m->hydraulics.solver.F[m->hydraulics.solver.Row[i]] += m->X[i];
    }
 }                        /* End of nodecoeffs */
 
@@ -2070,7 +2108,7 @@ void  valvecoeffs(Model *m)
    for (i=1; i <= m->Nvalves; i++)                   /* Examine each valve   */
    {
       k = m->Valve[i].Link;                        /* Link index of valve  */
-      if (m->LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
+      if (m->hydraulics.LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
       n1 = m->Link[k].N1;                          /* Start & end nodes    */
       n2 = m->Link[k].N2;
       switch (m->Link[k].Type)                     /* Call valve-specific  */
@@ -2108,7 +2146,7 @@ void  emittercoeffs(Model *m)
    {
       if (m->Node[i].Ke == 0.0) continue;
       ke = MAX(CSMALL, m->Node[i].Ke);
-      q = m->EmitterFlows[i];
+      q = m->hydraulics.EmitterFlows[i];
       z = ke*pow(ABS(q),m->Qexp);
       p = m->Qexp*z/ABS(q);
       if (p < m->RQtol)
@@ -2116,8 +2154,8 @@ void  emittercoeffs(Model *m)
       else
         p = 1.0/p;
       y = SGN(q)*z*p;
-      m->Aii[m->Row[i]] += p;
-      m->F[m->Row[i]] += y + p * m->Node[i].El;
+      m->hydraulics.solver.Aii[m->hydraulics.solver.Row[i]] += p;
+      m->hydraulics.solver.F[m->hydraulics.solver.Row[i]] += y + p * m->Node[i].El;
       m->X[i] -= q;
    }
 }
@@ -2134,13 +2172,13 @@ double  emitflowchange(Model *m, int i)
 {
    double ke, p;
    ke = MAX(CSMALL, m->Node[i].Ke);
-   p = m->Qexp * ke * pow(ABS(m->EmitterFlows[i]),(m->Qexp-1.0));
+   p = m->Qexp * ke * pow(ABS(m->hydraulics.EmitterFlows[i]),(m->Qexp-1.0));
    if (p < m->RQtol)
       p = 1 / m->RQtol;
    else
       p = 1.0/p;
   
-   return(m->EmitterFlows[i] / m->Qexp - p*(m->NodeHead[i] - m->Node[i].El));
+   return(m->hydraulics.EmitterFlows[i] / m->Qexp - p*(m->hydraulics.NodeHead[i] - m->Node[i].El));
 }
 
 
@@ -2167,15 +2205,15 @@ void  pipecoeff(Model *m, int k)
          dfdq;      /* Derivative of fric. fact. */
 
    /* For closed pipe use headloss formula: h = CBIG*q */
-   if (m->LinkStatus[k] <= CLOSED)
+   if (m->hydraulics.LinkStatus[k] <= CLOSED)
    {
-      m->P[k] = 1.0/CBIG;
-      m->Y[k] = m->LinkFlows[k];
+      m->hydraulics.solver.P[k] = 1.0/CBIG;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k];
       return;
    }
 
    /* Evaluate headloss coefficients */
-   q = ABS(m->LinkFlows[k]);                         /* Absolute flow       */
+   q = ABS(m->hydraulics.LinkFlows[k]);                         /* Absolute flow       */
    ml = m->Link[k].Km;                       /* Minor loss coeff.   */
    r = m->Link[k].R;                         /* Resistance coeff.   */
    f = 1.0;                               /* D-W friction factor */
@@ -2187,8 +2225,8 @@ void  pipecoeff(Model *m, int k)
    /* Use large P coefficient for small flow resistance product */
    if (r1*q < m->RQtol)
    {
-      m->P[k] = 1.0 / m->RQtol;
-      m->Y[k] = m->LinkFlows[k] / m->Hexp;
+      m->hydraulics.solver.P[k] = 1.0 / m->RQtol;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k] / m->Hexp;
       return;
    }
 
@@ -2199,8 +2237,8 @@ void  pipecoeff(Model *m, int k)
       p = 2.0*r1*q;                     /* |dh/dQ| */
      /* + dfdq*r*q*q;*/                 /* Ignore df/dQ term */
       p = 1.0/p;
-      m->P[k] = p;
-      m->Y[k] = SGN(m->LinkFlows[k])*hpipe*p;
+      m->hydraulics.solver.P[k] = p;
+      m->hydraulics.solver.Y[k] = SGN(m->hydraulics.LinkFlows[k])*hpipe*p;
    }
    else                                 /* H-W or C-M eqn.   */
    {
@@ -2212,9 +2250,9 @@ void  pipecoeff(Model *m, int k)
          p += 2.0*hml;                  /* Q*dh(Total)/dQ    */
       }
       else  hml = 0.0;
-      p = m->LinkFlows[k]/p;                       /* 1 / (dh/dQ) */
-      m->P[k] = ABS(p);
-      m->Y[k] = p*(hpipe + hml);
+      p = m->hydraulics.LinkFlows[k]/p;                       /* 1 / (dh/dQ) */
+      m->hydraulics.solver.P[k] = ABS(p);
+      m->hydraulics.solver.Y[k] = p*(hpipe + hml);
    }
 }                        /* End of pipecoeff */
 
@@ -2242,7 +2280,7 @@ double DWcoeff(Model *m, int k, double *dfdq)
 
    *dfdq = 0.0;
    if (m->Link[k].Type > PIPE) return(1.0); /* Only apply to pipes */
-   q = ABS(m->LinkFlows[k]);
+   q = ABS(m->hydraulics.LinkFlows[k]);
    s = m->Viscos * m->Link[k].Diam;
    w = q/s;                       /* w = Re(Pi/4) */
    if (w >= A1)                   /* Re >= 4000; Colebrook Formula */
@@ -2298,18 +2336,18 @@ void  pumpcoeff(Model *m, int k)
          r,         /* Flow resistance coeff. */
          n;         /* Flow exponent coeff.   */
 
-   double setting = m->LinkSetting[k];
+   double setting = m->hydraulics.LinkSetting[k];
   
    /* Use high resistance pipe if pump closed or cannot deliver head */
-   if (m->LinkStatus[k] <= CLOSED || setting == 0.0)
+   if (m->hydraulics.LinkStatus[k] <= CLOSED || setting == 0.0)
    {
       //pipecoeff(k);                                                          //(2.00.11 - LR)
-      m->P[k] = 1.0/CBIG;                                                         //(2.00.11 - LR)
-      m->Y[k] = m->LinkFlows[k];                                                             //(2.00.11 - LR)
+      m->hydraulics.solver.P[k] = 1.0/CBIG;                                                         //(2.00.11 - LR)
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k];                                                             //(2.00.11 - LR)
       return;
    }
 
-   q = ABS(m->LinkFlows[k]);
+   q = ABS(m->hydraulics.LinkFlows[k]);
    q = MAX(q,TINY);
    p = m->Link[k].pumpLinkIdx;
 
@@ -2333,8 +2371,8 @@ void  pumpcoeff(Model *m, int k)
    if (n != 1.0) r = n*r*pow(q,n-1.0);
 
    /* Compute inverse headloss gradient (P) and flow correction factor (Y) */
-   m->P[k] = 1.0/MAX(r, m->RQtol);
-   m->Y[k] = m->LinkFlows[k]/n + m->P[k]*h0;
+   m->hydraulics.solver.P[k] = 1.0/MAX(r, m->RQtol);
+   m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k]/n + m->hydraulics.solver.P[k]*h0;
 }                        /* End of pumpcoeff */
 
 
@@ -2393,24 +2431,24 @@ void  gpvcoeff(Model *m, int k)
 
 /*** Updated 9/7/00 ***/
    /* Treat as a pipe if valve closed */
-   if (m->LinkStatus[k] == CLOSED) valvecoeff(m,k); //pipecoeff(k);                          //(2.00.11 - LR)
+   if (m->hydraulics.LinkStatus[k] == CLOSED) valvecoeff(m,k); //pipecoeff(k);                          //(2.00.11 - LR)
 
    /* Otherwise utilize headloss curve   */
    /* whose index is stored in K */
    else
    {
       /* Find slope & intercept of headloss curve. */
-      q = ABS(m->LinkFlows[k]);
+      q = ABS(m->hydraulics.LinkFlows[k]);
       q = MAX(q,TINY);
 
 /*** Updated 10/25/00 ***/
 /*** Updated 12/29/00 ***/
-      curvecoeff(m, (int)ROUND(m->LinkSetting[k]), q, &h0, &r);
+      curvecoeff(m, (int)ROUND(m->hydraulics.LinkSetting[k]), q, &h0, &r);
 
       /* Compute inverse headloss gradient (P) */
       /* and flow correction factor (Y).       */
-      m->P[k] = 1.0 / MAX(r, m->RQtol);
-      m->Y[k] = m->P[k]*(h0 + r*q)*SGN(m->LinkFlows[k]);                                        //(2.00.11 - LR)
+      m->hydraulics.solver.P[k] = 1.0 / MAX(r, m->RQtol);
+      m->hydraulics.solver.Y[k] = m->hydraulics.solver.P[k]*(h0 + r*q)*SGN(m->hydraulics.LinkFlows[k]);                                        //(2.00.11 - LR)
    }
 }
  
@@ -2425,7 +2463,7 @@ void  pbvcoeff(Model *m, int k)
 */
 {
    /* If valve fixed OPEN or CLOSED then treat as a pipe */
-  if (m->LinkSetting[k] == MISSING || m->LinkSetting[k] == 0.0) {
+  if (m->hydraulics.LinkSetting[k] == MISSING || m->hydraulics.LinkSetting[k] == 0.0) {
     valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
   }
 
@@ -2433,13 +2471,13 @@ void  pbvcoeff(Model *m, int k)
    else
    {
       /* Treat as a pipe if minor loss > valve setting */
-      if (m->Link[k].Km*SQR(m->LinkFlows[k]) > m->LinkSetting[k]) valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
+      if (m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]) > m->hydraulics.LinkSetting[k]) valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
 
       /* Otherwise force headloss across valve to be equal to setting */
       else
       {
-         m->P[k] = CBIG;
-         m->Y[k] = m->LinkSetting[k]*CBIG;
+         m->hydraulics.solver.P[k] = CBIG;
+         m->hydraulics.solver.Y[k] = m->hydraulics.LinkSetting[k]*CBIG;
       }
    }
 }                        /* End of pbvcoeff */
@@ -2460,8 +2498,8 @@ void  tcvcoeff(Model *m, int k)
    km = m->Link[k].Km;
 
    /* If valve not fixed OPEN or CLOSED, compute its loss coeff. */
-   if (m->LinkSetting[k] != MISSING) {
-     m->Link[k].Km = 0.02517 * m->LinkSetting[k]/(SQR(m->Link[k].Diam)*SQR(m->Link[k].Diam));
+   if (m->hydraulics.LinkSetting[k] != MISSING) {
+     m->Link[k].Km = 0.02517 * m->hydraulics.LinkSetting[k]/(SQR(m->Link[k].Diam)*SQR(m->Link[k].Diam));
    }
    /* Then apply usual pipe formulas */
    valvecoeff(m,k);  //pipecoeff(k);                                             //(2.00.11 - LR)
@@ -2485,23 +2523,23 @@ void  prvcoeff(Model *m, int k, int n1, int n2)
 {
    int   i,j;                       /* Rows of solution matrix */
    double hset;                      /* Valve head setting      */
-   i  = m->Row[n1];                    /* Matrix rows of nodes    */
-   j  = m->Row[n2];
-   hset   = m->Node[n2].El + m->LinkSetting[k];     /* Valve setting           */
+   i  = m->hydraulics.solver.Row[n1];                    /* Matrix rows of nodes    */
+   j  = m->hydraulics.solver.Row[n2];
+   hset   = m->Node[n2].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
 
-   if (m->LinkStatus[k] == ACTIVE)
+   if (m->hydraulics.LinkStatus[k] == ACTIVE)
    {
       /*
          Set coeffs. to force head at downstream 
          node equal to valve setting & force flow (when updated in       
          newflows()) equal to flow imbalance at downstream node. 
       */
-      m->P[k] = 0.0;
-      m->Y[k] = m->LinkFlows[k] + m->X[n2];       /* Force flow balance   */
-      m->F[j] += (hset*CBIG);       /* Force head = hset    */
-      m->Aii[j] += CBIG;            /*   at downstream node */
+      m->hydraulics.solver.P[k] = 0.0;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k] + m->X[n2];       /* Force flow balance   */
+      m->hydraulics.solver.F[j] += (hset*CBIG);       /* Force head = hset    */
+      m->hydraulics.solver.Aii[j] += CBIG;            /*   at downstream node */
      if (m->X[n2] < 0.0) {
-       m->F[i] += m->X[n2];
+       m->hydraulics.solver.F[i] += m->X[n2];
      }
       return;
    }
@@ -2511,11 +2549,11 @@ void  prvcoeff(Model *m, int k, int n1, int n2)
       compute matrix coeffs. using the valvecoeff() function.                  //(2.00.11 - LR)
    */
    valvecoeff(m,k);  /*pipecoeff(k);*/                                           //(2.00.11 - LR)
-   m->Aij[m->Ndx[k]] -= m->P[k];
-   m->Aii[i] += m->P[k];
-   m->Aii[j] += m->P[k];
-   m->F[i] += (m->Y[k] - m->LinkFlows[k]);
-   m->F[j] -= (m->Y[k] - m->LinkFlows[k]);
+   m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];
+   m->hydraulics.solver.Aii[i] += m->hydraulics.solver.P[k];
+   m->hydraulics.solver.Aii[j] += m->hydraulics.solver.P[k];
+   m->hydraulics.solver.F[i] += (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
+   m->hydraulics.solver.F[j] -= (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
 }                        /* End of prvcoeff */
 
 
@@ -2533,22 +2571,23 @@ void  psvcoeff(Model *m, int k, int n1, int n2)
 {
    int   i,j;                       /* Rows of solution matrix */
    double hset;                      /* Valve head setting      */
-   i  = m->Row[n1];                    /* Matrix rows of nodes    */
-   j  = m->Row[n2];
-   hset   = m->Node[n1].El + m->LinkSetting[k];     /* Valve setting           */
+   i  = m->hydraulics.solver.Row[n1];                    /* Matrix rows of nodes    */
+   j  = m->hydraulics.solver.Row[n2];
+   hset   = m->Node[n1].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
 
-   if (m->LinkStatus[k] == ACTIVE)
+   if (m->hydraulics.LinkStatus[k] == ACTIVE)
    {
       /*
          Set coeffs. to force head at upstream 
          node equal to valve setting & force flow (when updated in       
          newflows()) equal to flow imbalance at upstream node. 
       */
-      m->P[k] = 0.0;
-      m->Y[k] = m->LinkFlows[k] - m->X[n1];              /* Force flow balance   */
-      m->F[i] += (hset*CBIG);              /* Force head = hset    */
-      m->Aii[i] += CBIG;                   /*   at upstream node   */
-      if (m->X[n1] > 0.0) m->F[j] += m->X[n1];
+      m->hydraulics.solver.P[k] = 0.0;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k] - m->X[n1];              /* Force flow balance   */
+      m->hydraulics.solver.F[i] += (hset*CBIG);              /* Force head = hset    */
+      m->hydraulics.solver.Aii[i] += CBIG;                   /*   at upstream node   */
+      if (m->X[n1] > 0.0)
+        m->hydraulics.solver.F[j] += m->X[n1];
       return;
    }
 
@@ -2557,11 +2596,11 @@ void  psvcoeff(Model *m, int k, int n1, int n2)
       compute matrix coeffs. using the valvecoeff() function.                  //(2.00.11 - LR)
    */
    valvecoeff(m,k);  /*pipecoeff(k);*/                                           //(2.00.11 - LR)
-   m->Aij[m->Ndx[k]] -= m->P[k];
-   m->Aii[i] += m->P[k];
-   m->Aii[j] += m->P[k];
-   m->F[i] += (m->Y[k] - m->LinkFlows[k]);
-   m->F[j] -= (m->Y[k] - m->LinkFlows[k]);
+   m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];
+   m->hydraulics.solver.Aii[i] += m->hydraulics.solver.P[k];
+   m->hydraulics.solver.Aii[j] += m->hydraulics.solver.P[k];
+   m->hydraulics.solver.F[i] += (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
+   m->hydraulics.solver.F[j] -= (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
 }                        /* End of psvcoeff */
 
 
@@ -2579,27 +2618,27 @@ void  fcvcoeff(Model *m, int k, int n1, int n2)
 {
    int   i,j;                   /* Rows in solution matrix */
    double q;                     /* Valve flow setting      */
-   q = m->LinkSetting[k];
-   i = m->Row[n1];
-   j = m->Row[n2];
+   q = m->hydraulics.LinkSetting[k];
+   i = m->hydraulics.solver.Row[n1];
+   j = m->hydraulics.solver.Row[n2];
 
    /*
       If valve active, break network at valve and treat  
       flow setting as external demand at upstream node   
       and external supply at downstream node.            
    */
-   if (m->LinkStatus[k] == ACTIVE)
+   if (m->hydraulics.LinkStatus[k] == ACTIVE)
    {
       m->X[n1] -= q;
-      m->F[i] -= q;
+      m->hydraulics.solver.F[i] -= q;
       m->X[n2] += q;
-      m->F[j] += q;
+      m->hydraulics.solver.F[j] += q;
       /*P[k] = 0.0;*/
-      m->P[k] = 1.0/CBIG;                                                         //(2.00.11 - LR)
-      m->Aij[m->Ndx[k]] -= m->P[k];                                                     //(2.00.11 - LR)
-      m->Aii[i] += m->P[k];                                                          //(2.00.11 - LR)
-      m->Aii[j] += m->P[k];                                                          //(2.00.11 - LR)
-      m->Y[k] = m->LinkFlows[k] - q;
+      m->hydraulics.solver.P[k] = 1.0/CBIG;                                                         //(2.00.11 - LR)
+      m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];                                                     //(2.00.11 - LR)
+      m->hydraulics.solver.Aii[i] += m->hydraulics.solver.P[k];                                                          //(2.00.11 - LR)
+      m->hydraulics.solver.Aii[j] += m->hydraulics.solver.P[k];                                                          //(2.00.11 - LR)
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k] - q;
    }
    /*
      Otherwise treat valve as an open pipe
@@ -2607,11 +2646,11 @@ void  fcvcoeff(Model *m, int k, int n1, int n2)
    else 
    {
       valvecoeff(m,k);  //pipecoeff(k);                                          //(2.00.11 - LR)
-      m->Aij[m->Ndx[k]] -= m->P[k];
-      m->Aii[i] += m->P[k];
-      m->Aii[j] += m->P[k];
-      m->F[i] += (m->Y[k] - m->LinkFlows[k]);
-      m->F[j] -= (m->Y[k] - m->LinkFlows[k]);
+      m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];
+      m->hydraulics.solver.Aii[i] += m->hydraulics.solver.P[k];
+      m->hydraulics.solver.Aii[j] += m->hydraulics.solver.P[k];
+      m->hydraulics.solver.F[i] += (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
+      m->hydraulics.solver.F[j] -= (m->hydraulics.solver.Y[k] - m->hydraulics.LinkFlows[k]);
    }
 }                        /* End of fcvcoeff */
 
@@ -2630,27 +2669,27 @@ void valvecoeff(Model *m, int k)
    double p;
 
    // Valve is closed. Use a very small matrix coeff.
-   if (m->LinkStatus[k] <= CLOSED)
+   if (m->hydraulics.LinkStatus[k] <= CLOSED)
    {
-      m->P[k] = 1.0/CBIG;
-      m->Y[k] = m->LinkFlows[k];
+      m->hydraulics.solver.P[k] = 1.0/CBIG;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k];
       return;
    }
 
    // Account for any minor headloss through the valve
    if (m->Link[k].Km > 0.0)
    {
-      p = 2.0 * m->Link[k].Km * fabs(m->LinkFlows[k]);
+      p = 2.0 * m->Link[k].Km * fabs(m->hydraulics.LinkFlows[k]);
       if ( p < m->RQtol ) {
         p = m->RQtol;
       }
-      m->P[k] = 1.0/p;
-      m->Y[k] = m->LinkFlows[k]/2.0;
+      m->hydraulics.solver.P[k] = 1.0/p;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k]/2.0;
    }
    else
    {
-      m->P[k] = 1.0 / m->RQtol;
-      m->Y[k] = m->LinkFlows[k];
+      m->hydraulics.solver.P[k] = 1.0 / m->RQtol;
+      m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k];
    }
 }
 

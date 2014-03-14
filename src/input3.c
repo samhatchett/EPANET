@@ -108,9 +108,9 @@ int  juncdata(Model *m)
       demand->Pat = p;
       demand->next = Node[m->Njuncs].D;
       Node[m->Njuncs].D = demand;
-      m->NodeDemand[m->Njuncs] = y;
+      m->hydraulics.NodeDemand[m->Njuncs] = y;
    }
-   else m->NodeDemand[m->Njuncs] = MISSING;
+   else m->hydraulics.NodeDemand[m->Njuncs] = MISSING;
 /*** end of update ***/
    return(0);
 }                        /* end of juncdata */
@@ -376,7 +376,7 @@ int  pumpdata(Model *mod)
   
    Link[Nlinks].N1    = j1;               /* Start-node index.  */
    Link[Nlinks].N2    = j2;               /* End-node index.    */
-   Link[Nlinks].Diam  = Npumps;           /* Pump index.        */
+   Link[Nlinks].pumpLinkIdx  = Npumps;           /* Pump index.        */
    Link[Nlinks].Len   = 0.0;              /* Link length.       */
    Link[Nlinks].Kc    = 1.0;              /* Speed factor.      */
    Link[Nlinks].Km    = 0.0;              /* Horsepower.        */
@@ -708,7 +708,7 @@ int  demanddata(Model *m)
    STmplist *pat;
   
   char **Tok = m->Tok;
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   Snode *Node = m->Node;
 
 /* Extract data from tokens */

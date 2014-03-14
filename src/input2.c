@@ -503,14 +503,13 @@ int  addcurve(Model *m, char *id)
 {
    STmplist *c;
 
-  STmplist *Curvelist = m->Curvelist;
   
 /* Check if ID is same as last one processed */
-   if (Curvelist != NULL && strcmp(id,Curvelist->ID) == 0)
+   if (m->Curvelist != NULL && strcmp(id,m->Curvelist->ID) == 0)
      return(0);
 
 /* Check that curve was not already created */
-   if (findID(id,Curvelist) == NULL) {
+   if (findID(id,m->Curvelist) == NULL) {
 
    /* Update curve count & create new list element */
       (m->MaxCurves)++;
@@ -524,8 +523,8 @@ int  addcurve(Model *m, char *id)
          strncpy(c->ID,id,MAXID);
          c->x = NULL;
          c->y = NULL;
-         c->next = Curvelist;
-         Curvelist = c;
+         c->next = m->Curvelist;
+         m->Curvelist = c;
       }
    }
    return(0);
@@ -710,7 +709,7 @@ int     getcurves(Model *m)
    STmplist *c;
 
 /* Start at head of curve list */
-   c = m->Curvelist;
+  c = m->Curvelist;
   Scurve *Curve = m->Curve;
   int MaxCurves = m->MaxCurves;
   char *Msg = m->Msg;

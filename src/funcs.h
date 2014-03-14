@@ -147,7 +147,7 @@ int     getnodetype(Model *m, int);                 /* Determines node type     
 int     openhyd(Model *m);                    /* Opens hydraulics solver    */
 
 /*** Updated 3/1/01 ***/
-void    inithyd(int);                     /* Re-sets initial conditions */
+void    inithyd(Model *m, int);                     /* Re-sets initial conditions */
 
 int     runhyd(Model *m, long *);                   /* Solves 1-period hydraulics */
 int     nexthyd(Model *m, long *);                  /* Moves to next time period  */

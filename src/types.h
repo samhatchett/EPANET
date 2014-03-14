@@ -299,15 +299,14 @@ struct  Floatlist  /* Element of list of floats */
 };
 typedef struct Floatlist SFloatlist;
 
-struct  Tmplist    /* Element of temp list for Pattern & Curve data */
+typedef struct  Tmplist    /* Element of temp list for Pattern & Curve data */
 {
    int        i;
    char       ID[MAXID+1];
    SFloatlist *x;
    SFloatlist *y;
    struct     Tmplist  *next;
-};
-typedef struct Tmplist STmplist;
+} STmplist;
 
 typedef struct        /* TIME PATTERN OBJECT */
 {
@@ -508,23 +507,51 @@ struct      ActItem         /* Action list item */
 };
 
 
+typedef struct {
+  
+  double         *NodeDemand,           /* Node actual demand           */
+  
+  *EmitterFlows,                    /* Emitter flows                */
+  *LinkSetting,          /* Link settings                */
+  *LinkFlows,                    /* Link flows                   */
+  *NodeHead;
+  
+  char           *LinkStatus,           /* Link status                  */
+  *OldStat;              /* Previous link/tank status    */
+  
+  
+  struct {
+    // hydraulic solution vars
+    double  *Aii,        /* Diagonal coeffs. of A               */
+    *Aij,        /* Non-zero, off-diagonal coeffs. of A */
+    *F;          /* Right hand side coeffs.             */
+    double  *P,          /* Inverse headloss derivatives        */
+    *Y;          /* Flow correction factors             */
+    int     *Order,      /* Node-to-row of A                    */
+    *Row,        /* Row-to-node of A                    */
+    *Ndx;        /* Index of link's coeff. in Aij       */
+    int     *XLNZ,       /* Start position of each column in NZSUB  */
+    *NZSUB,      /* Row index of each coeff. in each column */
+    *LNZ;        /* Position of each coeff. in Aij array    */
+    int      *Degree;     /* Number of links adjacent to each node  */
+  } solver;
+  
+  
+} hyraulics_t;
+
+
 
 
 /***** MODEL STRUCT ******/
 
 typedef struct {
   /* Array pointers not allocated and freed in same routine */
-  char           *LinkStatus,           /* Link status                  */
-    *OldStat;              /* Previous link/tank status    */
-  double         *NodeDemand,           /* Node actual demand           */
-    *NodeQual,             /* Node actual quality          */
-    *EmitterFlows,                    /* Emitter flows                */
-    *LinkSetting,          /* Link settings                */
-    *LinkFlows,                    /* Link flows                   */
-    *PipeRateCoeff,        /* Pipe reaction rate           */
+  
+  double *PipeRateCoeff,        /* Pipe reaction rate           */
     *X,                    /* General purpose array        */
     *TempQual;             /* General purpose array for water quality        */
-  double   *NodeHead;             /* Node heads                   */
+  double *NodeQual;
+  
   double *QTankVolumes;
   double *QLinkFlow;
   STmplist *Patlist;              /* Temporary time pattern list  */
@@ -556,23 +583,6 @@ typedef struct {
   Ncurves,               /* Number of data curves        */
   Ncoords;               /* Number of Coords             */
   
-  
-  // hydraulic solution vars
-  double  *Aii,        /* Diagonal coeffs. of A               */
-          *Aij,        /* Non-zero, off-diagonal coeffs. of A */
-          *F;          /* Right hand side coeffs.             */
-  double  *P,          /* Inverse headloss derivatives        */
-          *Y;          /* Flow correction factors             */
-  int     *Order,      /* Node-to-row of A                    */
-          *Row,        /* Row-to-node of A                    */
-          *Ndx;        /* Index of link's coeff. in Aij       */
-  int     *XLNZ,       /* Start position of each column in NZSUB  */
-          *NZSUB,      /* Row index of each coeff. in each column */
-          *LNZ;        /* Position of each coeff. in Aij array    */
-  
-  
-  int      *Degree;     /* Number of links adjacent to each node  */
-
   
   
   FILE			*InFile,               /* Input file pointer           */
@@ -727,6 +737,12 @@ typedef struct {
   STmplist  *PrevPat;       /* Pointer to pattern list element   */
   STmplist  *PrevCurve;     /* Pointer to curve list element     */
   STmplist  *PrevCoord;     /* Pointer to coordinate list element     */
+  
+  
+  
+  hyraulics_t hydraulics;
+  
+  
   
   
 } Model;

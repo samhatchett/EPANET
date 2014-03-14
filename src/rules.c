@@ -679,7 +679,7 @@ int  checkstatus(Model *m, struct Premise *p)
         case IS_OPEN:
         case IS_CLOSED:
         case IS_ACTIVE:
-                i = m->LinkStatus[p->index];
+                i = m->hydraulics.LinkStatus[p->index];
                 if      (i <= CLOSED) j = IS_CLOSED;
                 else if (i == ACTIVE) j = IS_ACTIVE;
                 else                  j = IS_OPEN;
@@ -704,14 +704,14 @@ int  checkvalue(Model *m, struct Premise *p)
     double x,
           tol = 1.e-3;
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
   Snode *Node = m->Node;
   Slink *Link = m->Link;
   Stank *Tank = m->Tank;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
   int Njuncs = m->Njuncs;
   double Dsystem = m->Dsystem;
   
@@ -858,8 +858,8 @@ int  takeactions(Model *m)
   struct aRule *Rule = m->Rule;
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
 
     n = 0;
     item = m->ActList;

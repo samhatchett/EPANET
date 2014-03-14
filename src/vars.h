@@ -21,7 +21,7 @@ AUTHOR:     L. Rossman
 
 /* Array pointers not allocated and freed in same routine */
 
-EXTERN Model en_defaultModel;
+Model en_defaultModel;
 
 
 

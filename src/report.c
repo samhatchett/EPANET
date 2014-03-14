@@ -280,16 +280,16 @@ void  writehydstat(Model *m, int iter, double relerr)
 /*** Updated 6/24/02 ***/
    char   atime[13];
 
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
   Snode *Node = m->Node;
   Slink *Link = m->Link;
   Stank *Tank = m->Tank;
-  char *LinkStatus = m->LinkStatus;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nlinks = m->Nlinks;
   SField *Field = m->Field;
-  char *OldStat = m->OldStat;
+  char *OldStat = m->hydraulics.OldStat;
   
   
    /* Display system status */
@@ -801,7 +801,7 @@ void  writestatchange(Model *m, int k, char s1, char s2)
    int    j1,j2;
    double setting;
   Slink *Link = m->Link;
-  double *LinkSetting = m->LinkSetting;
+  double *LinkSetting = m->hydraulics.LinkSetting;
   double *Ucf = m->Ucf;
 
 
@@ -911,15 +911,15 @@ int  writehydwarn(Model *m, int iter, double relerr)
    char flag = 0;
    char s;                                                                     //(2.00.11 - LR)
 
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   Snode *Node = m->Node;
   Slink *Link = m->Link;
   Spump *Pump = m->Pump;
   Svalve *Valve = m->Valve;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Njuncs = m->Njuncs;
   int Npumps = m->Npumps;
   int Nvalves = m->Nvalves;
@@ -1034,7 +1034,7 @@ int  disconnected(Model *m)
    int  *nodelist;
    char *marked;
   
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   Snode *Node = m->Node;
   int Njuncs = m->Njuncs;
   int Ntanks = m->Ntanks;
@@ -1145,7 +1145,7 @@ void  marknodes(Model *mod, int m, int *nodelist, char *marked)
          }
 
          /* Mark connection node if link not closed */
-         if (mod->LinkStatus[k] > CLOSED)
+         if (mod->hydraulics.LinkStatus[k] > CLOSED)
          {
             marked[j] = 1;
             m++;
