@@ -231,7 +231,7 @@ int DLLEXPORT ENepanet(char *f1, char *f2, char *f3, void (*pviewprog) (char *))
 **-------------------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
     int  errcode = 0;
     viewprog = pviewprog;
@@ -255,7 +255,9 @@ int DLLEXPORT ENopen(char *f1, char *f2, char *f3)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  en_defaultModel = calloc(1, sizeof(Model));
+  
+  Model *m = en_defaultModel;
   
    int  errcode = 0;
 
@@ -339,7 +341,7 @@ int DLLEXPORT ENsaveinpfile(char *filename)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag) return(102);
    return(saveinpfile(m, filename));
@@ -355,7 +357,7 @@ int DLLEXPORT ENclose()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (m->Openflag)
      writetime(m,FMT105);
@@ -399,6 +401,9 @@ int DLLEXPORT ENclose()
    m->SaveHflag = FALSE;
    m->OpenQflag = FALSE;
    m->SaveQflag = FALSE;
+  
+   free(en_defaultModel);
+  
    return(0);
 }
 
@@ -419,7 +424,7 @@ int DLLEXPORT ENsolveH()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int  errcode;
    long t, tstep;
@@ -479,7 +484,7 @@ int DLLEXPORT ENsaveH()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    char tmpflag;
    int  errcode;
@@ -512,7 +517,7 @@ int DLLEXPORT ENopenH()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int  errcode = 0;
 
@@ -545,7 +550,7 @@ int DLLEXPORT ENinitH(int flag)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode = 0;
    int sflag, fflag;
@@ -590,7 +595,7 @@ int DLLEXPORT ENrunH(long *t)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
    *t = 0;
@@ -615,7 +620,7 @@ int DLLEXPORT ENnextH(long *tstep)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
    *tstep = 0;
@@ -636,7 +641,7 @@ int DLLEXPORT ENcloseH()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag) return(102);
    closehyd(m);
@@ -654,7 +659,7 @@ int DLLEXPORT ENsavehydfile(char *filename)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    FILE *f;
    int   c;
@@ -684,7 +689,7 @@ int DLLEXPORT ENusehydfile(char *filename)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
 
@@ -725,7 +730,7 @@ int DLLEXPORT ENsolveQ()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int  errcode;
    long t, tstep;
@@ -789,7 +794,7 @@ int DLLEXPORT ENopenQ()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode = 0;
 
@@ -818,7 +823,7 @@ int DLLEXPORT ENinitQ(int saveflag)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode = 0;
    if (!m->OpenQflag) return(105);
@@ -849,7 +854,7 @@ int DLLEXPORT ENrunQ(long *t)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
    *t = 0;
@@ -874,7 +879,7 @@ int DLLEXPORT ENnextQ(long *tstep)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
    *tstep = 0;
@@ -900,7 +905,7 @@ int DLLEXPORT ENstepQ(long *tleft)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode;
    *tleft = 0;
@@ -921,7 +926,7 @@ int DLLEXPORT ENcloseQ()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
    if (!m->Openflag) return(102);
    closequal(m);
    m->OpenQflag = FALSE;
@@ -945,7 +950,7 @@ int DLLEXPORT ENwriteline(char *line)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag) return(102);
    writeline(m,line);
@@ -962,7 +967,7 @@ int DLLEXPORT ENreport()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int  errcode;
 
@@ -983,7 +988,7 @@ int  DLLEXPORT ENresetreport()
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int i;
    if (!m->Openflag) return(102);
@@ -1003,7 +1008,7 @@ int  DLLEXPORT ENsetreport(char *s)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    char s1[MAXLINE+1];
    if (!m->Openflag) return(102);
@@ -1055,7 +1060,7 @@ int DLLEXPORT ENgetcontrol(int cindex, int *ctype, int *lindex,
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    double s, lvl;
 
@@ -1107,7 +1112,7 @@ int DLLEXPORT ENgetcount(int code, int *count)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *count = 0;
    if (!m->Openflag) return(102);
@@ -1135,7 +1140,7 @@ int  DLLEXPORT ENgetoption(int code, EN_API_FLOAT_TYPE *value)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    double v = 0.0;
    *value = 0.0;
@@ -1168,7 +1173,7 @@ int DLLEXPORT ENgettimeparam(int code, long *value)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *value = 0;
    if (!m->Openflag) return(102);
@@ -1205,7 +1210,7 @@ int DLLEXPORT ENgetflowunits(int *code)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *code = -1;
    if (!m->Openflag) return(102);
@@ -1223,7 +1228,7 @@ int  DLLEXPORT  ENgetpatternindex(char *id, int *index)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int i;
    *index = 0;
@@ -1252,7 +1257,7 @@ int DLLEXPORT ENgetpatternid(int index, char *id)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    strcpy(id,"");
    if (!m->Openflag) return(102);
@@ -1271,7 +1276,7 @@ int DLLEXPORT ENgetpatternlen(int index, int *len)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag) return(102);
    if (index < 1 || index > m->Npats) return(205);
@@ -1291,7 +1296,7 @@ int DLLEXPORT ENgetpatternvalue(int index, int period, EN_API_FLOAT_TYPE *value)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
    *value = 0.0;
    if (!m->Openflag) return(102);
    if (index < 1 || index > m->Npats) return(205);
@@ -1312,7 +1317,7 @@ int  DLLEXPORT ENgetqualtype(int *qualcode, int *tracenode)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *tracenode = 0;
    if (!m->Openflag) return(102);
@@ -1323,7 +1328,7 @@ int  DLLEXPORT ENgetqualtype(int *qualcode, int *tracenode)
 
 int DLLEXPORT ENgetqualinfo(int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   ENgetqualtype(qualcode, tracenode);
   strncpy(chemname, m->ChemName,MAXID);
@@ -1368,7 +1373,7 @@ int  DLLEXPORT ENgetstatistic(int code, EN_API_FLOAT_TYPE* value)
  **----------------------------------------------------------------
  */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   switch (code) {
     case EN_ITERATIONS:
@@ -1399,7 +1404,7 @@ int DLLEXPORT ENgetnodeindex(char *id, int *index)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *index = 0;
    if (!m->Openflag) return(102);
@@ -1420,7 +1425,7 @@ int DLLEXPORT ENgetnodeid(int index, char *id)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    strcpy(id,"");
    if (!m->Openflag) return(102);
@@ -1439,7 +1444,7 @@ int  DLLEXPORT ENgetnodetype(int index, int *code)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *code = -1;
    if (!m->Openflag) return(102);
@@ -1464,7 +1469,7 @@ int DLLEXPORT ENgetcoord(int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
  **----------------------------------------------------------------
  */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   *x = m->Coord[index].X[0];
   *y = m->Coord[index].Y[0];
   return 0;
@@ -1480,7 +1485,7 @@ int DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   int tankIndex = 0;
   int isTank = 0;
@@ -1676,7 +1681,7 @@ int DLLEXPORT ENgetlinkindex(char *id, int *index)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *index = 0;
    if (!m->Openflag) return(102);
@@ -1697,7 +1702,7 @@ int DLLEXPORT ENgetlinkid(int index, char *id)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    strcpy(id,"");
    if (!m->Openflag) return(102);
@@ -1716,7 +1721,7 @@ int  DLLEXPORT ENgetlinktype(int index, int *code)
 **------------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *code = -1;
    if (!m->Openflag) return(102);
@@ -1736,7 +1741,7 @@ int  DLLEXPORT ENgetlinknodes(int index, int *node1, int *node2)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    *node1 = 0;
    *node2 = 0;
@@ -1758,7 +1763,7 @@ int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
 **------------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
 
    double a,h,q, v = 0.0;
 
@@ -1915,7 +1920,7 @@ int  DLLEXPORT ENgetcurve(int curveIndex, char* id, int *nValues, EN_API_FLOAT_T
  */
 {
   int err = 0;
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   Scurve curve = m->Curve[curveIndex];
   int nPoints = curve.Npts;
@@ -1968,7 +1973,7 @@ int DLLEXPORT ENsetcontrol(int cindex, int ctype, int lindex,
    long   t = 0;
    double s = setting, lvl = level;
 
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
 /* Check that input file opened */
    if (!m->Openflag) return(102);
@@ -2048,7 +2053,7 @@ int DLLEXPORT ENsetnodevalue(int index, int code, EN_API_FLOAT_TYPE v)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int  j;
    Pdemand demand;
@@ -2279,7 +2284,7 @@ int DLLEXPORT ENsetlinkvalue(int index, int code, EN_API_FLOAT_TYPE v)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    char  s;
    double r, value = v;
@@ -2401,7 +2406,7 @@ int  DLLEXPORT  ENaddpattern(char *id)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
     int i, j, n, err = 0;
     Spattern *tmpPat;
@@ -2474,7 +2479,7 @@ int  DLLEXPORT  ENsetpattern(int index, EN_API_FLOAT_TYPE *f, int n)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int j;
 
@@ -2511,7 +2516,7 @@ int  DLLEXPORT  ENsetpatternvalue(int index, int period, EN_API_FLOAT_TYPE value
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag) return(102);
    if (index  <= 0 || index  > m->Npats) return(205);
@@ -2531,7 +2536,7 @@ int  DLLEXPORT  ENsettimeparam(int code, long value)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    if (!m->Openflag)
      return(102);
@@ -2636,7 +2641,7 @@ int  DLLEXPORT ENsetoption(int code, EN_API_FLOAT_TYPE v)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int   i,j;
    double Ke,n,ucf, value = v;
@@ -2686,7 +2691,7 @@ int  DLLEXPORT ENsetstatusreport(int code)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    int errcode = 0;
    if (code >= 0 && code <= 2) {
@@ -2716,7 +2721,7 @@ int  DLLEXPORT ENsetqualtype(int qualcode, char *chemname,
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
 /*** Updated 3/1/01 ***/
    double ccf = 1.0;
@@ -3455,7 +3460,7 @@ void  errmsg(int errcode)
 **----------------------------------------------------------------
 */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
    char msg[MAXMSG+1];
    if (errcode == 309)    /* Report file write error -  */
@@ -3507,7 +3512,7 @@ void writewin(char *s)
 }
 int  DLLEXPORT ENgetnumdemands(int nodeIndex, int *numDemands)
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
 	Pdemand d;
 	int n=0;
@@ -3524,7 +3529,7 @@ int  DLLEXPORT ENgetnumdemands(int nodeIndex, int *numDemands)
 }
 int  DLLEXPORT ENgetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand)
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   Pdemand d;
   int n=1;
@@ -3547,7 +3552,7 @@ int  DLLEXPORT ENgetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *
 
 int  DLLEXPORT ENsetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand)
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   Pdemand d;
   int n=1;
@@ -3569,7 +3574,7 @@ int  DLLEXPORT ENsetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE b
 
 int  DLLEXPORT ENgetdemandpattern(int nodeIndex, int demandIdx, int *pattIdx)
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
 	Pdemand d;
 	int n=1;
@@ -3599,7 +3604,7 @@ int DLLEXPORT ENgetaveragepatternvalue(int index, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  Model *m = &en_defaultModel;
+  Model *m = en_defaultModel;
   
   *value = 0.0;
   if (!m->Openflag)
