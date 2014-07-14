@@ -56,6 +56,7 @@ AUTHOR:     L. Rossman
 #include <math.h>
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern

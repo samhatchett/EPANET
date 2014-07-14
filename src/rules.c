@@ -31,6 +31,7 @@ AUTHOR:     L. Rossman
 #endif
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern

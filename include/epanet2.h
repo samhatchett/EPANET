@@ -173,10 +173,14 @@
 #define EN_INITFLOW    10   /* Re-initialize flows flag  */
 
 
+
+
 // --- Declare the EPANET toolkit functions
 #if defined(__cplusplus)
 extern "C" {
 #endif
+  
+  typedef struct Model Model;
   
   // OLD (<= 2.00.13) api functions use the global default model pointer.
   //
@@ -262,7 +266,7 @@ extern "C" {
   
   // NEW (>2.00.13) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
   
-  int  DLLEXPORT OW_open(char *inpFile, Model *modelObj, char *rptFile, char *binOutFile);
+  int  DLLEXPORT OW_open(char *inpFile, Model **modelObj, char *rptFile, char *binOutFile);
   int  DLLEXPORT OW_saveinpfile(Model *modelObj, char *filename);
   int  DLLEXPORT OW_close(Model *modelObj);
   

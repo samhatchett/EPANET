@@ -129,11 +129,11 @@ execute function x and set the error code equal to its return value.
  
 #include "text.h"
 #include "types.h"
+#include "epanet2.h"
 #include "enumstxt.h"
 #include "funcs.h"
 #define  EXTERN
 #include "vars.h"
-#include "epanet2.h"
 
 void (* viewprog) (char *);     /* Pointer to progress viewing function */   
 
@@ -231,12 +231,13 @@ int DLLEXPORT ENepanet(char *f1, char *f2, char *f3, void (*pviewprog) (char *))
 **-------------------------------------------------------------------------
 */
 {
-  Model *m = en_defaultModel;
   
     int  errcode = 0;
     viewprog = pviewprog;
     ERRCODE(ENopen(f1, f2, f3));
-    if (m->Hydflag != USE) ERRCODE(ENsolveH());
+    if (en_defaultModel->Hydflag != USE) {
+      ERRCODE(ENsolveH());
+    }
     ERRCODE(ENsolveQ());
     ERRCODE(ENreport());
     ENclose();
@@ -255,7 +256,11 @@ int DLLEXPORT ENopen(char *f1, char *f2, char *f3)
 **----------------------------------------------------------------
 */
 {
-  return OW_open(f1, en_defaultModel, f2, f3);
+  int err;
+  Model *newModel;
+  err = OW_open(f1, &newModel, f2, f3);
+  en_defaultModel = newModel;
+  return err;
 }
 
 
@@ -1245,7 +1250,9 @@ int  openhydfile(Model *m)
 /* If HydFile currently open, then close it if its not a scratch file */
    if (m->HydFile != NULL)
    {
-      if (m->Hydflag == SCRATCH) return(0);
+      if (m->Hydflag == SCRATCH) {
+        return(0);
+      }
       fclose(m->HydFile);
    }
       
@@ -1920,11 +1927,13 @@ void writewin(char *s)
 //   open water analytics expanded methods below                   //
 // ================================================================//
 
-int  DLLEXPORT OW_open(char *inpFile, Model *m, char *rptFile, char *binOutFile)
+int  DLLEXPORT OW_open(char *inpFile, Model **modelOut, char *rptFile, char *binOutFile)
 {
   
-  m = calloc(1, sizeof(Model));
-
+  *modelOut = 0;
+  Model *m = calloc(1, sizeof(Model));
+  
+  
   int  errcode = 0;
   
   /*** Updated 9/7/00 ***/
@@ -1984,7 +1993,9 @@ int  DLLEXPORT OW_open(char *inpFile, Model *m, char *rptFile, char *binOutFile)
   freeTmplist(m->Coordlist);
   
   /* If using previously saved hydraulics then open its file */
-  if (m->Hydflag == USE) ERRCODE(openhydfile(m));
+  if (m->Hydflag == USE) {
+    ERRCODE(openhydfile(m));
+  }
   
   /* Write input summary to report file */
   if (!errcode)
@@ -1994,6 +2005,9 @@ int  DLLEXPORT OW_open(char *inpFile, Model *m, char *rptFile, char *binOutFile)
     m->Openflag = TRUE;
   }
   else errmsg(errcode);
+  
+  *modelOut = m;
+  
   return(errcode);
 }
 
@@ -2062,11 +2076,11 @@ int  DLLEXPORT OW_solveH(Model *m)
   long t, tstep;
   
   /* Open hydraulics solver */
-  errcode = ENopenH();
+  errcode = OW_openH(m);
   if (!errcode)
   {
     /* Initialize hydraulics */
-    errcode = ENinitH(EN_SAVE);
+    errcode = OW_initH(m, EN_SAVE);
     writecon(FMT14);
     
     /* Analyze each hydraulic period */
@@ -2084,8 +2098,8 @@ int  DLLEXPORT OW_solveH(Model *m)
       
       /* Solve for hydraulics & advance to next time period */
       tstep = 0;
-      ERRCODE(ENrunH(&t));
-      ERRCODE(ENnextH(&tstep));
+      ERRCODE(OW_runH(m, &t));
+      ERRCODE(OW_nextH(m, &tstep));
       
       /*** Updated 6/24/02 ***/
       writecon("\b\b\b\b\b\b\b\b\b\b");
@@ -2098,7 +2112,7 @@ int  DLLEXPORT OW_solveH(Model *m)
   /*** Updated 6/24/02 ***/
   writecon("\b\b\b\b\b\b\b\b                     ");
   
-  ENcloseH();
+  OW_closeH(m);
   errcode = MAX(errcode, m->Warnflag);
   return(errcode);
 }
@@ -2119,7 +2133,7 @@ int  DLLEXPORT OW_saveH(Model *m)
   /* Call WQ solver to simply transfer results */
   /* from Hydraulics file to Output file at    */
   /* fixed length reporting time intervals.    */
-  errcode = ENsolveQ();
+  errcode = OW_solveQ(m);
   
   /* Restore WQ analysis option */
   m->Qualflag = tmpflag;
@@ -2135,15 +2149,23 @@ int  DLLEXPORT OW_openH(Model *m)
   /* Check that input data exists */
   m->OpenHflag = FALSE;
   m->SaveHflag = FALSE;
-  if (!m->Openflag) return(102);
+  if (!m->Openflag) {
+    return(102);
+  }
   
   /* Check that previously saved hydraulics file not in use */
-  if (m->Hydflag == USE) return(107);
+  if (m->Hydflag == USE) {
+    return(107);
+  }
   
   /* Open hydraulics solver */
   ERRCODE(openhyd(m));
-  if (!errcode) m->OpenHflag = TRUE;
-  else errmsg(errcode);
+  if (!errcode) {
+    m->OpenHflag = TRUE;
+  }
+  else {
+    errmsg(errcode);
+  }
   return(errcode);
 }
 
@@ -2266,11 +2288,11 @@ int  DLLEXPORT OW_solveQ(Model *m)
   long t, tstep;
   
   /* Open WQ solver */
-  errcode = ENopenQ();
+  errcode = OW_openQ(m);
   if (!errcode)
   {
     /* Initialize WQ */
-    errcode = ENinitQ(EN_SAVE);
+    errcode = OW_initQ(m, EN_SAVE);
     if (m->Qualflag) writecon(FMT15);
     else
     {
@@ -2296,8 +2318,8 @@ int  DLLEXPORT OW_solveQ(Model *m)
       
       /* Retrieve current network solution & update WQ to next time period */
       tstep = 0;
-      ERRCODE(ENrunQ(&t));
-      ERRCODE(ENnextQ(&tstep));
+      ERRCODE(OW_runQ(m, &t));
+      ERRCODE(OW_nextQ(m, &tstep));
       
       /*** Updated 6/24/02 ***/
       writecon("\b\b\b\b\b\b\b\b\b\b");
@@ -2310,7 +2332,7 @@ int  DLLEXPORT OW_solveQ(Model *m)
   
   /*** Updated 6/24/02 ***/
   writecon("\b\b\b\b\b\b\b\b                     ");
-  ENcloseQ();
+  OW_closeQ(m);
   return(errcode);
 }
 
@@ -3049,7 +3071,7 @@ int  DLLEXPORT OW_getlinkvalue(Model *m, int index, int code, EN_API_FLOAT_TYPE 
       
     case EN_INITSETTING:
       if (m->Link[index].Type == PIPE || m->Link[index].Type == CV)
-        return(ENgetlinkvalue(index, EN_ROUGHNESS, value));
+        return(OW_getlinkvalue(m, index, EN_ROUGHNESS, value));
       v = m->Link[index].Kc;
       switch (m->Link[index].Type)
     {
@@ -3115,7 +3137,7 @@ int  DLLEXPORT OW_getlinkvalue(Model *m, int index, int code, EN_API_FLOAT_TYPE 
       
     case EN_SETTING:
       if (m->Link[index].Type == PIPE || m->Link[index].Type == CV) {
-        return(ENgetlinkvalue(index, EN_ROUGHNESS, value));
+        return(OW_getlinkvalue(m, index, EN_ROUGHNESS, value));
       }
       if (m->hydraulics.LinkSetting[index] == MISSING) {
         v = 0.0;
@@ -3542,7 +3564,7 @@ int  DLLEXPORT OW_setlinkvalue(Model *m, int index, int code, EN_API_FLOAT_TYPE 
     case EN_SETTING:
       if (value < 0.0) return(202);
       if (m->Link[index].Type == PIPE || m->Link[index].Type == CV)
-        return(ENsetlinkvalue(index, EN_ROUGHNESS, v));
+        return(OW_setlinkvalue(m, index, EN_ROUGHNESS, v));
       else
       {
         switch (m->Link[index].Type)
@@ -3596,7 +3618,7 @@ int  DLLEXPORT OW_addpattern(Model *m, char *id)
   /* Check if a pattern with same id already exists */
   
   if ( !m->Openflag ) return(102);
-  if ( ENgetpatternindex(id, &i) == 0 ) return(215);
+  if ( OW_getpatternindex(m, id, &i) == 0 ) return(215);
   
   /* Check that id name is not too long */
   
@@ -3803,7 +3825,7 @@ int  DLLEXPORT OW_setoption(Model *m, int code, EN_API_FLOAT_TYPE v)
       ucf = pow(m->Ucf[FLOW],n) / m->Ucf[PRESSURE];
       for (i=1; i <= m->Njuncs; i++)
       {
-        j = ENgetnodevalue(i,EN_EMITTER,&v);
+        j = OW_getnodevalue(m, i,EN_EMITTER,&v);
         Ke = v;
         if (j == 0 && Ke > 0.0) {
           m->Node[i].Ke = ucf/pow(Ke,n);
@@ -3885,7 +3907,7 @@ int  DLLEXPORT OW_setqualtype(Model *m, int qualcode, char *chemname, char *chem
 
 int  DLLEXPORT OW_getqualinfo(Model *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
-  ENgetqualtype(qualcode, tracenode);
+  OW_getqualtype(m, qualcode, tracenode);
   strncpy(chemname, m->ChemName,MAXID);
   strncpy(chemunits, m->ChemUnits,MAXID);
   return 0;

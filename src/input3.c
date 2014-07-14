@@ -29,6 +29,7 @@ All functions in this module are called from newline() in INPUT2.C.
 #include <math.h>
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern

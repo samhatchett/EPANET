@@ -22,6 +22,7 @@ AUTHOR:     L. Rossman
 #include <math.h>
 #include "text.h"
 #include "types.h"
+#include "epanet2.h"
 #include "funcs.h"
 #define  EXTERN  extern
 #include "hash.h"

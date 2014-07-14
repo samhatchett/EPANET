@@ -134,23 +134,23 @@ typedef  int          INT4;                                                    /
  ----------------------------------------------
  */
 enum Hydtype                   /* Hydraulics solution option:         */
-{USE,           /*    use from previous run            */
+{ USE,           /*    use from previous run            */
   SAVE,          /*    save after current run           */
   SCRATCH};      /*    use temporary file               */
 
 enum QualType                  /* Water quality analysis option:      */
-{NONE,          /*    no quality analysis              */
+{ NONE,          /*    no quality analysis              */
   CHEM,          /*    analyze a chemical               */
   AGE,           /*    analyze water age                */
   TRACE};        /*    trace % of flow from a source    */
 
 enum NodeType                  /* Type of node:                       */
-{JUNC,          /*    junction                         */
+{ JUNC,          /*    junction                         */
   RESERV,        /*    reservoir                        */
   TANK};         /*    tank                             */
 
 enum LinkType                  /* Type of link:                       */
-{CV,           /*    pipe with check valve            */
+{ CV,           /*    pipe with check valve            */
   PIPE,         /*    regular pipe                     */
   PUMP,         /*    pump                             */
   PRV,          /*    pressure reducing valve          */
@@ -544,7 +544,7 @@ typedef struct {
 
 /***** MODEL STRUCT ******/
 
-typedef struct {
+struct Model {
   /* Array pointers not allocated and freed in same routine */
   
   double *PipeRateCoeff,        /* Pipe reaction rate           */
@@ -745,16 +745,7 @@ typedef struct {
   
   
   
-} Model;
-
-typedef struct {
-  
-} Environment;
-
-typedef struct {
-  Model *model;
-  Environment *environment;
-} Simulation;
+};
 
 
 
