@@ -85,10 +85,10 @@ AUTHOR:     L. Rossman
 //double RelaxFactor;                                                            //(2.00.11 - LR)
 
 /* Function to find flow coeffs. through open/closed valves */                 //(2.00.11 - LR)
-void valvecoeff(Model *m, int k);                                                        //(2.00.11 - LR)
+void valvecoeff(OW_Model *m, int k);                                                        //(2.00.11 - LR)
 
 
-int  openhyd(Model *m)
+int  openhyd(OW_Model *m)
 /*
  *--------------------------------------------------------------
  *  Input:   none     
@@ -109,7 +109,7 @@ int  openhyd(Model *m)
 
 
 /*** Updated 3/1/01 ***/
-void inithyd(Model *m, int initflag)
+void inithyd(OW_Model *m, int initflag)
 /*
 **--------------------------------------------------------------
 **  Input:   initflag > 0 if link flows should be re-initialized
@@ -185,7 +185,7 @@ void inithyd(Model *m, int initflag)
 }
 
 
-int   runhyd(Model *m, long *t)
+int   runhyd(OW_Model *m, long *t)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -228,7 +228,7 @@ int   runhyd(Model *m, long *t)
 }                               /* end of runhyd */
 
 
-int  nexthyd(Model *m, long *tstep)
+int  nexthyd(OW_Model *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -276,7 +276,7 @@ int  nexthyd(Model *m, long *tstep)
 }
   
 
-void  closehyd(Model *m)
+void  closehyd(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -290,7 +290,7 @@ void  closehyd(Model *m)
 }
 
 
-int  allocmatrix(Model *m)
+int  allocmatrix(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -320,7 +320,7 @@ int  allocmatrix(Model *m)
 }                               /* end of allocmatrix */
 
 
-void  freematrix(Model *m)
+void  freematrix(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -340,7 +340,7 @@ void  freematrix(Model *m)
 }                               /* end of freematrix */
 
 
-void  initlinkflow(Model *m, int i, char s, double k)
+void  initlinkflow(OW_Model *m, int i, char s, double k)
 /*
 **--------------------------------------------------------------------
 **  Input:   i = link index
@@ -368,7 +368,7 @@ void  initlinkflow(Model *m, int i, char s, double k)
 
 
 /*** Updated 9/7/00 ***/
-void  setlinkflow(Model *m, int k, double dh)
+void  setlinkflow(OW_Model *m, int k, double dh)
 /*
 **--------------------------------------------------------------
 **  Input:   k = link index
@@ -443,7 +443,7 @@ void  setlinkflow(Model *m, int k, double dh)
 }
 
 
-void  setlinkstatus(Model *m, int index, char value, char *s, double *k)
+void  setlinkstatus(OW_Model *m, int index, char value, char *s, double *k)
 /*----------------------------------------------------------------
 **  Input:   index  = link index
 **           value  = 0 (CLOSED) or 1 (OPEN)
@@ -486,7 +486,7 @@ void  setlinkstatus(Model *m, int index, char value, char *s, double *k)
 }
 
 
-void  setlinksetting(Model *m, int index, double value, char *s, double *k)
+void  setlinksetting(OW_Model *m, int index, double value, char *s, double *k)
 /*----------------------------------------------------------------
 **  Input:   index  = link index
 **           value  = pump speed or valve setting
@@ -536,7 +536,7 @@ void  setlinksetting(Model *m, int index, double value, char *s, double *k)
 } 
 
 
-void  resistance(Model *m, int k)
+void  resistance(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------------
 **  Input:   k = link index                                                      
@@ -593,7 +593,7 @@ void  resistance(Model *m, int k)
 }
 
 
-void  demands(Model *m)
+void  demands(OW_Model *m)
 /*
 **--------------------------------------------------------------------
 **  Input:   none                                                      
@@ -661,7 +661,7 @@ void  demands(Model *m)
 }                        /* End of demands */
 
 
-int  controls(Model *m)
+int  controls(OW_Model *m)
 /*
 **---------------------------------------------------------------------
 **  Input:   none                                                   
@@ -735,7 +735,7 @@ int  controls(Model *m)
 }                        /* End of controls */
 
 
-long  timestep(Model *m)
+long  timestep(OW_Model *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -775,7 +775,7 @@ long  timestep(Model *m)
 }
 
 
-void  tanktimestep(Model *m, long *tstep)
+void  tanktimestep(OW_Model *m, long *tstep)
 /*
 **-----------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -812,7 +812,7 @@ void  tanktimestep(Model *m, long *tstep)
 }
 
 
-void  controltimestep(Model *m, long *tstep)
+void  controltimestep(OW_Model *m, long *tstep)
 /*
 **------------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -880,7 +880,7 @@ void  controltimestep(Model *m, long *tstep)
 }                        /* End of timestep */
 
 
-void  ruletimestep(Model *m, long *tstep)
+void  ruletimestep(OW_Model *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **  Input:   *tstep = current time step (sec)                            
@@ -947,7 +947,7 @@ void  ruletimestep(Model *m, long *tstep)
 }
    
 
-void  addenergy(Model *mod, long hstep)
+void  addenergy(OW_Model *mod, long hstep)
 /*
 **-------------------------------------------------------------
 **  Input:   hstep = time step (sec)                            
@@ -1033,7 +1033,7 @@ void  addenergy(Model *mod, long hstep)
 }                       /* End of pumpenergy */
 
 
-void  getenergy(Model *m, int k, double *kw, double *eff)
+void  getenergy(OW_Model *m, int k, double *kw, double *eff)
 /*
 **----------------------------------------------------------------
 **  Input:   k    = link index                         
@@ -1083,7 +1083,7 @@ void  getenergy(Model *m, int k, double *kw, double *eff)
 }
 
 
-void  tanklevels(Model *m, long tstep)
+void  tanklevels(OW_Model *m, long tstep)
 /*
 **----------------------------------------------------------------
 **  Input:   tstep = current time step                         
@@ -1120,7 +1120,7 @@ void  tanklevels(Model *m, long tstep)
 }                       /* End of tanklevels */
 
 
-double  tankvolume(Model *m, int i, double h)
+double  tankvolume(OW_Model *m, int i, double h)
 /*
 **--------------------------------------------------------------------
 **  Input:   i = tank index                                         
@@ -1153,7 +1153,7 @@ double  tankvolume(Model *m, int i, double h)
 }                       /* End of tankvolume */
 
 
-double  tankgrade(Model *m, int i, double v)
+double  tankgrade(OW_Model *m, int i, double v)
 /*
 **-------------------------------------------------------------------
 **  Input:   i = tank index                                         
@@ -1187,7 +1187,7 @@ double  tankgrade(Model *m, int i, double v)
 }                        /* End of tankgrade */
 
 
-int  netsolve(Model *m, int *iter, double *relerr)
+int  netsolve(OW_Model *m, int *iter, double *relerr)
 /*
 **-------------------------------------------------------------------
 **  Input:   none                                                
@@ -1329,7 +1329,7 @@ int  netsolve(Model *m, int *iter, double *relerr)
 }                        /* End of netsolve */
 
 
-int  badvalve(Model *m, int n)
+int  badvalve(OW_Model *m, int n)
 /*
 **-----------------------------------------------------------------
 **  Input:   n = node index                                                
@@ -1377,7 +1377,7 @@ int  badvalve(Model *m, int n)
 }
    
 
-int  valvestatus(Model *m)
+int  valvestatus(OW_Model *m)
 /*
 **-----------------------------------------------------------------
 **  Input:   none                                                
@@ -1438,7 +1438,7 @@ int  valvestatus(Model *m)
 
 
 /*** Updated 9/7/00 ***/
-int  linkstatus(Model *m)
+int  linkstatus(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1503,7 +1503,7 @@ int  linkstatus(Model *m)
 }                        /* End of linkstatus */
 
 
-char  cvstatus(Model *m, char s, double dh, double q)
+char  cvstatus(OW_Model *m, char s, double dh, double q)
 /*
 **--------------------------------------------------
 **  Input:   s  = current status
@@ -1534,7 +1534,7 @@ char  cvstatus(Model *m, char s, double dh, double q)
 }
 
 
-char  pumpstatus(Model *m, int k, double dh)
+char  pumpstatus(OW_Model *m, int k, double dh)
 /*
 **--------------------------------------------------
 **  Input:   k  = link index                         
@@ -1566,7 +1566,7 @@ char  pumpstatus(Model *m, int k, double dh)
 }
 
 
-char  prvstatus(Model *m, int k, char s, double hset, double h1, double h2)
+char  prvstatus(OW_Model *m, int k, char s, double hset, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1637,7 +1637,7 @@ char  prvstatus(Model *m, int k, char s, double hset, double h1, double h2)
 }
 
 
-char  psvstatus(Model *m, int k, char s, double hset, double h1, double h2)
+char  psvstatus(OW_Model *m, int k, char s, double hset, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1688,7 +1688,7 @@ char  psvstatus(Model *m, int k, char s, double hset, double h1, double h2)
 }
 
 
-char  fcvstatus(Model *m, int k, char s, double h1, double h2)
+char  fcvstatus(OW_Model *m, int k, char s, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1725,7 +1725,7 @@ char  fcvstatus(Model *m, int k, char s, double h1, double h2)
 
 /*** Updated 9/7/00 ***/
 /*** Updated 11/19/01 ***/
-void  tankstatus(Model *m, int k, int n1, int n2)
+void  tankstatus(OW_Model *m, int k, int n1, int n2)
 /*
 **----------------------------------------------------------------
 **  Input:   k  = link index                                     
@@ -1796,7 +1796,7 @@ void  tankstatus(Model *m, int k, int n1, int n2)
 }                        /* End of tankstatus */
 
 
-int  pswitch(Model *m)
+int  pswitch(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1873,7 +1873,7 @@ int  pswitch(Model *m)
 }                        /* End of pswitch */
 
 
-double newflows(Model *m)
+double newflows(OW_Model *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -1957,7 +1957,7 @@ double newflows(Model *m)
 }                        /* End of newflows */
 
 
-void   newcoeffs(Model *m)
+void   newcoeffs(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1979,7 +1979,7 @@ void   newcoeffs(Model *m)
 }                        /* End of newcoeffs */
 
 
-void  linkcoeffs(Model *m)
+void  linkcoeffs(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2072,7 +2072,7 @@ void  linkcoeffs(Model *m)
 }                        /* End of linkcoeffs */
 
 
-void  nodecoeffs(Model *m)
+void  nodecoeffs(OW_Model *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -2094,7 +2094,7 @@ void  nodecoeffs(Model *m)
 }                        /* End of nodecoeffs */
 
 
-void  valvecoeffs(Model *m)
+void  valvecoeffs(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2123,7 +2123,7 @@ void  valvecoeffs(Model *m)
 }                        /* End of valvecoeffs */
 
 
-void  emittercoeffs(Model *m)
+void  emittercoeffs(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2162,7 +2162,7 @@ void  emittercoeffs(Model *m)
 }
 
 
-double  emitflowchange(Model *m, int i)
+double  emitflowchange(OW_Model *m, int i)
 /*
 **--------------------------------------------------------------
 **   Input:   i = node index
@@ -2183,7 +2183,7 @@ double  emitflowchange(Model *m, int i)
 }
 
 
-void  pipecoeff(Model *m, int k)
+void  pipecoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2258,7 +2258,7 @@ void  pipecoeff(Model *m, int k)
 }                        /* End of pipecoeff */
 
 
-double DWcoeff(Model *m, int k, double *dfdq)
+double DWcoeff(OW_Model *m, int k, double *dfdq)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2322,7 +2322,7 @@ double DWcoeff(Model *m, int k, double *dfdq)
 
 /*** Updated 10/25/00 ***/
 /*** Updated 12/29/00 ***/
-void  pumpcoeff(Model *m, int k)
+void  pumpcoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2379,7 +2379,7 @@ void  pumpcoeff(Model *m, int k)
 
 /*** Updated 10/25/00 ***/
 /*** Updated 12/29/00 ***/
-void  curvecoeff(Model *m, int i, double q, double *h0, double *r)
+void  curvecoeff(OW_Model *m, int i, double q, double *h0, double *r)
 /*
 **-------------------------------------------------------------------
 **   Input:   i   = curve index                                        
@@ -2417,7 +2417,7 @@ void  curvecoeff(Model *m, int i, double q, double *h0, double *r)
 }                       /* End of curvecoeff */
 
 
-void  gpvcoeff(Model *m, int k)
+void  gpvcoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index
@@ -2454,7 +2454,7 @@ void  gpvcoeff(Model *m, int k)
 }
  
 
-void  pbvcoeff(Model *m, int k)
+void  pbvcoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2484,7 +2484,7 @@ void  pbvcoeff(Model *m, int k)
 }                        /* End of pbvcoeff */
 
 
-void  tcvcoeff(Model *m, int k)
+void  tcvcoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2510,7 +2510,7 @@ void  tcvcoeff(Model *m, int k)
 }                        /* End of tcvcoeff */
 
 
-void  prvcoeff(Model *m, int k, int n1, int n2)
+void  prvcoeff(OW_Model *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2558,7 +2558,7 @@ void  prvcoeff(Model *m, int k, int n1, int n2)
 }                        /* End of prvcoeff */
 
 
-void  psvcoeff(Model *m, int k, int n1, int n2)
+void  psvcoeff(OW_Model *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2605,7 +2605,7 @@ void  psvcoeff(Model *m, int k, int n1, int n2)
 }                        /* End of psvcoeff */
 
 
-void  fcvcoeff(Model *m, int k, int n1, int n2)
+void  fcvcoeff(OW_Model *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2657,7 +2657,7 @@ void  fcvcoeff(Model *m, int k, int n1, int n2)
 
 
 /*** New function added. ***/                                                  //(2.00.11 - LR)
-void valvecoeff(Model *m, int k)
+void valvecoeff(OW_Model *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   

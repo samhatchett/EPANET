@@ -180,7 +180,7 @@
 extern "C" {
 #endif
   
-  typedef struct Model Model;
+  typedef struct OW_Model OW_Model;
   
   // OLD (<= 2.00.13) api functions use the global default model pointer.
   //
@@ -266,79 +266,79 @@ extern "C" {
   
   // NEW (>2.00.13) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
   
-  int  DLLEXPORT OW_open(char *inpFile, Model **modelObj, char *rptFile, char *binOutFile);
-  int  DLLEXPORT OW_saveinpfile(Model *modelObj, char *filename);
-  int  DLLEXPORT OW_close(Model *modelObj);
+  int  DLLEXPORT OW_open(char *inpFile, OW_Model **modelObj, char *rptFile, char *binOutFile);
+  int  DLLEXPORT OW_saveinpfile(OW_Model *modelObj, char *filename);
+  int  DLLEXPORT OW_close(OW_Model *modelObj);
   
-  int  DLLEXPORT OW_solveH(Model *modelObj);
-  int  DLLEXPORT OW_saveH(Model *modelObj);
-  int  DLLEXPORT OW_openH(Model *modelObj);
-  int  DLLEXPORT OW_initH(Model *modelObj, int initFlag);
-  int  DLLEXPORT OW_runH(Model *modelObj, long *currentTime);
-  int  DLLEXPORT OW_nextH(Model *modelObj, long *tStep);
-  int  DLLEXPORT OW_closeH(Model *modelObj);
-  int  DLLEXPORT OW_savehydfile(Model *modelObj, char *filename);
-  int  DLLEXPORT OW_usehydfile(Model *modelObj, char *filename);
+  int  DLLEXPORT OW_solveH(OW_Model *modelObj);
+  int  DLLEXPORT OW_saveH(OW_Model *modelObj);
+  int  DLLEXPORT OW_openH(OW_Model *modelObj);
+  int  DLLEXPORT OW_initH(OW_Model *modelObj, int initFlag);
+  int  DLLEXPORT OW_runH(OW_Model *modelObj, long *currentTime);
+  int  DLLEXPORT OW_nextH(OW_Model *modelObj, long *tStep);
+  int  DLLEXPORT OW_closeH(OW_Model *modelObj);
+  int  DLLEXPORT OW_savehydfile(OW_Model *modelObj, char *filename);
+  int  DLLEXPORT OW_usehydfile(OW_Model *modelObj, char *filename);
   
-  int  DLLEXPORT OW_solveQ(Model *modelObj);
-  int  DLLEXPORT OW_openQ(Model *modelObj);
-  int  DLLEXPORT OW_initQ(Model *modelObj, int saveFlag);
-  int  DLLEXPORT OW_runQ(Model *modelObj, long *currentTime);
-  int  DLLEXPORT OW_nextQ(Model *modelObj, long *tStep);
-  int  DLLEXPORT OW_stepQ(Model *modelObj, long *timeLeft);
-  int  DLLEXPORT OW_closeQ(Model *modelObj);
+  int  DLLEXPORT OW_solveQ(OW_Model *modelObj);
+  int  DLLEXPORT OW_openQ(OW_Model *modelObj);
+  int  DLLEXPORT OW_initQ(OW_Model *modelObj, int saveFlag);
+  int  DLLEXPORT OW_runQ(OW_Model *modelObj, long *currentTime);
+  int  DLLEXPORT OW_nextQ(OW_Model *modelObj, long *tStep);
+  int  DLLEXPORT OW_stepQ(OW_Model *modelObj, long *timeLeft);
+  int  DLLEXPORT OW_closeQ(OW_Model *modelObj);
   
-  int  DLLEXPORT OW_writeline(Model *modelObj, char *line);
-  int  DLLEXPORT OW_report(Model *modelObj);
-  int  DLLEXPORT OW_resetreport(Model *modelObj);
-  int  DLLEXPORT OW_setreport(Model *modelObj, char *reportFormat);
+  int  DLLEXPORT OW_writeline(OW_Model *modelObj, char *line);
+  int  DLLEXPORT OW_report(OW_Model *modelObj);
+  int  DLLEXPORT OW_resetreport(OW_Model *modelObj);
+  int  DLLEXPORT OW_setreport(OW_Model *modelObj, char *reportFormat);
   
-  int  DLLEXPORT OW_getcontrol(Model *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
-  int  DLLEXPORT OW_getcount(Model *modelObj, int code, int *count);
-  int  DLLEXPORT OW_getoption(Model *modelObj, int code, EN_API_FLOAT_TYPE *value);
-  int  DLLEXPORT OW_gettimeparam(Model *modelObj, int code, long *value);
-  int  DLLEXPORT OW_getflowunits(Model *modelObj, int *code);
-  int  DLLEXPORT OW_getpatternindex(Model *modelObj, char *id, int *index);
-  int  DLLEXPORT OW_getpatternid(Model *modelObj, int index, char *id);
-  int  DLLEXPORT OW_getpatternlen(Model *modelObj, int index, int *len);
-  int  DLLEXPORT OW_getpatternvalue(Model *modelObj, int index, int period, EN_API_FLOAT_TYPE *value);
-  int  DLLEXPORT OW_getaveragepatternvalue(Model *modelObj, int index, EN_API_FLOAT_TYPE *value);
-  int  DLLEXPORT OW_getqualtype(Model *modelObj, int *qualcode, int *tracenode);
+  int  DLLEXPORT OW_getcontrol(OW_Model *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
+  int  DLLEXPORT OW_getcount(OW_Model *modelObj, int code, int *count);
+  int  DLLEXPORT OW_getoption(OW_Model *modelObj, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_gettimeparam(OW_Model *modelObj, int code, long *value);
+  int  DLLEXPORT OW_getflowunits(OW_Model *modelObj, int *code);
+  int  DLLEXPORT OW_getpatternindex(OW_Model *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getpatternid(OW_Model *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getpatternlen(OW_Model *modelObj, int index, int *len);
+  int  DLLEXPORT OW_getpatternvalue(OW_Model *modelObj, int index, int period, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getaveragepatternvalue(OW_Model *modelObj, int index, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getqualtype(OW_Model *modelObj, int *qualcode, int *tracenode);
   int  DLLEXPORT OW_geterror(int errcode, char *errmsg, int maxLen);
-  int  DLLEXPORT OW_getstatistic(Model *modelObj, int code, EN_API_FLOAT_TYPE* value);
+  int  DLLEXPORT OW_getstatistic(OW_Model *modelObj, int code, EN_API_FLOAT_TYPE* value);
   
-  int  DLLEXPORT OW_getnodeindex(Model *modelObj, char *id, int *index);
-  int  DLLEXPORT OW_getnodeid(Model *modelObj, int index, char *id);
-  int  DLLEXPORT OW_getnodetype(Model *modelObj, int index, int *code);
-  int  DLLEXPORT OW_getnodevalue(Model *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
-  int  DLLEXPORT OW_getcoord(Model *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
+  int  DLLEXPORT OW_getnodeindex(OW_Model *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getnodeid(OW_Model *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getnodetype(OW_Model *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getnodevalue(OW_Model *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getcoord(OW_Model *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
   
-  int  DLLEXPORT OW_getnumdemands(Model *modelObj, int nodeIndex, int *numDemands);
-  int  DLLEXPORT OW_getbasedemand(Model *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand);
-  int  DLLEXPORT OW_getdemandpattern(Model *modelObj, int nodeIndex, int demandIdx, int *pattIdx);
+  int  DLLEXPORT OW_getnumdemands(OW_Model *modelObj, int nodeIndex, int *numDemands);
+  int  DLLEXPORT OW_getbasedemand(OW_Model *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand);
+  int  DLLEXPORT OW_getdemandpattern(OW_Model *modelObj, int nodeIndex, int demandIdx, int *pattIdx);
   
-  int  DLLEXPORT OW_getlinkindex(Model *modelObj, char *id, int *index);
-  int  DLLEXPORT OW_getlinkid(Model *modelObj, int index, char *id);
-  int  DLLEXPORT OW_getlinktype(Model *modelObj, int index, int *code);
-  int  DLLEXPORT OW_getlinknodes(Model *modelObj, int index, int *node1, int *node2);
-  int  DLLEXPORT OW_getlinkvalue(Model *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getlinkindex(OW_Model *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getlinkid(OW_Model *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getlinktype(OW_Model *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getlinknodes(OW_Model *modelObj, int index, int *node1, int *node2);
+  int  DLLEXPORT OW_getlinkvalue(OW_Model *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
   
-  int  DLLEXPORT OW_getcurve(Model *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
+  int  DLLEXPORT OW_getcurve(OW_Model *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
   
   int  DLLEXPORT OW_getversion(int *version);
   
-  int  DLLEXPORT OW_setcontrol(Model *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
-  int  DLLEXPORT OW_setnodevalue(Model *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
-  int  DLLEXPORT OW_setlinkvalue(Model *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
-  int  DLLEXPORT OW_addpattern(Model *modelObj, char *id);
-  int  DLLEXPORT OW_setpattern(Model *modelObj, int index, EN_API_FLOAT_TYPE *f, int len);
-  int  DLLEXPORT OW_setpatternvalue(Model *modelObj, int index, int period, EN_API_FLOAT_TYPE value);
-  int  DLLEXPORT OW_settimeparam(Model *modelObj, int code, long value);
-  int  DLLEXPORT OW_setoption(Model *modelObj, int code, EN_API_FLOAT_TYPE v);
-  int  DLLEXPORT OW_setstatusreport(Model *modelObj, int code);
-  int  DLLEXPORT OW_setqualtype(Model *modelObj, int qualcode, char *chemname, char *chemunits, char *tracenode);
-  int  DLLEXPORT OW_getqualinfo(Model *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
-  int  DLLEXPORT OW_setbasedemand(Model *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
+  int  DLLEXPORT OW_setcontrol(OW_Model *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
+  int  DLLEXPORT OW_setnodevalue(OW_Model *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_setlinkvalue(OW_Model *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_addpattern(OW_Model *modelObj, char *id);
+  int  DLLEXPORT OW_setpattern(OW_Model *modelObj, int index, EN_API_FLOAT_TYPE *f, int len);
+  int  DLLEXPORT OW_setpatternvalue(OW_Model *modelObj, int index, int period, EN_API_FLOAT_TYPE value);
+  int  DLLEXPORT OW_settimeparam(OW_Model *modelObj, int code, long value);
+  int  DLLEXPORT OW_setoption(OW_Model *modelObj, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_setstatusreport(OW_Model *modelObj, int code);
+  int  DLLEXPORT OW_setqualtype(OW_Model *modelObj, int qualcode, char *chemname, char *chemunits, char *tracenode);
+  int  DLLEXPORT OW_getqualinfo(OW_Model *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
+  int  DLLEXPORT OW_setbasedemand(OW_Model *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
   
   
   

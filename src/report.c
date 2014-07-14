@@ -58,11 +58,11 @@ extern char *RptFormTxt[];
 
 
 typedef   REAL4 *Pfloat;
-void      writenodetable(Model *m, Pfloat *);
-void      writelinktable(Model *m, Pfloat *);
+void      writenodetable(OW_Model *m, Pfloat *);
+void      writelinktable(OW_Model *m, Pfloat *);
 
 
-int  writereport(Model *m)
+int  writereport(OW_Model *m)
 /*
 **------------------------------------------------------
 **   Input:   none                                      
@@ -135,12 +135,14 @@ int  writereport(Model *m)
    }
 
    /* Special error handler for write-to-file error */
-   if (Fprinterr) errmsg(309);
+   if (Fprinterr) {
+     errmsg(m, 309);
+   }
    return(errcode);
 }                        /* End of writereport */
 
 
-void  writelogo(Model *m)
+void  writelogo(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -163,7 +165,7 @@ void  writelogo(Model *m)
 }                        /* End of writelogo */
 
 
-void  writesummary(Model *m)
+void  writesummary(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -263,7 +265,7 @@ void  writesummary(Model *m)
 }                        /* End of writesummary */
 
 
-void  writehydstat(Model *m, int iter, double relerr)
+void  writehydstat(OW_Model *m, int iter, double relerr)
 /*
 **--------------------------------------------------------------
 **   Input:   iter   = # iterations to find hydraulic solution        
@@ -346,7 +348,7 @@ void  writehydstat(Model *m, int iter, double relerr)
 }                        /* End of writehydstat */
 
 
-void  writeenergy(Model *m)
+void  writeenergy(OW_Model *m)
 /*
 **-------------------------------------------------------------
 **   Input:   none                                               
@@ -391,7 +393,7 @@ void  writeenergy(Model *m)
 }                       /* End of writeenergy */
 
 
-int  writeresults(Model *mod)
+int  writeresults(OW_Model *mod)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -477,7 +479,7 @@ int  writeresults(Model *mod)
 }                        /* End of writereport */
 
 
-void  writenodetable(Model *m, Pfloat *x)
+void  writenodetable(OW_Model *m, Pfloat *x)
 /*
 **---------------------------------------------------------------
 **   Input:   x = pointer to node results for current time
@@ -545,7 +547,7 @@ void  writenodetable(Model *m, Pfloat *x)
 }
 
 
-void  writelinktable(Model *m, Pfloat *x)
+void  writelinktable(OW_Model *m, Pfloat *x)
 /*
 **---------------------------------------------------------------
 **   Input:   x = pointer to link results for current time
@@ -624,7 +626,7 @@ void  writelinktable(Model *m, Pfloat *x)
 }
 
 
-void  writeheader(Model *m, int type, int contin)
+void  writeheader(OW_Model *m, int type, int contin)
 /*
 **--------------------------------------------------------------
 **   Input:   type   = table type                                
@@ -740,7 +742,7 @@ void  writeheader(Model *m, int type, int contin)
 }                        /* End of writeheader */
 
 
-void  writeline(Model *m, char *s)
+void  writeline(OW_Model *m, char *s)
 /*
 **--------------------------------------------------------------
 **   Input:   *s = text string                                    
@@ -765,7 +767,7 @@ void  writeline(Model *m, char *s)
 }                        /* End of writeline */
 
 
-void  writerelerr(Model *m, int iter, double relerr)
+void  writerelerr(OW_Model *m, int iter, double relerr)
 /*
 **-----------------------------------------------------------------
 **   Input:   iter   = current iteration of hydraulic solution    
@@ -788,7 +790,7 @@ void  writerelerr(Model *m, int iter, double relerr)
 }                        /* End of writerelerr */
 
 
-void  writestatchange(Model *m, int k, char s1, char s2)
+void  writestatchange(OW_Model *m, int k, char s1, char s2)
 /*
 **--------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -841,7 +843,7 @@ void  writestatchange(Model *m, int k, char s1, char s2)
 }                        /* End of writestatchange */
 
 
-void writecontrolaction(Model *m, int k, int i)
+void writecontrolaction(OW_Model *m, int k, int i)
 /*
 ----------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -876,7 +878,7 @@ void writecontrolaction(Model *m, int k, int i)
 }
 
 
-void writeruleaction(Model *m, int k, char *ruleID)
+void writeruleaction(OW_Model *m, int k, char *ruleID)
 /*
 **--------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -891,7 +893,7 @@ void writeruleaction(Model *m, int k, char *ruleID)
 }
 
 
-int  writehydwarn(Model *m, int iter, double relerr)
+int  writehydwarn(OW_Model *m, int iter, double relerr)
 /*
 **--------------------------------------------------------------
 **   Input:   iter = # iterations to find hydraulic solution      
@@ -1002,7 +1004,7 @@ int  writehydwarn(Model *m, int iter, double relerr)
 }                        /* End of writehydwarn */
 
 
-void  writehyderr(Model *m, int errnode)
+void  writehyderr(OW_Model *m, int errnode)
 /*
 **-----------------------------------------------------------
 **   Input:   none                                          
@@ -1019,7 +1021,7 @@ void  writehyderr(Model *m, int errnode)
 }                        /* End of writehyderr */
 
 
-int  disconnected(Model *m)
+int  disconnected(OW_Model *m)
 /*
 **-------------------------------------------------------------------
 **   Input:   None                                                  
@@ -1108,7 +1110,7 @@ int  disconnected(Model *m)
 }                   /* End of disconnected() */
 
 
-void  marknodes(Model *mod, int m, int *nodelist, char *marked)
+void  marknodes(OW_Model *mod, int m, int *nodelist, char *marked)
 /*
 **----------------------------------------------------------------
 **   Input:   m = number of source nodes
@@ -1158,7 +1160,7 @@ void  marknodes(Model *mod, int m, int *nodelist, char *marked)
 }                   /* End of marknodes() */
 
 
-void getclosedlink(Model *m, int i, char *marked)
+void getclosedlink(OW_Model *m, int i, char *marked)
 /*
 **----------------------------------------------------------------
 **   Input:   i = junction index                                    
@@ -1187,7 +1189,7 @@ void getclosedlink(Model *m, int i, char *marked)
 }
       
 
-void  writelimits(Model *m, int j1, int j2)
+void  writelimits(OW_Model *m, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **   Input:   j1 = index of first output variable                 
@@ -1220,7 +1222,7 @@ void  writelimits(Model *m, int j1, int j2)
 }                        /* End of writelimits */
    
 
-int  checklimits(Model *m, double *y, int j1, int j2)
+int  checklimits(OW_Model *m, double *y, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **   Input:   *y = array of output results                        
@@ -1241,7 +1243,7 @@ int  checklimits(Model *m, double *y, int j1, int j2)
 }                        /* End of checklim */
 
 
-void writetime(Model *m, char *fmt)
+void writetime(OW_Model *m, char *fmt)
 /*
 **----------------------------------------------------------------
 **   Input:   fmt = format string                             
@@ -1292,7 +1294,7 @@ char *fillstr(char *s, char ch, int n)
 }
 
 
-int  getnodetype(Model *m, int i)
+int  getnodetype(OW_Model *m, int i)
 /*
 **---------------------------------------------------------
 **  Determines type of node with index i

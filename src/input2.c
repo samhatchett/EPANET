@@ -56,7 +56,7 @@ extern char *SectTxt[];   /* Input section keywords            */
 extern char *RptSectTxt[];
 
 
-int  netsize(Model *m)
+int  netsize(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -143,7 +143,7 @@ int  netsize(Model *m)
 }                        /*  End of netsize  */
 
 
-int  readdata(Model *m)
+int  readdata(OW_Model *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -259,7 +259,7 @@ int  readdata(Model *m)
 }                        /*  End of readdata  */
 
 
-int  newline(Model *m, int sect, char *line)
+int  newline(OW_Model *m, int sect, char *line)
 /*
 **--------------------------------------------------------------
 **  Input:   sect  = current section of input file
@@ -314,7 +314,7 @@ int  newline(Model *m, int sect, char *line)
 }                        /* end of newline */
 
 
-int  getpumpparams(Model *mod)
+int  getpumpparams(OW_Model *mod)
 /*
 **-------------------------------------------------------------
 **  Input:   none
@@ -421,7 +421,7 @@ int  getpumpparams(Model *mod)
 }
 
 
-int   addnodeID(Model *m, int n, char *id)
+int   addnodeID(OW_Model *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = node index
@@ -438,7 +438,7 @@ int   addnodeID(Model *m, int n, char *id)
 }
 
 
-int   addlinkID(Model *m, int n, char *id)
+int   addlinkID(OW_Model *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = link index
@@ -455,7 +455,7 @@ int   addlinkID(Model *m, int n, char *id)
 }
 
 
-int  addpattern(Model *m, char *id)
+int  addpattern(OW_Model *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = pattern ID label
@@ -493,7 +493,7 @@ int  addpattern(Model *m, char *id)
 }
 
 
-int  addcurve(Model *m, char *id)
+int  addcurve(OW_Model *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = curve ID label
@@ -531,7 +531,7 @@ int  addcurve(Model *m, char *id)
    return(0);
 }
 
-int  addcoord(Model *m, char *id)
+int  addcoord(OW_Model *m, char *id)
 /*
  **-------------------------------------------------------------
  **  Input:   id = curve ID label
@@ -593,7 +593,7 @@ STmplist *findID(char *id, STmplist *list)
 }
 
 
-int  unlinked(Model *m)
+int  unlinked(OW_Model *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -635,7 +635,7 @@ int  unlinked(Model *m)
 }                        /* End of unlinked */
 
 
-int     getpatterns(Model *m)
+int     getpatterns(OW_Model *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -695,7 +695,7 @@ int     getpatterns(Model *m)
 }
 
 
-int     getcurves(Model *m)
+int     getcurves(OW_Model *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -768,7 +768,7 @@ int     getcurves(Model *m)
    return(0);
 }
 
-int getcoords(Model *m)
+int getcoords(OW_Model *m)
 /*
  **-----------------------------------------------------------
  **  Input:   none
@@ -1012,7 +1012,7 @@ int  getfloat(char *s, double *y)
 }
 
 
-int  setreport(Model *m, char *s)
+int  setreport(OW_Model *m, char *s)
 /*
 **-----------------------------------------------------------
 **  Input:   *s = report format command 
@@ -1028,7 +1028,7 @@ int  setreport(Model *m, char *s)
 }
 
 
-void  inperrmsg(Model *m, int err, int sect, char *line)
+void  inperrmsg(OW_Model *m, int err, int sect, char *line)
 /*
 **-------------------------------------------------------------
 **  Input:   err     = error code
