@@ -83,6 +83,10 @@ xcuserdata
 # PRIVATE ones are stored inside xcuserdata
 !xcschemes
 
+# XCode 5 additions
+*.xccheckout
+
+
 # Visual Studio 2012
 *.suo
 *.sdf
@@ -118,8 +122,6 @@ xcuserdata
 *.bi
 *.opensdf
 
-# XCode 5 additions
-*.xccheckout
 
 
 Debug/
