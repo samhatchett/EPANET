@@ -118,6 +118,10 @@ xcuserdata
 *.bi
 *.opensdf
 
+# XCode 5 additions
+*.xccheckout
+
+
 Debug/
 
 
