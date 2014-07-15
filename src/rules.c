@@ -69,24 +69,24 @@ char    *Value[]     = {"XXXX",   w_OPEN, w_CLOSED, w_ACTIVE,NULL};
 **   because some of them utilize the Premise and Action structures
 **   defined locally in this module.
 */
-void    newrule(OW_Model *m);
-int     newpremise(OW_Model *m, int);
-int     newaction(OW_Model *m);
-int     newpriority(OW_Model *m);
-int     evalpremises(OW_Model *m, int);
-void    updateactlist(OW_Model *m, int, struct Action *);
-int     checkaction(OW_Model *m, int, struct Action *);
-int     checkpremise(OW_Model *m, struct Premise *);
-int     checktime(OW_Model *m, struct Premise *);
-int     checkstatus(OW_Model *m, struct Premise *);
-int     checkvalue(OW_Model *m, struct Premise *);
-int     takeactions(OW_Model *m);
-void    clearactlist(OW_Model *m);
-void    clearrules(OW_Model *m);
-void    ruleerrmsg(OW_Model *m, int);
+void    newrule(OW_Project *m);
+int     newpremise(OW_Project *m, int);
+int     newaction(OW_Project *m);
+int     newpriority(OW_Project *m);
+int     evalpremises(OW_Project *m, int);
+void    updateactlist(OW_Project *m, int, struct Action *);
+int     checkaction(OW_Project *m, int, struct Action *);
+int     checkpremise(OW_Project *m, struct Premise *);
+int     checktime(OW_Project *m, struct Premise *);
+int     checkstatus(OW_Project *m, struct Premise *);
+int     checkvalue(OW_Project *m, struct Premise *);
+int     takeactions(OW_Project *m);
+void    clearactlist(OW_Project *m);
+void    clearrules(OW_Project *m);
+void    ruleerrmsg(OW_Project *m, int);
 
 
-void initrules(OW_Model *m)
+void initrules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Initializes rule base.
@@ -99,7 +99,7 @@ void initrules(OW_Model *m)
 }
 
 
-void addrule(OW_Model *m, char *tok)
+void addrule(OW_Project *m, char *tok)
 /*
 **--------------------------------------------------------------
 **    Updates rule count if RULE keyword found in line of input.
@@ -111,7 +111,7 @@ void addrule(OW_Model *m, char *tok)
 }
 
 
-int  allocrules(OW_Model *m)
+int  allocrules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Allocates memory for rule-based controls.
@@ -126,7 +126,7 @@ int  allocrules(OW_Model *m)
 }
 
 
-void freerules(OW_Model *m)
+void freerules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Frees memory used for rule-based controls.
@@ -139,7 +139,7 @@ void freerules(OW_Model *m)
 }
 
 
-int checkrules(OW_Model *m, long dt)
+int checkrules(OW_Project *m, long dt)
 /*
 **-----------------------------------------------------
 **    Checks which rules should fire at current time.
@@ -179,7 +179,7 @@ int checkrules(OW_Model *m, long dt)
 }
 
 
-int  ruledata(OW_Model *m)
+int  ruledata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Parses a line from [RULES] section of input.
@@ -259,7 +259,7 @@ int  ruledata(OW_Model *m)
 }
 
 
-void  clearactlist(OW_Model *m)
+void  clearactlist(OW_Project *m)
 /*
 **----------------------------------------------------------
 **    Clears memory used for action list
@@ -278,7 +278,7 @@ void  clearactlist(OW_Model *m)
 }
 
 
-void  clearrules(OW_Model *m)
+void  clearrules(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **    Clears memory used for premises & actions for all rules
@@ -317,7 +317,7 @@ void  clearrules(OW_Model *m)
 }
 
 
-void  newrule(OW_Model *m)
+void  newrule(OW_Project *m)
 /*
 **----------------------------------------------------------
 **    Adds new rule to rule base
@@ -334,7 +334,7 @@ void  newrule(OW_Model *m)
 }
 
 
-int  newpremise(OW_Model *mod, int logop)
+int  newpremise(OW_Project *mod, int logop)
 /*
 **--------------------------------------------------------------------
 **   Adds new premise to current rule.
@@ -472,7 +472,7 @@ int  newpremise(OW_Model *mod, int logop)
 }
 
 
-int  newaction(OW_Model *m)
+int  newaction(OW_Project *m)
 /*
 **----------------------------------------------------------
 **   Adds new action to current rule.
@@ -547,7 +547,7 @@ int  newaction(OW_Model *m)
 }
 
 
-int  newpriority(OW_Model *m)
+int  newpriority(OW_Project *m)
 /*
 **---------------------------------------------------
 **    Adds priority rating to current rule
@@ -563,7 +563,7 @@ int  newpriority(OW_Model *m)
 }
 
 
-int  evalpremises(OW_Model *m, int i)
+int  evalpremises(OW_Project *m, int i)
 /*
 **----------------------------------------------------------
 **    Checks if premises to rule i are true
@@ -595,7 +595,7 @@ int  evalpremises(OW_Model *m, int i)
 }
 
  
-int  checkpremise(OW_Model *m, struct Premise *p)
+int  checkpremise(OW_Project *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if a particular premise is true
@@ -611,7 +611,7 @@ int  checkpremise(OW_Model *m, struct Premise *p)
 }
 
 
-int  checktime(OW_Model *m, struct Premise *p)
+int  checktime(OW_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on system time holds
@@ -666,7 +666,7 @@ int  checktime(OW_Model *m, struct Premise *p)
 }
 
 
-int  checkstatus(OW_Model *m, struct Premise *p)
+int  checkstatus(OW_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on link status holds
@@ -693,7 +693,7 @@ int  checkstatus(OW_Model *m, struct Premise *p)
 }
 
 
-int  checkvalue(OW_Model *m, struct Premise *p)
+int  checkvalue(OW_Project *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if numerical condition on a variable is true.
@@ -774,7 +774,7 @@ int  checkvalue(OW_Model *m, struct Premise *p)
 }
 
 
-void  updateactlist(OW_Model *m, int i, struct Action *actions)
+void  updateactlist(OW_Project *m, int i, struct Action *actions)
 /*
 **---------------------------------------------------
 **    Adds rule's actions to action list
@@ -806,7 +806,7 @@ void  updateactlist(OW_Model *m, int i, struct Action *actions)
 }
 
 
-int  checkaction(OW_Model *m, int i, struct Action *a)
+int  checkaction(OW_Project *m, int i, struct Action *a)
 /*
 **-----------------------------------------------------------
 **    Checks if an action is already on the Action List
@@ -842,7 +842,7 @@ int  checkaction(OW_Model *m, int i, struct Action *a)
 }
 
 
-int  takeactions(OW_Model *m)
+int  takeactions(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **    Implements actions on action list
@@ -919,7 +919,7 @@ int  takeactions(OW_Model *m)
 }
 
 
-void  ruleerrmsg(OW_Model *m, int err)
+void  ruleerrmsg(OW_Project *m, int err)
 /*
 **-----------------------------------------------------------
 **    Reports error message

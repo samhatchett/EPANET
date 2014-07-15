@@ -31,7 +31,7 @@ AUTHOR:     L. Rossman
 /* Macro to write x[1] to x[n] to file OutFile: */
 #define   FSAVE(n)  (fwrite(x+1,sizeof(REAL4),(n),OutFile))
 
-int  savenetdata(OW_Model *m)
+int  savenetdata(OW_Project *m)
 /*
 **---------------------------------------------------------------
 **   Input:   none
@@ -145,7 +145,7 @@ int  savenetdata(OW_Model *m)
 }
 
 
-int  savehyd(OW_Model *m, long *htime)
+int  savehyd(OW_Project *m, long *htime)
 /*
 **--------------------------------------------------------------
 **   Input:   *htime   = current time                             
@@ -209,7 +209,7 @@ int  savehyd(OW_Model *m, long *htime)
 }                        /* End of savehyd */
 
 
-int  savehydstep(OW_Model *m, long *hydstep)
+int  savehydstep(OW_Project *m, long *hydstep)
 /*
 **--------------------------------------------------------------
 **   Input:   *hydstep = next time step                           
@@ -229,7 +229,7 @@ int  savehydstep(OW_Model *m, long *hydstep)
 }
 
 
-int  saveenergy(OW_Model *m)
+int  saveenergy(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                             
@@ -293,7 +293,7 @@ int  saveenergy(OW_Model *m)
 }
 
 
-int  readhyd(OW_Model *m, long *hydtime)
+int  readhyd(OW_Project *m, long *hydtime)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -347,7 +347,7 @@ int  readhyd(OW_Model *m, long *hydtime)
 }                        /* End of readhyd */
 
 
-int  readhydstep(OW_Model *m, long *hydstep)
+int  readhydstep(OW_Project *m, long *hydstep)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -364,7 +364,7 @@ int  readhydstep(OW_Model *m, long *hydstep)
 }                        /* End of readhydstep */
 
 
-int  saveoutput(OW_Model *m)
+int  saveoutput(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -386,7 +386,7 @@ int  saveoutput(OW_Model *m)
 }                        /* End of saveoutput */
 
 
-int  nodeoutput(OW_Model *m, int j, REAL4 *x, double ucf)
+int  nodeoutput(OW_Project *m, int j, REAL4 *x, double ucf)
 /*
 **--------------------------------------------------------------
 **   Input:   j   = type of node variable                         
@@ -429,7 +429,7 @@ int  nodeoutput(OW_Model *m, int j, REAL4 *x, double ucf)
 }                        /* End of nodeoutput */
 
 
-int  linkoutput(OW_Model *m, int j, REAL4 *x, double ucf)
+int  linkoutput(OW_Project *m, int j, REAL4 *x, double ucf)
 /*
 **----------------------------------------------------------------
 **   Input:   j   = type of link variable                         
@@ -542,7 +542,7 @@ int  linkoutput(OW_Model *m, int j, REAL4 *x, double ucf)
 }                        /* End of linkoutput */
 
 
-int  savefinaloutput(OW_Model *m)
+int  savefinaloutput(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                          
@@ -582,7 +582,7 @@ int  savefinaloutput(OW_Model *m)
 }
 
 
-int  savetimestat(OW_Model *m, REAL4 *x, char objtype)
+int  savetimestat(OW_Project *m, REAL4 *x, char objtype)
 /*
 **--------------------------------------------------------------
 **   Input:   *x  = buffer for node values
@@ -740,7 +740,7 @@ int  savetimestat(OW_Model *m, REAL4 *x, char objtype)
 }
 
 
-int  savenetreacts(OW_Model *m, double wbulk, double wwall, double wtank, double wsource)
+int  savenetreacts(OW_Project *m, double wbulk, double wwall, double wtank, double wsource)
 /*
 **-----------------------------------------------------
 **  Writes average network-wide reaction rates (in
@@ -762,7 +762,7 @@ int  savenetreacts(OW_Model *m, double wbulk, double wwall, double wtank, double
 }
 
 
-int  saveepilog(OW_Model *m)
+int  saveepilog(OW_Project *m)
 /*
 **-------------------------------------------------
 **  Writes Nperiods, Warnflag, & Magic Number to 

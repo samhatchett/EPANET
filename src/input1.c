@@ -67,7 +67,7 @@ extern char *Fldname[];      /* Defined in enumstxt.h in EPANET.C      */
 extern char *RptFlowUnitsTxt[];
 
 
-int  getdata(OW_Model *m)
+int  getdata(OW_Project *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none
@@ -89,7 +89,7 @@ int  getdata(OW_Model *m)
 }                       /*  End of getdata  */
 
 
-void  setdefaults(OW_Model *m)
+void  setdefaults(OW_Project *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none
@@ -157,7 +157,7 @@ void  setdefaults(OW_Model *m)
 }                       /*  End of setdefaults  */
 
 
-void  initreport(OW_Model *m)
+void  initreport(OW_Project *m)
 /*
 **----------------------------------------------------------------------
 **  Input:   none
@@ -196,7 +196,7 @@ void  initreport(OW_Model *m)
 }
 
 
-void  adjustdata(OW_Model *m)
+void  adjustdata(OW_Project *m)
 /*
 **----------------------------------------------------------------------
 **  Input:   none
@@ -346,7 +346,7 @@ void  adjustdata(OW_Model *m)
 }                       /*  End of adjustdata  */
 
 
-int  inittanks(OW_Model *m)
+int  inittanks(OW_Project *m)
 /*
 **---------------------------------------------------------------
 **  Input:   none
@@ -416,7 +416,7 @@ int  inittanks(OW_Model *m)
 }                       /* End of inittanks */
 
 
-void  initunits(OW_Model *m)
+void  initunits(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -529,7 +529,7 @@ void  initunits(OW_Model *m)
 }                       /*  End of initunits  */
 
 
-void  convertunits(OW_Model *m)
+void  convertunits(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none

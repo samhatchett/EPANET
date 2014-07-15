@@ -259,7 +259,7 @@ int DLLEXPORT ENopen(char *f1, char *f2, char *f3)
 */
 {
   int err;
-  OW_Model *newModel;
+  OW_Project *newModel;
   err = OW_open(f1, &newModel, f2, f3);
   en_defaultModel = newModel;
   return err;
@@ -1184,7 +1184,7 @@ int DLLEXPORT ENgetaveragepatternvalue(int index, EN_API_FLOAT_TYPE *value)
 */
 
 
-int   openfiles(OW_Model *m, char *f1, char *f2, char *f3)
+int   openfiles(OW_Project *m, char *f1, char *f2, char *f3)
 /*----------------------------------------------------------------
 **  Input:   f1 = pointer to name of input file                  
 **           f2 = pointer to name of report file                 
@@ -1235,7 +1235,7 @@ int   openfiles(OW_Model *m, char *f1, char *f2, char *f3)
 }                                       /* End of openfiles */
 
 
-int  openhydfile(OW_Model *m)
+int  openhydfile(OW_Project *m)
 /*----------------------------------------------------------------
 ** Input:   none
 ** Output:  none
@@ -1321,7 +1321,7 @@ int  openhydfile(OW_Model *m)
 }
 
 
-int  openoutfile(OW_Model *m)
+int  openoutfile(OW_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -1395,7 +1395,7 @@ int  openoutfile(OW_Model *m)
 */
 
 
-void initpointers(OW_Model *m)
+void initpointers(OW_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -1444,7 +1444,7 @@ void initpointers(OW_Model *m)
 }
 
 
-int  allocdata(OW_Model *m)
+int  allocdata(OW_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -1592,7 +1592,7 @@ void  freeFloatlist(SFloatlist *f)
 }
 
 
-void  freedata(OW_Model *m)
+void  freedata(OW_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -1769,7 +1769,7 @@ double  interp(int n, double x[], double y[], double xx)
 }                       /* End of interp */
 
 
-int   findnode(OW_Model *m, char *id)
+int   findnode(OW_Project *m, char *id)
 /*----------------------------------------------------------------
 **  Input:   id = node ID
 **  Output:  none
@@ -1782,7 +1782,7 @@ int   findnode(OW_Model *m, char *id)
 }
 
 
-int  findlink(OW_Model *m, char *id)
+int  findlink(OW_Project *m, char *id)
 /*----------------------------------------------------------------
 **  Input:   id = link ID
 **  Output:  none
@@ -1862,7 +1862,7 @@ void geterrmsg(int errcode, char *msgOut)
 }
 
 
-void  errmsg(OW_Model *m, int errcode)
+void  errmsg(OW_Project *m, int errcode)
 /*----------------------------------------------------------------
 **  Input:   errcode = error code
 **  Output:  none
@@ -1927,11 +1927,11 @@ void writewin(char *s)
 //   open water analytics expanded methods below                   //
 // ================================================================//
 
-int  DLLEXPORT OW_open(char *inpFile, OW_Model **modelOut, char *rptFile, char *binOutFile)
+int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char *binOutFile)
 {
   
   *modelOut = 0;
-  OW_Model *m = calloc(1, sizeof(OW_Model));
+  OW_Project *m = calloc(1, sizeof(OW_Project));
   
   
   int  errcode = 0;
@@ -2011,14 +2011,14 @@ int  DLLEXPORT OW_open(char *inpFile, OW_Model **modelOut, char *rptFile, char *
   return(errcode);
 }
 
-int  DLLEXPORT OW_saveinpfile(OW_Model *m, char *filename)
+int  DLLEXPORT OW_saveinpfile(OW_Project *m, char *filename)
 {
   if (!m->Openflag) return(102);
   return(saveinpfile(m, filename));
 }
 
 
-int  DLLEXPORT OW_close(OW_Model *m)
+int  DLLEXPORT OW_close(OW_Project *m)
 {
   if (m->Openflag)
     writetime(m,FMT105);
@@ -2070,7 +2070,7 @@ int  DLLEXPORT OW_close(OW_Model *m)
 
 
 
-int  DLLEXPORT OW_solveH(OW_Model *m)
+int  DLLEXPORT OW_solveH(OW_Project *m)
 {
   int  errcode;
   long t, tstep;
@@ -2118,7 +2118,7 @@ int  DLLEXPORT OW_solveH(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_saveH(OW_Model *m)
+int  DLLEXPORT OW_saveH(OW_Project *m)
 {
   char tmpflag;
   int  errcode;
@@ -2144,7 +2144,7 @@ int  DLLEXPORT OW_saveH(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_openH(OW_Model *m)
+int  DLLEXPORT OW_openH(OW_Project *m)
 {
   int  errcode = 0;
   
@@ -2172,7 +2172,7 @@ int  DLLEXPORT OW_openH(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_initH(OW_Model *m, int flag)
+int  DLLEXPORT OW_initH(OW_Project *m, int flag)
 {
   int errcode = 0;
   int sflag, fflag;
@@ -2208,7 +2208,7 @@ int  DLLEXPORT OW_initH(OW_Model *m, int flag)
 }
 
 
-int  DLLEXPORT OW_runH(OW_Model *m, long *t)
+int  DLLEXPORT OW_runH(OW_Project *m, long *t)
 {
   int errcode;
   *t = 0;
@@ -2223,7 +2223,7 @@ int  DLLEXPORT OW_runH(OW_Model *m, long *t)
 }
 
 
-int  DLLEXPORT OW_nextH(OW_Model *m, long *tstep)
+int  DLLEXPORT OW_nextH(OW_Project *m, long *tstep)
 {
   int errcode;
   *tstep = 0;
@@ -2239,7 +2239,7 @@ int  DLLEXPORT OW_nextH(OW_Model *m, long *tstep)
 }
 
 
-int  DLLEXPORT OW_closeH(OW_Model *m)
+int  DLLEXPORT OW_closeH(OW_Project *m)
 {
   if (!m->Openflag) return(102);
   closehyd(m);
@@ -2248,7 +2248,7 @@ int  DLLEXPORT OW_closeH(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_savehydfile(OW_Model *m, char *filename)
+int  DLLEXPORT OW_savehydfile(OW_Project *m, char *filename)
 {
   
   FILE *f;
@@ -2270,7 +2270,7 @@ int  DLLEXPORT OW_savehydfile(OW_Model *m, char *filename)
 }
 
 
-int  DLLEXPORT OW_usehydfile(OW_Model *m, char *filename)
+int  DLLEXPORT OW_usehydfile(OW_Project *m, char *filename)
 {
   int errcode;
   
@@ -2296,7 +2296,7 @@ int  DLLEXPORT OW_usehydfile(OW_Model *m, char *filename)
 
 
 
-int  DLLEXPORT OW_solveQ(OW_Model *m)
+int  DLLEXPORT OW_solveQ(OW_Project *m)
 {
   int  errcode;
   long t, tstep;
@@ -2351,7 +2351,7 @@ int  DLLEXPORT OW_solveQ(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_openQ(OW_Model *m)
+int  DLLEXPORT OW_openQ(OW_Project *m)
 {
   int errcode = 0;
   
@@ -2376,7 +2376,7 @@ int  DLLEXPORT OW_openQ(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_initQ(OW_Model *m, int saveflag)
+int  DLLEXPORT OW_initQ(OW_Project *m, int saveflag)
 {
   int errcode = 0;
   if (!m->OpenQflag) return(105);
@@ -2394,7 +2394,7 @@ int  DLLEXPORT OW_initQ(OW_Model *m, int saveflag)
 }
 
 
-int  DLLEXPORT OW_runQ(OW_Model *m, long *t)
+int  DLLEXPORT OW_runQ(OW_Project *m, long *t)
 {
   int errcode;
   *t = 0;
@@ -2409,7 +2409,7 @@ int  DLLEXPORT OW_runQ(OW_Model *m, long *t)
 }
 
 
-int  DLLEXPORT OW_nextQ(OW_Model *m, long *tstep)
+int  DLLEXPORT OW_nextQ(OW_Project *m, long *tstep)
 {
   int errcode;
   *tstep = 0;
@@ -2427,7 +2427,7 @@ int  DLLEXPORT OW_nextQ(OW_Model *m, long *tstep)
 }
 
 
-int  DLLEXPORT OW_stepQ(OW_Model *m, long *tleft)
+int  DLLEXPORT OW_stepQ(OW_Project *m, long *tleft)
 {
   int errcode;
   *tleft = 0;
@@ -2445,7 +2445,7 @@ int  DLLEXPORT OW_stepQ(OW_Model *m, long *tleft)
 }
 
 
-int  DLLEXPORT OW_closeQ(OW_Model *m)
+int  DLLEXPORT OW_closeQ(OW_Project *m)
 {
   if (!m->Openflag) return(102);
   closequal(m);
@@ -2455,7 +2455,7 @@ int  DLLEXPORT OW_closeQ(OW_Model *m)
 
 
 
-int  DLLEXPORT OW_writeline(OW_Model *m, char *line)
+int  DLLEXPORT OW_writeline(OW_Project *m, char *line)
 {
   if (!m->Openflag) return(102);
   writeline(m,line);
@@ -2463,7 +2463,7 @@ int  DLLEXPORT OW_writeline(OW_Model *m, char *line)
 }
 
 
-int  DLLEXPORT OW_report(OW_Model *m)
+int  DLLEXPORT OW_report(OW_Project *m)
 {
   int  errcode;
   
@@ -2479,7 +2479,7 @@ int  DLLEXPORT OW_report(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_resetreport(OW_Model *m)
+int  DLLEXPORT OW_resetreport(OW_Project *m)
 {
   int i;
   if (!m->Openflag) return(102);
@@ -2490,7 +2490,7 @@ int  DLLEXPORT OW_resetreport(OW_Model *m)
 }
 
 
-int  DLLEXPORT OW_setreport(OW_Model *m, char *s)
+int  DLLEXPORT OW_setreport(OW_Project *m, char *s)
 {
   char s1[MAXLINE+1];
   if (!m->Openflag) return(102);
@@ -2502,7 +2502,7 @@ int  DLLEXPORT OW_setreport(OW_Model *m, char *s)
 
 
 
-int  DLLEXPORT OW_getcontrol(OW_Model *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
+int  DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
 {
   double s, lvl;
   
@@ -2544,7 +2544,7 @@ int  DLLEXPORT OW_getcontrol(OW_Model *m, int controlIndex, int *controlType, in
 }
 
 
-int  DLLEXPORT OW_getcount(OW_Model *m, int code, int *count)
+int  DLLEXPORT OW_getcount(OW_Project *m, int code, int *count)
 {
   *count = 0;
   if (!m->Openflag) return(102);
@@ -2563,7 +2563,7 @@ int  DLLEXPORT OW_getcount(OW_Model *m, int code, int *count)
 }
 
 
-int  DLLEXPORT OW_getoption(OW_Model *m, int code, EN_API_FLOAT_TYPE *value)
+int  DLLEXPORT OW_getoption(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
 {
   double v = 0.0;
   *value = 0.0;
@@ -2587,7 +2587,7 @@ int  DLLEXPORT OW_getoption(OW_Model *m, int code, EN_API_FLOAT_TYPE *value)
 }
 
 
-int  DLLEXPORT OW_gettimeparam(OW_Model *m, int code, long *value)
+int  DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
 {
   *value = 0;
   if (!m->Openflag) return(102);
@@ -2614,7 +2614,7 @@ int  DLLEXPORT OW_gettimeparam(OW_Model *m, int code, long *value)
 }
 
 
-int  DLLEXPORT OW_getflowunits(OW_Model *m, int *code)
+int  DLLEXPORT OW_getflowunits(OW_Project *m, int *code)
 {
   *code = -1;
   if (!m->Openflag) return(102);
@@ -2623,7 +2623,7 @@ int  DLLEXPORT OW_getflowunits(OW_Model *m, int *code)
 }
 
 
-int  DLLEXPORT OW_getpatternindex(OW_Model *m, char *id, int *index)
+int  DLLEXPORT OW_getpatternindex(OW_Project *m, char *id, int *index)
 {
   int i;
   *index = 0;
@@ -2641,7 +2641,7 @@ int  DLLEXPORT OW_getpatternindex(OW_Model *m, char *id, int *index)
 }
 
 
-int  DLLEXPORT OW_getpatternid(OW_Model *m, int index, char *id)
+int  DLLEXPORT OW_getpatternid(OW_Project *m, int index, char *id)
 {
   strcpy(id,"");
   if (!m->Openflag) return(102);
@@ -2651,7 +2651,7 @@ int  DLLEXPORT OW_getpatternid(OW_Model *m, int index, char *id)
 }
 
 
-int  DLLEXPORT OW_getpatternlen(OW_Model *m, int index, int *len)
+int  DLLEXPORT OW_getpatternlen(OW_Project *m, int index, int *len)
 {
   if (!m->Openflag) return(102);
   if (index < 1 || index > m->Npats) return(205);
@@ -2660,7 +2660,7 @@ int  DLLEXPORT OW_getpatternlen(OW_Model *m, int index, int *len)
 }
 
 
-int  DLLEXPORT OW_getpatternvalue(OW_Model *m, int index, int period, EN_API_FLOAT_TYPE *value)
+int  DLLEXPORT OW_getpatternvalue(OW_Project *m, int index, int period, EN_API_FLOAT_TYPE *value)
 {
   *value = 0.0;
   if (!m->Openflag) return(102);
@@ -2671,7 +2671,7 @@ int  DLLEXPORT OW_getpatternvalue(OW_Model *m, int index, int period, EN_API_FLO
 }
 
 
-int  DLLEXPORT OW_getaveragepatternvalue(OW_Model *m, int index, EN_API_FLOAT_TYPE *value)
+int  DLLEXPORT OW_getaveragepatternvalue(OW_Project *m, int index, EN_API_FLOAT_TYPE *value)
 {
   *value = 0.0;
   if (!m->Openflag)
@@ -2688,7 +2688,7 @@ int  DLLEXPORT OW_getaveragepatternvalue(OW_Model *m, int index, EN_API_FLOAT_TY
 }
 
 
-int  DLLEXPORT OW_getqualtype(OW_Model *m, int *qualcode, int *tracenode)
+int  DLLEXPORT OW_getqualtype(OW_Project *m, int *qualcode, int *tracenode)
 {
   *tracenode = 0;
   if (!m->Openflag) return(102);
@@ -2719,7 +2719,7 @@ int  DLLEXPORT OW_geterror(int errcode, char *errmsg, int n)
 }
 
 
-int  DLLEXPORT OW_getstatistic(OW_Model *m, int code, EN_API_FLOAT_TYPE* value)
+int  DLLEXPORT OW_getstatistic(OW_Project *m, int code, EN_API_FLOAT_TYPE* value)
 {
   switch (code) {
     case EN_ITERATIONS:
@@ -2736,7 +2736,7 @@ int  DLLEXPORT OW_getstatistic(OW_Model *m, int code, EN_API_FLOAT_TYPE* value)
 
 
 
-int  DLLEXPORT OW_getnodeindex(OW_Model *m, char *id, int *index)
+int  DLLEXPORT OW_getnodeindex(OW_Project *m, char *id, int *index)
 {
   *index = 0;
   if (!m->Openflag) return(102);
@@ -2746,7 +2746,7 @@ int  DLLEXPORT OW_getnodeindex(OW_Model *m, char *id, int *index)
 }
 
 
-int  DLLEXPORT OW_getnodeid(OW_Model *m, int index, char *id)
+int  DLLEXPORT OW_getnodeid(OW_Project *m, int index, char *id)
 {
   strcpy(id,"");
   if (!m->Openflag) return(102);
@@ -2756,7 +2756,7 @@ int  DLLEXPORT OW_getnodeid(OW_Model *m, int index, char *id)
 }
 
 
-int  DLLEXPORT OW_getnodetype(OW_Model *m, int index, int *code)
+int  DLLEXPORT OW_getnodetype(OW_Project *m, int index, int *code)
 {
   *code = -1;
   if (!m->Openflag) return(102);
@@ -2771,7 +2771,7 @@ int  DLLEXPORT OW_getnodetype(OW_Model *m, int index, int *code)
 }
 
 
-int  DLLEXPORT OW_getnodevalue(OW_Model *m, int index, int code, EN_API_FLOAT_TYPE *value)
+int  DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
 {
   int tankIndex = 0;
   int isTank = 0;
@@ -2951,7 +2951,7 @@ int  DLLEXPORT OW_getnodevalue(OW_Model *m, int index, int code, EN_API_FLOAT_TY
 }
 
 
-int  DLLEXPORT OW_getcoord(OW_Model *m, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
+int  DLLEXPORT OW_getcoord(OW_Project *m, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
 {
   *x = m->Coord[index].X[0];
   *y = m->Coord[index].Y[0];
@@ -2960,7 +2960,7 @@ int  DLLEXPORT OW_getcoord(OW_Model *m, int index, EN_API_FLOAT_TYPE *x, EN_API_
 
 
 
-int  DLLEXPORT OW_getnumdemands(OW_Model *m, int nodeIndex, int *numDemands)
+int  DLLEXPORT OW_getnumdemands(OW_Project *m, int nodeIndex, int *numDemands)
 {
   Pdemand d;
 	int n=0;
@@ -2977,7 +2977,7 @@ int  DLLEXPORT OW_getnumdemands(OW_Model *m, int nodeIndex, int *numDemands)
 }
 
 
-int  DLLEXPORT OW_getbasedemand(OW_Model *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand)
+int  DLLEXPORT OW_getbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand)
 {
   Pdemand d;
   int n=1;
@@ -2999,7 +2999,7 @@ int  DLLEXPORT OW_getbasedemand(OW_Model *m, int nodeIndex, int demandIdx, EN_AP
 }
 
 
-int  DLLEXPORT OW_getdemandpattern(OW_Model *m, int nodeIndex, int demandIdx, int *pattIdx)
+int  DLLEXPORT OW_getdemandpattern(OW_Project *m, int nodeIndex, int demandIdx, int *pattIdx)
 {
   Pdemand d;
 	int n=1;
@@ -3020,7 +3020,7 @@ int  DLLEXPORT OW_getdemandpattern(OW_Model *m, int nodeIndex, int demandIdx, in
 
 
 
-int  DLLEXPORT OW_getlinkindex(OW_Model *m, char *id, int *index)
+int  DLLEXPORT OW_getlinkindex(OW_Project *m, char *id, int *index)
 {
   *index = 0;
   if (!m->Openflag) return(102);
@@ -3030,7 +3030,7 @@ int  DLLEXPORT OW_getlinkindex(OW_Model *m, char *id, int *index)
 }
 
 
-int  DLLEXPORT OW_getlinkid(OW_Model *m, int index, char *id)
+int  DLLEXPORT OW_getlinkid(OW_Project *m, int index, char *id)
 {
   strcpy(id,"");
   if (!m->Openflag) return(102);
@@ -3040,7 +3040,7 @@ int  DLLEXPORT OW_getlinkid(OW_Model *m, int index, char *id)
 }
 
 
-int  DLLEXPORT OW_getlinktype(OW_Model *m, int index, int *code)
+int  DLLEXPORT OW_getlinktype(OW_Project *m, int index, int *code)
 {
   *code = -1;
   if (!m->Openflag) return(102);
@@ -3050,7 +3050,7 @@ int  DLLEXPORT OW_getlinktype(OW_Model *m, int index, int *code)
 }
 
 
-int  DLLEXPORT OW_getlinknodes(OW_Model *m, int index, int *node1, int *node2)
+int  DLLEXPORT OW_getlinknodes(OW_Project *m, int index, int *node1, int *node2)
 {
   *node1 = 0;
   *node2 = 0;
@@ -3062,7 +3062,7 @@ int  DLLEXPORT OW_getlinknodes(OW_Model *m, int index, int *node1, int *node2)
 }
 
 
-int  DLLEXPORT OW_getlinkvalue(OW_Model *m, int index, int code, EN_API_FLOAT_TYPE *value)
+int  DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
 {
   double a,h,q, v = 0.0;
   
@@ -3208,7 +3208,7 @@ int  DLLEXPORT OW_getlinkvalue(OW_Model *m, int index, int code, EN_API_FLOAT_TY
 
 
 
-int  DLLEXPORT OW_getcurve(OW_Model *m, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues)
+int  DLLEXPORT OW_getcurve(OW_Project *m, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues)
 {
   int err = 0;
   
@@ -3243,7 +3243,7 @@ int  DLLEXPORT OW_getversion(int *v)
 
 
 
-int  DLLEXPORT OW_setcontrol(OW_Model *m, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level)
+int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level)
 {
   char   status = ACTIVE;
   long   t = 0;
@@ -3316,7 +3316,7 @@ int  DLLEXPORT OW_setcontrol(OW_Model *m, int cindex, int ctype, int lindex, EN_
 }
 
 
-int  DLLEXPORT OW_setnodevalue(OW_Model *m, int index, int code, EN_API_FLOAT_TYPE v)
+int  DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
 {
   int  j;
   Pdemand demand;
@@ -3536,7 +3536,7 @@ int  DLLEXPORT OW_setnodevalue(OW_Model *m, int index, int code, EN_API_FLOAT_TY
 }
 
 
-int  DLLEXPORT OW_setlinkvalue(OW_Model *m, int index, int code, EN_API_FLOAT_TYPE v)
+int  DLLEXPORT OW_setlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
 {
   char  s;
   double r, value = v;
@@ -3648,7 +3648,7 @@ int  DLLEXPORT OW_setlinkvalue(OW_Model *m, int index, int code, EN_API_FLOAT_TY
 }
 
 
-int  DLLEXPORT OW_addpattern(OW_Model *m, char *id)
+int  DLLEXPORT OW_addpattern(OW_Project *m, char *id)
 {
   int i, j, n, err = 0;
   Spattern *tmpPat;
@@ -3710,7 +3710,7 @@ int  DLLEXPORT OW_addpattern(OW_Model *m, char *id)
 }
 
 
-int  DLLEXPORT OW_setpattern(OW_Model *m, int index, EN_API_FLOAT_TYPE *f, int n)
+int  DLLEXPORT OW_setpattern(OW_Project *m, int index, EN_API_FLOAT_TYPE *f, int n)
 {
   int j;
   
@@ -3736,7 +3736,7 @@ int  DLLEXPORT OW_setpattern(OW_Model *m, int index, EN_API_FLOAT_TYPE *f, int n
 }
 
 
-int  DLLEXPORT OW_setpatternvalue(OW_Model *m, int index, int period, EN_API_FLOAT_TYPE value)
+int  DLLEXPORT OW_setpatternvalue(OW_Project *m, int index, int period, EN_API_FLOAT_TYPE value)
 {
   if (!m->Openflag) return(102);
   if (index  <= 0 || index  > m->Npats) return(205);
@@ -3746,7 +3746,7 @@ int  DLLEXPORT OW_setpatternvalue(OW_Model *m, int index, int period, EN_API_FLO
 }
 
 
-int  DLLEXPORT OW_settimeparam(OW_Model *m, int code, long value)
+int  DLLEXPORT OW_settimeparam(OW_Project *m, int code, long value)
 {
   if (!m->Openflag)
     return(102);
@@ -3841,7 +3841,7 @@ int  DLLEXPORT OW_settimeparam(OW_Model *m, int code, long value)
 }
 
 
-int  DLLEXPORT OW_setoption(OW_Model *m, int code, EN_API_FLOAT_TYPE v)
+int  DLLEXPORT OW_setoption(OW_Project *m, int code, EN_API_FLOAT_TYPE v)
 {
   int   i,j;
   double Ke,n,ucf, value = v;
@@ -3882,7 +3882,7 @@ int  DLLEXPORT OW_setoption(OW_Model *m, int code, EN_API_FLOAT_TYPE v)
 }
 
 
-int  DLLEXPORT OW_setstatusreport(OW_Model *m, int code)
+int  DLLEXPORT OW_setstatusreport(OW_Project *m, int code)
 {
   int errcode = 0;
   if (code >= 0 && code <= 2) {
@@ -3895,7 +3895,7 @@ int  DLLEXPORT OW_setstatusreport(OW_Model *m, int code)
 }
 
 
-int  DLLEXPORT OW_setqualtype(OW_Model *m, int qualcode, char *chemname, char *chemunits, char *tracenode)
+int  DLLEXPORT OW_setqualtype(OW_Project *m, int qualcode, char *chemname, char *chemunits, char *tracenode)
 {
   /*** Updated 3/1/01 ***/
   double ccf = 1.0;
@@ -3943,7 +3943,7 @@ int  DLLEXPORT OW_setqualtype(OW_Model *m, int qualcode, char *chemname, char *c
 }
 
 
-int  DLLEXPORT OW_getqualinfo(OW_Model *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
+int  DLLEXPORT OW_getqualinfo(OW_Project *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
   OW_getqualtype(m, qualcode, tracenode);
   strncpy(chemname, m->ChemName,MAXID);
@@ -3952,7 +3952,7 @@ int  DLLEXPORT OW_getqualinfo(OW_Model *m, int *qualcode, char *chemname, char *
 }
 
 
-int  DLLEXPORT OW_setbasedemand(OW_Model *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand)
+int  DLLEXPORT OW_setbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand)
 {
   Pdemand d;
   int n=1;

@@ -48,7 +48,7 @@ extern char *Fldname[];
 //extern int       Ntokens;
 
 
-int  juncdata(OW_Model *m)
+int  juncdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -117,7 +117,7 @@ int  juncdata(OW_Model *m)
 }                        /* end of juncdata */
 
 
-int  tankdata(OW_Model *m)
+int  tankdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -230,7 +230,7 @@ int  tankdata(OW_Model *m)
 }                        /* end of tankdata */
 
 
-int  pipedata(OW_Model *m)
+int  pipedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -324,7 +324,7 @@ int  pipedata(OW_Model *m)
 }                        /* end of pipedata */
 
 
-int  pumpdata(OW_Model *mod)
+int  pumpdata(OW_Project *mod)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -445,7 +445,7 @@ int  pumpdata(OW_Model *mod)
 }                        /* end of pumpdata */
 
 
-int  valvedata(OW_Model *m)
+int  valvedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -539,7 +539,7 @@ int  valvedata(OW_Model *m)
 }                        /* end of valvedata */
 
 
-int  patterndata(OW_Model *m)
+int  patterndata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -581,7 +581,7 @@ int  patterndata(OW_Model *m)
 }                        /* end of patterndata */
 
 
-int  curvedata(OW_Model *m)
+int  curvedata(OW_Project *m)
 /*
 **------------------------------------------------------
 **  Input:   none                                        
@@ -630,7 +630,7 @@ int  curvedata(OW_Model *m)
    return(0);
 }
 
-int  coordata(OW_Model *m)
+int  coordata(OW_Project *m)
 /*
  **--------------------------------------------------------------
  **  Input:   none
@@ -687,7 +687,7 @@ int  coordata(OW_Model *m)
   
 }                        /* end of coordata */
 
-int  demanddata(OW_Model *m)
+int  demanddata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -762,7 +762,7 @@ int  demanddata(OW_Model *m)
 }                        /* end of demanddata */
 
 
-int  controldata(OW_Model *m)
+int  controldata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -875,7 +875,7 @@ int  controldata(OW_Model *m)
 }                        /* end of controldata */
 
 
-int  sourcedata(OW_Model *m)
+int  sourcedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -929,7 +929,7 @@ int  sourcedata(OW_Model *m)
 }                        /* end of sourcedata */
 
 
-int  emitterdata(OW_Model *m)
+int  emitterdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -957,7 +957,7 @@ int  emitterdata(OW_Model *m)
 }
 
 
-int  qualdata(OW_Model *m)
+int  qualdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1012,7 +1012,7 @@ int  qualdata(OW_Model *m)
 }                        /* end of qualdata */
 
 
-int  reactdata(OW_Model *m)
+int  reactdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1151,7 +1151,7 @@ int  reactdata(OW_Model *m)
 }                        /* end of reactdata */
 
 
-int  mixingdata(OW_Model *m)
+int  mixingdata(OW_Project *m)
 /*
 **-------------------------------------------------------------
 **  Input:   none                                               
@@ -1190,7 +1190,7 @@ int  mixingdata(OW_Model *m)
 }
 
 
-int  statusdata(OW_Model *m)
+int  statusdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1259,7 +1259,7 @@ int  statusdata(OW_Model *m)
 }              /* end of statusdata */
 
 
-int  energydata(OW_Model *m)
+int  energydata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1353,7 +1353,7 @@ int  energydata(OW_Model *m)
 }
 
 
-int  reportdata(OW_Model *m)
+int  reportdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1509,7 +1509,7 @@ int  reportdata(OW_Model *m)
 }                        /* end of reportdata */
 
 
-int  timedata(OW_Model *m)
+int  timedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1592,7 +1592,7 @@ int  timedata(OW_Model *m)
 }                        /* end of timedata */
 
 
-int  optiondata(OW_Model *m)
+int  optiondata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1610,7 +1610,7 @@ int  optiondata(OW_Model *m)
 }                        /* end of optiondata */
 
 
-int  optionchoice(OW_Model *m, int n)
+int  optionchoice(OW_Project *m, int n)
 /*
 **--------------------------------------------------------------
 **  Input:   n = index of last input token saved in Tok[]          
@@ -1735,7 +1735,7 @@ int  optionchoice(OW_Model *m, int n)
 }                        /* end of optionchoice */
 
 
-int  optionvalue(OW_Model *m, int n)
+int  optionvalue(OW_Project *m, int n)
 /*
 **------------------------------------------------------------- 
 **  Input:   *line = line read from input file                   
@@ -1829,7 +1829,7 @@ int  optionvalue(OW_Model *m, int n)
 }                        /* end of optionvalue */
 
 
-int  getpumpcurve(OW_Model *m, int n)
+int  getpumpcurve(OW_Project *m, int n)
 /*
 **--------------------------------------------------------
 **  Input:   n = number of parameters for pump curve
@@ -1925,7 +1925,7 @@ int  powercurve(double h0, double h1, double h2, double q1,
 }
 
 
-int  valvecheck(OW_Model *m, int type, int j1, int j2)
+int  valvecheck(OW_Project *m, int type, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **  Input:   type = valve type                                   
@@ -1984,7 +1984,7 @@ int  valvecheck(OW_Model *m, int type, int j1, int j2)
 }                   /* End of valvecheck */
 
 
-void  changestatus(OW_Model *m, int j, char status, double y)
+void  changestatus(OW_Project *m, int j, char status, double y)
 /*
 **--------------------------------------------------------------
 **  Input:   j      = link index                                   

@@ -90,19 +90,19 @@ AUTHOR:     L. Rossman
 //static    alloc_handle_t *SegPool; // Memory pool for water quality segments   //(2.00.11 - LR)
 
 // replacing defs with some real functions that reference the model wrapper.
-int UP_NODE(OW_Model *m, int iLink) {
+int UP_NODE(OW_Project *m, int iLink) {
   return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N1 : m->Link[(iLink)].N2 );
 }
-int DOWN_NODE(OW_Model *m, int iLink) {
+int DOWN_NODE(OW_Project *m, int iLink) {
   return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N2 : m->Link[(iLink)].N1 );
 }
-int LINKVOL(OW_Model *m, int iLink) {
+int LINKVOL(OW_Project *m, int iLink) {
   return ( 0.785398 * m->Link[(iLink)].Len * SQR(m->Link[(iLink)].Diam) );
 }
 
 
 
-int  openqual(OW_Model *m)
+int  openqual(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -150,7 +150,7 @@ int  openqual(OW_Model *m)
    }
 
 
-void  initqual(OW_Model *m)
+void  initqual(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -224,7 +224,7 @@ void  initqual(OW_Model *m)
 }
 
 
-int runqual(OW_Model *m, long *t)
+int runqual(OW_Project *m, long *t)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -284,7 +284,7 @@ int runqual(OW_Model *m, long *t)
 }
 
 
-int nextqual(OW_Model *m, long *tstep)
+int nextqual(OW_Project *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -377,7 +377,7 @@ int nextqual(OW_Model *m, long *tstep)
 }
 
 
-int stepqual(OW_Model *m, long *tleft)
+int stepqual(OW_Project *m, long *tleft)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -417,7 +417,7 @@ int stepqual(OW_Model *m, long *tleft)
 }
 
 
-int closequal(OW_Model *m)
+int closequal(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -448,7 +448,7 @@ int closequal(OW_Model *m)
 }
 
 
-int  gethyd(OW_Model *m, long *hydtime, long *hydstep)
+int  gethyd(OW_Project *m, long *hydtime, long *hydstep)
 /*
 **-----------------------------------------------------------
 **   Input:   none     
@@ -510,7 +510,7 @@ int  gethyd(OW_Model *m, long *hydtime, long *hydstep)
 }
 
 
-char  setReactflag(OW_Model *m)
+char  setReactflag(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **   Input:   none     
@@ -538,7 +538,7 @@ char  setReactflag(OW_Model *m)
 }
 
 
-void  transport(OW_Model *m, long tstep)
+void  transport(OW_Project *m, long tstep)
 /*
 **--------------------------------------------------------------
 **   Input:   tstep = length of current time step     
@@ -569,7 +569,7 @@ void  transport(OW_Model *m, long tstep)
 }
 
 
-void  initsegs(OW_Model *m)
+void  initsegs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -637,7 +637,7 @@ void  initsegs(OW_Model *m)
 }
 
 
-void  reorientsegs(OW_Model *m)
+void  reorientsegs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -684,7 +684,7 @@ void  reorientsegs(OW_Model *m)
 }
 
 
-void  updatesegs(OW_Model *m, long dt)
+void  updatesegs(OW_Project *m, long dt)
 /*
 **-------------------------------------------------------------
 **   Input:   t = time from last WQ segment update     
@@ -735,7 +735,7 @@ void  updatesegs(OW_Model *m, long dt)
 }
 
 
-void  removesegs(OW_Model *m, int k)
+void  removesegs(OW_Project *m, int k)
 /*
 **-------------------------------------------------------------
 **   Input:   k = link index     
@@ -757,7 +757,7 @@ void  removesegs(OW_Model *m, int k)
 }
 
 
-void  addseg(OW_Model *m, int k, double v, double c)
+void  addseg(OW_Project *m, int k, double v, double c)
 /*
 **-------------------------------------------------------------
 **   Input:   k = link segment
@@ -799,7 +799,7 @@ void  addseg(OW_Model *m, int k, double v, double c)
 }
 
 
-void accumulate(OW_Model *m, long dt)
+void accumulate(OW_Project *m, long dt)
 /*
 **-------------------------------------------------------------
 **   Input:   dt = current WQ time step
@@ -915,7 +915,7 @@ void accumulate(OW_Model *m, long dt)
 }
 
 
-void updatenodes(OW_Model *m, long dt)
+void updatenodes(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -961,7 +961,7 @@ void updatenodes(OW_Model *m, long dt)
 }
 
 
-void sourceinput(OW_Model *m, long dt)
+void sourceinput(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -1082,7 +1082,7 @@ void sourceinput(OW_Model *m, long dt)
 }
 
 
-void release(OW_Model *m, long dt)
+void release(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------
 **   Input:   dt = current WQ time step
@@ -1139,7 +1139,7 @@ void release(OW_Model *m, long dt)
 }
 
 
-void  updatesourcenodes(OW_Model *m, long dt)
+void  updatesourcenodes(OW_Project *m, long dt)
 /*
 **---------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -1184,7 +1184,7 @@ void  updatesourcenodes(OW_Model *m, long dt)
 }
 
 
-void  updatetanks(OW_Model *m, long dt)
+void  updatetanks(OW_Project *m, long dt)
 /*
 **---------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -1255,7 +1255,7 @@ void  updatetanks(OW_Model *m, long dt)
 
 
 ////  New version of tankmix1  ////                                            //(2.00.12 - LR)
-void  tankmix1(OW_Model *m, int i, long dt)
+void  tankmix1(OW_Project *m, int i, long dt)
 /*
 **---------------------------------------------
 **   Input:   i = tank index
@@ -1302,7 +1302,7 @@ void  tankmix1(OW_Model *m, int i, long dt)
 
 /*** Updated 10/25/00 ***/
 ////  New version of tankmix2  ////                                            //(2.00.12 - LR) 
-void  tankmix2(OW_Model *m, int i, long dt)
+void  tankmix2(OW_Project *m, int i, long dt)
 /*
 **------------------------------------------------
 **   Input:   i = tank index
@@ -1399,7 +1399,7 @@ void  tankmix2(OW_Model *m, int i, long dt)
 }
 
 
-void  tankmix3(OW_Model *m, int i, long dt)
+void  tankmix3(OW_Project *m, int i, long dt)
 /*
 **----------------------------------------------------------
 **   Input:   i = tank index
@@ -1502,7 +1502,7 @@ void  tankmix3(OW_Model *m, int i, long dt)
 }   
 
 
-void  tankmix4(OW_Model *m, int i, long dt)
+void  tankmix4(OW_Project *m, int i, long dt)
 /*
 **----------------------------------------------------------
 **   Input:   i = tank index
@@ -1614,7 +1614,7 @@ void  tankmix4(OW_Model *m, int i, long dt)
 }         
 
 
-double  sourcequal(OW_Model *m, Psource source)
+double  sourcequal(OW_Project *m, Psource source)
 /*
 **--------------------------------------------------------------
 **   Input:   j = source index
@@ -1643,7 +1643,7 @@ double  sourcequal(OW_Model *m, Psource source)
 }
 
 
-double  avgqual(OW_Model *m, int k)
+double  avgqual(OW_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index
@@ -1671,7 +1671,7 @@ double  avgqual(OW_Model *m, int k)
 }
 
 
-void  ratecoeffs(OW_Model *m)
+void  ratecoeffs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -1693,7 +1693,7 @@ void  ratecoeffs(OW_Model *m)
 }                         /* End of ratecoeffs */
 
 
-double piperate(OW_Model *m, int k)
+double piperate(OW_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -1754,7 +1754,7 @@ double piperate(OW_Model *m, int k)
 }                         /* End of piperate */
 
 
-double  pipereact(OW_Model *m, int k, double c, double v, long dt)
+double  pipereact(OW_Project *m, int k, double c, double v, long dt)
 /*
 **------------------------------------------------------------
 **   Input:   k = link index
@@ -1797,7 +1797,7 @@ double  pipereact(OW_Model *m, int k, double c, double v, long dt)
 }
 
 
-double  tankreact(OW_Model *m, double c, double v, double kb, long dt)
+double  tankreact(OW_Project *m, double c, double v, double kb, long dt)
 /*
 **-------------------------------------------------------
 **   Input:   c = current WQ in tank
@@ -1831,7 +1831,7 @@ double  tankreact(OW_Model *m, double c, double v, double kb, long dt)
 }
    
 
-double  bulkrate(OW_Model *m, double c, double kb, double order)
+double  bulkrate(OW_Project *m, double c, double kb, double order)
 /*
 **-----------------------------------------------------------
 **   Input:   c = current WQ concentration
@@ -1877,7 +1877,7 @@ double  bulkrate(OW_Model *m, double c, double kb, double order)
 }
 
 
-double  wallrate(OW_Model *m, double c, double d, double kw, double kf)
+double  wallrate(OW_Project *m, double c, double d, double kw, double kf)
 /*
 **------------------------------------------------------------
 **   Input:   c = current WQ concentration

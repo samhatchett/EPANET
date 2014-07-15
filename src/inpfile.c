@@ -49,7 +49,7 @@ extern char *RptFlagTxt[];
 extern char *SectTxt[];
 
 
-void  saveauxdata(OW_Model *m, FILE *f)                                                     //(2.00.12 - LR)
+void  saveauxdata(OW_Project *m, FILE *f)                                                     //(2.00.12 - LR)
 /*
 ------------------------------------------------------------
   Writes auxilary data from original input file to new file.
@@ -105,7 +105,7 @@ void  saveauxdata(OW_Model *m, FILE *f)                                         
 
 ////  This function was heavily modified.  ////                                //(2.00.12 - LR)
 
-int  saveinpfile(OW_Model *m, char *fname)
+int  saveinpfile(OW_Project *m, char *fname)
 /*
 -------------------------------------------------
   Writes network data to text file.

@@ -544,7 +544,7 @@ typedef struct {
 
 /***** MODEL STRUCT ******/
 
-struct OW_Model {
+struct OW_Project {
   /* Array pointers not allocated and freed in same routine */
   
   double *PipeRateCoeff,        /* Pipe reaction rate           */
