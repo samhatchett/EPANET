@@ -12,8 +12,10 @@ DATE:       5/30/00
             6/24/02
             8/15/07    (2.00.11)
             2/14/08    (2.00.12)
+            2014-07-10 (2.1)
 AUTHOR:     L. Rossman
             US EPA - NRMRL
+            Also, Jim Uber, Feng Shang, Sam Hatchett...
 
 EPANET performs extended period hydraulic and water quality analysis of
 looped, pressurized piping networks. The program consists of the

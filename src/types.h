@@ -40,9 +40,9 @@ typedef  int          INT4;                                                    /
 -----------------------------
 */
 /*** Updated ***/
-#define   CODEVERSION        20100
+#define   CODEVERSION        20100 // 2.01.00
 #define   MAGICNUMBER        516114521
-#define   VERSION            200
+#define   VERSION            200 // used for binary file compatibility
 #define   EOFMARK            0x1A  /* Use 0x04 for UNIX systems */
 #define   MAXTITLE  3        /* Max. # title lines                     */
 #define   MAXID     31       /* Max. # characters in ID name           */      //(2.00.11 - LR)
