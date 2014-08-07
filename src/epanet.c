@@ -1548,7 +1548,9 @@ int  allocdata(OW_Project *m)
    }
 
 /* Allocate memory for rule base (see RULES.C) */
-   if (!errcode) errcode = allocrules(m);
+   if (!errcode) {
+     errcode = allocrules(m);
+   }
    return(errcode);
 }                                       /* End of allocdata */
 
@@ -1627,7 +1629,9 @@ void  freedata(OW_Project *m)
          }
       /* Free memory used for WQ source data */
          source = m->Node[j].S;
-         if (source != NULL) free(source);
+         if (source != NULL) {
+           free(source);
+         }
       }
       free(m->Node);
     }
@@ -1658,6 +1662,15 @@ void  freedata(OW_Project *m)
        }
        free(m->Curve);
     }
+  
+  // free coordinates
+  if (m->Coord != NULL) {
+    for (j = 0; j <= m->MaxCoords; j++) {
+      free(m->Coord[j].X);
+      free(m->Coord[j].Y);
+    }
+    free(m->Coord);
+  }
 
 /* Free memory for rule base (see RULES.C) */
     freerules(m);
@@ -1665,6 +1678,8 @@ void  freedata(OW_Project *m)
 /* Free hash table memory */
     if (m->NodeHashTable != NULL) ENHashTableFree(m->NodeHashTable);
     if (m->LinkHashTable != NULL) ENHashTableFree(m->LinkHashTable);
+  
+  return;
 }
 
 
