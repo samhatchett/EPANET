@@ -2035,6 +2035,9 @@ int  DLLEXPORT OW_saveinpfile(OW_Project *m, char *filename)
 
 int  DLLEXPORT OW_close(OW_Project *m)
 {
+  if (!m) {
+    return 0;
+  }
   if (m->Openflag)
     writetime(m,FMT105);
   
