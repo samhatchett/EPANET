@@ -40,6 +40,7 @@ Linsolve() solves the linearized system of hydraulic equations.
 #include <math.h>
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern
@@ -47,7 +48,7 @@ Linsolve() solves the linearized system of hydraulic equations.
 
 
 
-int  createsparse(Model *m)
+int  createsparse(OW_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -63,8 +64,8 @@ int  createsparse(Model *m)
    if (errcode) return(errcode);
 
    /* Build node-link adjacency lists with parallel links removed. */
-   m->Degree = (int *) calloc(m->Nnodes+1, sizeof(int));
-   ERRCODE(MEMCHECK(m->Degree));
+   m->hydraulics.solver.Degree = (int *) calloc(m->Nnodes+1, sizeof(int));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Degree));
    ERRCODE(buildlists(m, TRUE));
    if (!errcode)
    {
@@ -94,12 +95,12 @@ int  createsparse(Model *m)
    ERRCODE(buildlists(m, FALSE));
 
    /* Free allocated memory */
-   free(m->Degree);
+   free(m->hydraulics.solver.Degree);
    return(errcode);
 }                        /* End of createsparse */
 
 
-int  allocsparse(Model *m)
+int  allocsparse(OW_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                              
@@ -110,18 +111,18 @@ int  allocsparse(Model *m)
 {
    int errcode = 0;
    m->Adjlist = (Padjlist *) calloc(m->Nnodes+1,  sizeof(Padjlist));
-   m->Order  = (int *)   calloc(m->Nnodes+1,  sizeof(int));
-   m->Row    = (int *)   calloc(m->Nnodes+1,  sizeof(int));
-   m->Ndx    = (int *)   calloc(m->Nlinks+1,  sizeof(int));
+   m->hydraulics.solver.Order  = (int *)   calloc(m->Nnodes+1,  sizeof(int));
+   m->hydraulics.solver.Row    = (int *)   calloc(m->Nnodes+1,  sizeof(int));
+   m->hydraulics.solver.Ndx    = (int *)   calloc(m->Nlinks+1,  sizeof(int));
    ERRCODE(MEMCHECK(m->Adjlist));
-   ERRCODE(MEMCHECK(m->Order));
-   ERRCODE(MEMCHECK(m->Row));
-   ERRCODE(MEMCHECK(m->Ndx));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Order));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Row));
+   ERRCODE(MEMCHECK(m->hydraulics.solver.Ndx));
    return(errcode);
 }
 
 
-void  freesparse(Model *m)
+void  freesparse(OW_Project *m)
 /*
 **----------------------------------------------------------------
 ** Input:   None                                                
@@ -132,16 +133,16 @@ void  freesparse(Model *m)
 {
    freelists(m);
    free(m->Adjlist);
-   free(m->Order);
-   free(m->Row);
-   free(m->Ndx);
-   free(m->XLNZ);
-   free(m->NZSUB);
-   free(m->LNZ); 
+   free(m->hydraulics.solver.Order);
+   free(m->hydraulics.solver.Row);
+   free(m->hydraulics.solver.Ndx);
+   free(m->hydraulics.solver.XLNZ);
+   free(m->hydraulics.solver.NZSUB);
+   free(m->hydraulics.solver.LNZ);
 }                        /* End of freesparse */
 
 
-int  buildlists(Model *m, int paraflag)
+int  buildlists(OW_Project *m, int paraflag)
 /*
 **--------------------------------------------------------------
 ** Input:   paraflag = TRUE if list marks parallel links      
@@ -184,7 +185,7 @@ int  buildlists(Model *m, int paraflag)
 }                        /* End of buildlists */
 
 
-int  paralink(Model *m, int i, int j, int k)
+int  paralink(OW_Project *m, int i, int j, int k)
 /*
 **--------------------------------------------------------------
 ** Input:   i = index of start node of link                    
@@ -201,16 +202,16 @@ int  paralink(Model *m, int i, int j, int k)
    {
       if (alink->node == j)     /* Link || to k (same end nodes) */
       {
-         m->Ndx[k] = alink->link;  /* Assign Ndx entry to this link */
+         m->hydraulics.solver.Ndx[k] = alink->link;  /* Assign Ndx entry to this link */
          return(1);
       }
    }
-   m->Ndx[k] = k;                  /* Ndx entry if link not parallel */
+   m->hydraulics.solver.Ndx[k] = k;                  /* Ndx entry if link not parallel */
    return(0);
 }                        /* End of paralink */
 
 
-void  xparalinks(Model *m)
+void  xparalinks(OW_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -255,7 +256,7 @@ void  xparalinks(Model *m)
 }                        /* End of xparalinks */
 
 
-void  freelists(Model *m)
+void  freelists(OW_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -278,7 +279,7 @@ void  freelists(Model *m)
 }                        /* End of freelists */
 
 
-void  countdegree(Model *m)
+void  countdegree(OW_Project *m)
 /*
 **----------------------------------------------------------------
 ** Input:   none                                                
@@ -289,18 +290,18 @@ void  countdegree(Model *m)
 {
     int   i;
     Padjlist alink;
-    memset(m->Degree,0,(m->Nnodes+1)*sizeof(int));
+    memset(m->hydraulics.solver.Degree,0,(m->Nnodes+1)*sizeof(int));
 
    /* NOTE: For purposes of node re-ordering, Tanks (nodes with  */
    /*       indexes above Njuncs) have zero degree of adjacency. */
 
     for (i=1; i <= m->Njuncs; i++)
         for (alink = m->Adjlist[i]; alink != NULL; alink = alink->next)
-            if (alink->node > 0) m->Degree[i]++;
+            if (alink->node > 0) m->hydraulics.solver.Degree[i]++;
 }
 
 
-int   reordernodes(Model *m)
+int   reordernodes(OW_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -313,27 +314,27 @@ int   reordernodes(Model *m)
    int k, knode, p, n;
    for (k=1; k <= m->Nnodes; k++)
    {
-      m->Row[k] = k;
-      m->Order[k] = k;
+      m->hydraulics.solver.Row[k] = k;
+      m->hydraulics.solver.Order[k] = k;
    }
    n = m->Njuncs;
    for (k=1; k<=n; k++)                   /* Examine each junction    */
    {
       p = mindegree(m, k, n);                 /* Node with lowest degree  */
-      knode = m->Order[p];                   /* Node's index             */
+      knode = m->hydraulics.solver.Order[p];                   /* Node's index             */
       if (!growlist(m, knode))
         return(101);  /* Augment adjacency list   */
-      m->Order[p] = m->Order[k];                /* Switch order of nodes    */
-      m->Order[k] = knode;
-      m->Degree[knode] = 0;                  /* In-activate node         */
+      m->hydraulics.solver.Order[p] = m->hydraulics.solver.Order[k];                /* Switch order of nodes    */
+      m->hydraulics.solver.Order[k] = knode;
+      m->hydraulics.solver.Degree[knode] = 0;                  /* In-activate node         */
    }
    for (k=1; k<=n; k++)                   /* Assign nodes to rows of  */
-     m->Row[m->Order[k]] = k;                   /*   coeff. matrix          */
+     m->hydraulics.solver.Row[m->hydraulics.solver.Order[k]] = k;                   /*   coeff. matrix          */
    return(0);
 }                        /* End of reordernodes */
 
 
-int  mindegree(Model *mod, int k, int n)
+int  mindegree(OW_Project *mod, int k, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   k = first node in list of active nodes              
@@ -349,7 +350,7 @@ int  mindegree(Model *mod, int k, int n)
 
    for (i=k; i<=n; i++)
    {
-      m = mod->Degree[mod->Order[i]];
+      m = mod->hydraulics.solver.Degree[mod->hydraulics.solver.Order[i]];
       if (m < min)
       {
          min = m;
@@ -360,7 +361,7 @@ int  mindegree(Model *mod, int k, int n)
 }                        /* End of mindegree */
 
 
-int  growlist(Model *m, int knode)
+int  growlist(OW_Project *m, int knode)
 /*
 **--------------------------------------------------------------
 ** Input:   knode = node index                                  
@@ -378,9 +379,9 @@ int  growlist(Model *m, int knode)
    for (alink = m->Adjlist[knode]; alink != NULL; alink = alink -> next)
    {
       node = alink->node;       /* End node of connecting link  */
-      if (m->Degree[node] > 0)     /* End node is active           */
+      if (m->hydraulics.solver.Degree[node] > 0)     /* End node is active           */
       {
-         m->Degree[node]--;        /* Reduce degree of adjacency   */
+         m->hydraulics.solver.Degree[node]--;        /* Reduce degree of adjacency   */
          if (!newlink(m, alink))   /* Add to adjacency list        */
             return(0);
       }
@@ -389,7 +390,7 @@ int  growlist(Model *m, int knode)
 }                        /* End of growlist */
 
 
-int  newlink(Model *m, Padjlist alink)
+int  newlink(OW_Project *m, Padjlist alink)
 /*
 **--------------------------------------------------------------
 ** Input:   alink = element of node's adjacency list            
@@ -410,7 +411,7 @@ int  newlink(Model *m, Padjlist alink)
 
       /* If jnode still active, and inode not connected to jnode, */
       /* then add a new connection between inode and jnode.       */
-      if (m->Degree[jnode] > 0)        /* jnode still active */
+      if (m->hydraulics.solver.Degree[jnode] > 0)        /* jnode still active */
       {
          if (!linked(m,inode,jnode))  /* inode not linked to jnode */
          {
@@ -425,8 +426,8 @@ int  newlink(Model *m, Padjlist alink)
               return(0);
             if (!addlink(m, jnode, inode, m->Ncoeffs))
               return(0);
-            m->Degree[inode]++;
-            m->Degree[jnode]++;
+            m->hydraulics.solver.Degree[inode]++;
+            m->hydraulics.solver.Degree[jnode]++;
          }
       }
    }
@@ -434,7 +435,7 @@ int  newlink(Model *m, Padjlist alink)
 }                        /* End of newlink */
 
 
-int  linked(Model *m, int i, int j)
+int  linked(OW_Project *m, int i, int j)
 /*
 **--------------------------------------------------------------
 ** Input:   i = node index                                      
@@ -451,7 +452,7 @@ int  linked(Model *m, int i, int j)
 }                        /* End of linked */
 
 
-int  addlink(Model *m, int i, int j, int n)
+int  addlink(OW_Project *m, int i, int j, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   i = node index                                      
@@ -473,7 +474,7 @@ int  addlink(Model *m, int i, int j, int n)
 }                        /* End of addlink */
 
 
-int  storesparse(Model *mod, int n)
+int  storesparse(OW_Project *mod, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   n = number of rows in solution matrix               
@@ -488,40 +489,40 @@ int  storesparse(Model *mod, int n)
    int   errcode = 0;
 
    /* Allocate sparse matrix storage */
-   mod->XLNZ  = (int *) calloc(n+2, sizeof(int));
-   mod->NZSUB = (int *) calloc(mod->Ncoeffs+2, sizeof(int));
-   mod->LNZ   = (int *) calloc(mod->Ncoeffs+2, sizeof(int));
-   ERRCODE(MEMCHECK(mod->XLNZ));
-   ERRCODE(MEMCHECK(mod->NZSUB));
-   ERRCODE(MEMCHECK(mod->LNZ));
+   mod->hydraulics.solver.XLNZ  = (int *) calloc(n+2, sizeof(int));
+   mod->hydraulics.solver.NZSUB = (int *) calloc(mod->Ncoeffs+2, sizeof(int));
+   mod->hydraulics.solver.LNZ   = (int *) calloc(mod->Ncoeffs+2, sizeof(int));
+   ERRCODE(MEMCHECK(mod->hydraulics.solver.XLNZ));
+   ERRCODE(MEMCHECK(mod->hydraulics.solver.NZSUB));
+   ERRCODE(MEMCHECK(mod->hydraulics.solver.LNZ));
    if (errcode) return(errcode);
 
    /* Generate row index pointers for each column of matrix */
    k = 0;
-   mod->XLNZ[1] = 1;
+   mod->hydraulics.solver.XLNZ[1] = 1;
    for (i=1; i<=n; i++)             /* column */
    {
        m = 0;
-       ii = mod->Order[i];
+       ii = mod->hydraulics.solver.Order[i];
        for (alink = mod->Adjlist[ii]; alink != NULL; alink = alink->next)
        {
-          j = mod->Row[alink->node];    /* row */
+          j = mod->hydraulics.solver.Row[alink->node];    /* row */
           l = alink->link;
           if (j > i && j <= n)
           {
              m++;
              k++;
-             mod->NZSUB[k] = j;
-             mod->LNZ[k] = l;
+             mod->hydraulics.solver.NZSUB[k] = j;
+             mod->hydraulics.solver.LNZ[k] = l;
           }
        }
-       mod->XLNZ[i+1] = mod->XLNZ[i] + m;
+       mod->hydraulics.solver.XLNZ[i+1] = mod->hydraulics.solver.XLNZ[i] + m;
    }
    return(errcode);
 }                        /* End of storesparse */
 
 
-int  ordersparse(Model *m, int n)
+int  ordersparse(OW_Project *m, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   n = number of rows in solution matrix               
@@ -549,15 +550,15 @@ int  ordersparse(Model *m, int n)
       for (i=1; i<=n; i++) nzt[i] = 0;
       for (i=1; i<=n; i++)
       {
-          for (k = m->XLNZ[i]; k < m->XLNZ[i+1]; k++)
-            nzt[m->NZSUB[k]]++;
+          for (k = m->hydraulics.solver.XLNZ[i]; k < m->hydraulics.solver.XLNZ[i+1]; k++)
+            nzt[m->hydraulics.solver.NZSUB[k]]++;
       }
       xlnzt[1] = 1;
       for (i=1; i<=n; i++) xlnzt[i+1] = xlnzt[i] + nzt[i];
 
       /* Transpose matrix twice to order column indexes */
-      transpose(n, m->XLNZ, m->NZSUB, m->LNZ, xlnzt, nzsubt, lnzt, nzt);
-      transpose(n, xlnzt, nzsubt, lnzt, m->XLNZ, m->NZSUB, m->LNZ, nzt);
+      transpose(n, m->hydraulics.solver.XLNZ, m->hydraulics.solver.NZSUB, m->hydraulics.solver.LNZ, xlnzt, nzsubt, lnzt, nzt);
+      transpose(n, xlnzt, nzsubt, lnzt, m->hydraulics.solver.XLNZ, m->hydraulics.solver.NZSUB, m->hydraulics.solver.LNZ, nzt);
    }
 
    /* Reclaim memory */
@@ -598,7 +599,7 @@ void  transpose(int n, int *il, int *jl, int *xl, int *ilt, int *jlt,
 }                        /* End of transpose */
 
 
-int  linsolve(Model *m, int n, double *Aii, double *Aij, double *B)
+int  linsolve(OW_Project *m, int n, double *Aii, double *Aij, double *B)
 /*
 **--------------------------------------------------------------
 ** Input:   n    = number of equations                          
@@ -661,25 +662,25 @@ int  linsolve(Model *m, int n, double *Aii, double *Aij, double *B)
          /* L(*,k) starting at first[k] of L(*,k).   */
          newk = link[k];
          kfirst = first[k];
-         ljk = Aij[m->LNZ[kfirst]];
+         ljk = Aij[m->hydraulics.solver.LNZ[kfirst]];
          diagj += ljk*ljk;
          istrt = kfirst + 1;
-         istop = m->XLNZ[k+1] - 1;
+         istop = m->hydraulics.solver.XLNZ[k+1] - 1;
          if (istop >= istrt)
          {
 
 	     /* Before modification, update vectors 'first' */
 	     /* and 'link' for future modification steps.   */
             first[k] = istrt;
-            isub = m->NZSUB[istrt];
+            isub = m->hydraulics.solver.NZSUB[istrt];
             link[k] = link[isub];
             link[isub] = k;
 
 	    /* The actual mod is saved in vector 'temp'. */
             for (i=istrt; i<=istop; i++)
             {
-               isub = m->NZSUB[i];
-               temp[isub] += Aij[m->LNZ[i]]*ljk;
+               isub = m->hydraulics.solver.NZSUB[i];
+               temp[isub] += Aij[m->hydraulics.solver.LNZ[i]]*ljk;
             }
          }
          k = newk;
@@ -695,19 +696,19 @@ int  linsolve(Model *m, int n, double *Aii, double *Aij, double *B)
       }
       diagj = sqrt(diagj);
       Aii[j] = diagj;
-      istrt = m->XLNZ[j];
-      istop = m->XLNZ[j+1] - 1;
+      istrt = m->hydraulics.solver.XLNZ[j];
+      istop = m->hydraulics.solver.XLNZ[j+1] - 1;
       if (istop >= istrt)
       {
          first[j] = istrt;
-         isub = m->NZSUB[istrt];
+         isub = m->hydraulics.solver.NZSUB[istrt];
          link[j] = link[isub];
          link[isub] = j;
          for (i=istrt; i<=istop; i++)
          {
-            isub = m->NZSUB[i];
-            bj = (Aij[m->LNZ[i]] - temp[isub])/diagj;
-            Aij[m->LNZ[i]] = bj;
+            isub = m->hydraulics.solver.NZSUB[i];
+            bj = (Aij[m->hydraulics.solver.LNZ[i]] - temp[isub])/diagj;
+            Aij[m->hydraulics.solver.LNZ[i]] = bj;
             temp[isub] = 0.0;
          }
       }
@@ -718,14 +719,14 @@ int  linsolve(Model *m, int n, double *Aii, double *Aij, double *B)
    {
       bj = B[j]/Aii[j];
       B[j] = bj;
-      istrt = m->XLNZ[j];
-      istop = m->XLNZ[j+1] - 1;
+      istrt = m->hydraulics.solver.XLNZ[j];
+      istop = m->hydraulics.solver.XLNZ[j+1] - 1;
       if (istop >= istrt)
       {
          for (i=istrt; i<=istop; i++)
          {
-            isub = m->NZSUB[i];
-            B[isub] -= Aij[m->LNZ[i]]*bj;
+            isub = m->hydraulics.solver.NZSUB[i];
+            B[isub] -= Aij[m->hydraulics.solver.LNZ[i]]*bj;
          }
       }
    }
@@ -734,14 +735,14 @@ int  linsolve(Model *m, int n, double *Aii, double *Aij, double *B)
    for (j=n; j>=1; j--)
    {
       bj = B[j];
-      istrt = m->XLNZ[j];
-      istop = m->XLNZ[j+1] - 1;
+      istrt = m->hydraulics.solver.XLNZ[j];
+      istop = m->hydraulics.solver.XLNZ[j+1] - 1;
       if (istop >= istrt)
       {
          for (i=istrt; i<=istop; i++)
          {
-            isub = m->NZSUB[i];
-            bj -= Aij[m->LNZ[i]]*B[isub];
+            isub = m->hydraulics.solver.NZSUB[i];
+            bj -= Aij[m->hydraulics.solver.LNZ[i]]*B[isub];
          }
       }
       B[j] = bj/Aii[j];

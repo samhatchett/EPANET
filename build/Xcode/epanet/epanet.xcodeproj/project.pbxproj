@@ -71,7 +71,7 @@
 		22322F66106833BB00641384 /* runepanet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = runepanet; sourceTree = BUILT_PRODUCTS_DIR; };
 		22322F701068369500641384 /* enumstxt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = enumstxt.h; path = ../../../src/enumstxt.h; sourceTree = SOURCE_ROOT; };
 		22322F711068369500641384 /* epanet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = epanet.c; path = ../../../src/epanet.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		22322F721068369500641384 /* funcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = funcs.h; path = ../../../src/funcs.h; sourceTree = SOURCE_ROOT; };
+		22322F721068369500641384 /* funcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = funcs.h; path = ../../../src/funcs.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		22322F731068369500641384 /* hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hash.c; path = ../../../src/hash.c; sourceTree = SOURCE_ROOT; };
 		22322F741068369500641384 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = ../../../src/hash.h; sourceTree = SOURCE_ROOT; };
 		22322F751068369500641384 /* hydraul.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hydraul.c; path = ../../../src/hydraul.c; sourceTree = SOURCE_ROOT; };

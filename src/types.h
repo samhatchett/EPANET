@@ -40,9 +40,9 @@ typedef  int          INT4;                                                    /
 -----------------------------
 */
 /*** Updated ***/
-#define   CODEVERSION        20100
+#define   CODEVERSION        20100 // 2.01.00
 #define   MAGICNUMBER        516114521
-#define   VERSION            200
+#define   VERSION            200 // used for binary file compatibility
 #define   EOFMARK            0x1A  /* Use 0x04 for UNIX systems */
 #define   MAXTITLE  3        /* Max. # title lines                     */
 #define   MAXID     31       /* Max. # characters in ID name           */      //(2.00.11 - LR)
@@ -134,23 +134,23 @@ typedef  int          INT4;                                                    /
  ----------------------------------------------
  */
 enum Hydtype                   /* Hydraulics solution option:         */
-{USE,           /*    use from previous run            */
+{ USE,           /*    use from previous run            */
   SAVE,          /*    save after current run           */
   SCRATCH};      /*    use temporary file               */
 
 enum QualType                  /* Water quality analysis option:      */
-{NONE,          /*    no quality analysis              */
+{ NONE,          /*    no quality analysis              */
   CHEM,          /*    analyze a chemical               */
   AGE,           /*    analyze water age                */
   TRACE};        /*    trace % of flow from a source    */
 
 enum NodeType                  /* Type of node:                       */
-{JUNC,          /*    junction                         */
+{ JUNC,          /*    junction                         */
   RESERV,        /*    reservoir                        */
   TANK};         /*    tank                             */
 
 enum LinkType                  /* Type of link:                       */
-{CV,           /*    pipe with check valve            */
+{ CV,           /*    pipe with check valve            */
   PIPE,         /*    regular pipe                     */
   PUMP,         /*    pump                             */
   PRV,          /*    pressure reducing valve          */
@@ -299,15 +299,14 @@ struct  Floatlist  /* Element of list of floats */
 };
 typedef struct Floatlist SFloatlist;
 
-struct  Tmplist    /* Element of temp list for Pattern & Curve data */
+typedef struct  Tmplist    /* Element of temp list for Pattern & Curve data */
 {
    int        i;
    char       ID[MAXID+1];
    SFloatlist *x;
    SFloatlist *y;
    struct     Tmplist  *next;
-};
-typedef struct Tmplist STmplist;
+} STmplist;
 
 typedef struct        /* TIME PATTERN OBJECT */
 {
@@ -508,23 +507,51 @@ struct      ActItem         /* Action list item */
 };
 
 
+typedef struct {
+  
+  double         *NodeDemand,           /* Node actual demand           */
+  
+  *EmitterFlows,                    /* Emitter flows                */
+  *LinkSetting,          /* Link settings                */
+  *LinkFlows,                    /* Link flows                   */
+  *NodeHead;
+  
+  char           *LinkStatus,           /* Link status                  */
+  *OldStat;              /* Previous link/tank status    */
+  
+  
+  struct {
+    // hydraulic solution vars
+    double  *Aii,        /* Diagonal coeffs. of A               */
+    *Aij,        /* Non-zero, off-diagonal coeffs. of A */
+    *F;          /* Right hand side coeffs.             */
+    double  *P,          /* Inverse headloss derivatives        */
+    *Y;          /* Flow correction factors             */
+    int     *Order,      /* Node-to-row of A                    */
+    *Row,        /* Row-to-node of A                    */
+    *Ndx;        /* Index of link's coeff. in Aij       */
+    int     *XLNZ,       /* Start position of each column in NZSUB  */
+    *NZSUB,      /* Row index of each coeff. in each column */
+    *LNZ;        /* Position of each coeff. in Aij array    */
+    int      *Degree;     /* Number of links adjacent to each node  */
+  } solver;
+  
+  
+} hyraulics_t;
+
+
 
 
 /***** MODEL STRUCT ******/
 
-typedef struct {
+struct OW_Project {
   /* Array pointers not allocated and freed in same routine */
-  char           *LinkStatus,           /* Link status                  */
-    *OldStat;              /* Previous link/tank status    */
-  double         *NodeDemand,           /* Node actual demand           */
-    *NodeQual,             /* Node actual quality          */
-    *EmitterFlows,                    /* Emitter flows                */
-    *LinkSetting,          /* Link settings                */
-    *LinkFlows,                    /* Link flows                   */
-    *PipeRateCoeff,        /* Pipe reaction rate           */
+  
+  double *PipeRateCoeff,        /* Pipe reaction rate           */
     *X,                    /* General purpose array        */
     *TempQual;             /* General purpose array for water quality        */
-  double   *NodeHead;             /* Node heads                   */
+  double *NodeQual;
+  
   double *QTankVolumes;
   double *QLinkFlow;
   STmplist *Patlist;              /* Temporary time pattern list  */
@@ -556,23 +583,6 @@ typedef struct {
   Ncurves,               /* Number of data curves        */
   Ncoords;               /* Number of Coords             */
   
-  
-  // hydraulic solution vars
-  double  *Aii,        /* Diagonal coeffs. of A               */
-          *Aij,        /* Non-zero, off-diagonal coeffs. of A */
-          *F;          /* Right hand side coeffs.             */
-  double  *P,          /* Inverse headloss derivatives        */
-          *Y;          /* Flow correction factors             */
-  int     *Order,      /* Node-to-row of A                    */
-          *Row,        /* Row-to-node of A                    */
-          *Ndx;        /* Index of link's coeff. in Aij       */
-  int     *XLNZ,       /* Start position of each column in NZSUB  */
-          *NZSUB,      /* Row index of each coeff. in each column */
-          *LNZ;        /* Position of each coeff. in Aij array    */
-  
-  
-  int      *Degree;     /* Number of links adjacent to each node  */
-
   
   
   FILE			*InFile,               /* Input file pointer           */
@@ -729,16 +739,13 @@ typedef struct {
   STmplist  *PrevCoord;     /* Pointer to coordinate list element     */
   
   
-} Model;
-
-typedef struct {
   
-} Environment;
-
-typedef struct {
-  Model *model;
-  Environment *environment;
-} Simulation;
+  hyraulics_t hydraulics;
+  
+  
+  
+  
+};
 
 
 

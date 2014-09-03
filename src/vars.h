@@ -19,9 +19,11 @@ AUTHOR:     L. Rossman
 
  
 
-/* Array pointers not allocated and freed in same routine */
+//
+// The default global model object
+//
 
-EXTERN Model en_defaultModel;
+OW_Project *en_defaultModel;
 
 
 

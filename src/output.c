@@ -22,6 +22,7 @@ AUTHOR:     L. Rossman
 #include <math.h>
 #include "text.h"
 #include "types.h"
+#include "epanet2.h"
 #include "funcs.h"
 #define  EXTERN  extern
 #include "hash.h"
@@ -30,7 +31,7 @@ AUTHOR:     L. Rossman
 /* Macro to write x[1] to x[n] to file OutFile: */
 #define   FSAVE(n)  (fwrite(x+1,sizeof(REAL4),(n),OutFile))
 
-int  savenetdata(Model *m)
+int  savenetdata(OW_Project *m)
 /*
 **---------------------------------------------------------------
 **   Input:   none
@@ -144,7 +145,7 @@ int  savenetdata(Model *m)
 }
 
 
-int  savehyd(Model *m, long *htime)
+int  savehyd(OW_Project *m, long *htime)
 /*
 **--------------------------------------------------------------
 **   Input:   *htime   = current time                             
@@ -158,11 +159,11 @@ int  savehyd(Model *m, long *htime)
    INT4 t;
    int errcode = 0;
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   FILE *HydFile = m->HydFile;
@@ -208,7 +209,7 @@ int  savehyd(Model *m, long *htime)
 }                        /* End of savehyd */
 
 
-int  savehydstep(Model *m, long *hydstep)
+int  savehydstep(OW_Project *m, long *hydstep)
 /*
 **--------------------------------------------------------------
 **   Input:   *hydstep = next time step                           
@@ -228,7 +229,7 @@ int  savehydstep(Model *m, long *hydstep)
 }
 
 
-int  saveenergy(Model *m)
+int  saveenergy(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                             
@@ -292,7 +293,7 @@ int  saveenergy(Model *m)
 }
 
 
-int  readhyd(Model *m, long *hydtime)
+int  readhyd(OW_Project *m, long *hydtime)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -307,11 +308,11 @@ int  readhyd(Model *m, long *hydtime)
 */
 {
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   FILE *HydFile = m->HydFile;
@@ -346,7 +347,7 @@ int  readhyd(Model *m, long *hydtime)
 }                        /* End of readhyd */
 
 
-int  readhydstep(Model *m, long *hydstep)
+int  readhydstep(OW_Project *m, long *hydstep)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -363,7 +364,7 @@ int  readhydstep(Model *m, long *hydstep)
 }                        /* End of readhydstep */
 
 
-int  saveoutput(Model *m)
+int  saveoutput(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -385,7 +386,7 @@ int  saveoutput(Model *m)
 }                        /* End of saveoutput */
 
 
-int  nodeoutput(Model *m, int j, REAL4 *x, double ucf)
+int  nodeoutput(OW_Project *m, int j, REAL4 *x, double ucf)
 /*
 **--------------------------------------------------------------
 **   Input:   j   = type of node variable                         
@@ -398,8 +399,8 @@ int  nodeoutput(Model *m, int j, REAL4 *x, double ucf)
 {
    int   i;
 
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *NodeQual = m->NodeQual;
   Snode *Node = m->Node;
   int Nnodes = m->Nnodes;
@@ -428,7 +429,7 @@ int  nodeoutput(Model *m, int j, REAL4 *x, double ucf)
 }                        /* End of nodeoutput */
 
 
-int  linkoutput(Model *m, int j, REAL4 *x, double ucf)
+int  linkoutput(OW_Project *m, int j, REAL4 *x, double ucf)
 /*
 **----------------------------------------------------------------
 **   Input:   j   = type of link variable                         
@@ -442,13 +443,13 @@ int  linkoutput(Model *m, int j, REAL4 *x, double ucf)
    int i;
    double a,h,q,f;
 
-  double *NodeHead = m->NodeHead;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
   double *PipeRateCoeff = m->PipeRateCoeff;
-  char *LinkStatus = m->LinkStatus;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nlinks = m->Nlinks;
   FILE *TmpOutFile = m->TmpOutFile;
   char Qualflag = m->Qualflag;
@@ -541,7 +542,7 @@ int  linkoutput(Model *m, int j, REAL4 *x, double ucf)
 }                        /* End of linkoutput */
 
 
-int  savefinaloutput(Model *m)
+int  savefinaloutput(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                          
@@ -581,7 +582,7 @@ int  savefinaloutput(Model *m)
 }
 
 
-int  savetimestat(Model *m, REAL4 *x, char objtype)
+int  savetimestat(OW_Project *m, REAL4 *x, char objtype)
 /*
 **--------------------------------------------------------------
 **   Input:   *x  = buffer for node values
@@ -596,11 +597,11 @@ int  savetimestat(Model *m, REAL4 *x, char objtype)
 */
 {
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *NodeQual = m->NodeQual;
   double *Ucf = m->Ucf;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
   int Nnodes = m->Nnodes;
   int Nlinks = m->Nlinks;
   int Nperiods = m->Nperiods;
@@ -739,7 +740,7 @@ int  savetimestat(Model *m, REAL4 *x, char objtype)
 }
 
 
-int  savenetreacts(Model *m, double wbulk, double wwall, double wtank, double wsource)
+int  savenetreacts(OW_Project *m, double wbulk, double wwall, double wtank, double wsource)
 /*
 **-----------------------------------------------------
 **  Writes average network-wide reaction rates (in
@@ -761,7 +762,7 @@ int  savenetreacts(Model *m, double wbulk, double wwall, double wtank, double ws
 }
 
 
-int  saveepilog(Model *m)
+int  saveepilog(OW_Project *m)
 /*
 **-------------------------------------------------
 **  Writes Nperiods, Warnflag, & Magic Number to 

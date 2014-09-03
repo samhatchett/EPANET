@@ -173,10 +173,17 @@
 #define EN_INITFLOW    10   /* Re-initialize flows flag  */
 
 
+
+
 // --- Declare the EPANET toolkit functions
 #if defined(__cplusplus)
 extern "C" {
 #endif
+  
+  typedef struct OW_Project OW_Project;
+  
+  // OLD (<= 2.00.13) api functions use the global default model pointer.
+  //
   int  DLLEXPORT ENepanet(char *inpFile, char *rptFile, char *binOutFile, void (*callback) (char *));
   
   int  DLLEXPORT ENopen(char *inpFile, char *rptFile, char *binOutFile);
@@ -253,6 +260,89 @@ extern "C" {
   int  DLLEXPORT ENsetqualtype(int qualcode, char *chemname, char *chemunits, char *tracenode);
   int  DLLEXPORT ENgetqualinfo(int *qualcode, char *chemname, char *chemunits, int *tracenode);
   int  DLLEXPORT ENsetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
+  
+  
+  
+  
+  // NEW (>2.00.13) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
+  
+  int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelObj, char *rptFile, char *binOutFile);
+  int  DLLEXPORT OW_saveinpfile(OW_Project *modelObj, char *filename);
+  int  DLLEXPORT OW_close(OW_Project *modelObj);
+  
+  int  DLLEXPORT OW_solveH(OW_Project *modelObj);
+  int  DLLEXPORT OW_saveH(OW_Project *modelObj);
+  int  DLLEXPORT OW_openH(OW_Project *modelObj);
+  int  DLLEXPORT OW_initH(OW_Project *modelObj, int initFlag);
+  int  DLLEXPORT OW_runH(OW_Project *modelObj, long *currentTime);
+  int  DLLEXPORT OW_nextH(OW_Project *modelObj, long *tStep);
+  int  DLLEXPORT OW_closeH(OW_Project *modelObj);
+  int  DLLEXPORT OW_savehydfile(OW_Project *modelObj, char *filename);
+  int  DLLEXPORT OW_usehydfile(OW_Project *modelObj, char *filename);
+  
+  int  DLLEXPORT OW_solveQ(OW_Project *modelObj);
+  int  DLLEXPORT OW_openQ(OW_Project *modelObj);
+  int  DLLEXPORT OW_initQ(OW_Project *modelObj, int saveFlag);
+  int  DLLEXPORT OW_runQ(OW_Project *modelObj, long *currentTime);
+  int  DLLEXPORT OW_nextQ(OW_Project *modelObj, long *tStep);
+  int  DLLEXPORT OW_stepQ(OW_Project *modelObj, long *timeLeft);
+  int  DLLEXPORT OW_closeQ(OW_Project *modelObj);
+  
+  int  DLLEXPORT OW_writeline(OW_Project *modelObj, char *line);
+  int  DLLEXPORT OW_report(OW_Project *modelObj);
+  int  DLLEXPORT OW_resetreport(OW_Project *modelObj);
+  int  DLLEXPORT OW_setreport(OW_Project *modelObj, char *reportFormat);
+  
+  int  DLLEXPORT OW_getcontrol(OW_Project *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
+  int  DLLEXPORT OW_getcount(OW_Project *modelObj, int code, int *count);
+  int  DLLEXPORT OW_getoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_gettimeparam(OW_Project *modelObj, int code, long *value);
+  int  DLLEXPORT OW_getflowunits(OW_Project *modelObj, int *code);
+  int  DLLEXPORT OW_getpatternindex(OW_Project *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getpatternid(OW_Project *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getpatternlen(OW_Project *modelObj, int index, int *len);
+  int  DLLEXPORT OW_getpatternvalue(OW_Project *modelObj, int index, int period, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getaveragepatternvalue(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getqualtype(OW_Project *modelObj, int *qualcode, int *tracenode);
+  int  DLLEXPORT OW_geterror(int errcode, char *errmsg, int maxLen);
+  int  DLLEXPORT OW_getstatistic(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE* value);
+  
+  int  DLLEXPORT OW_getnodeindex(OW_Project *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getnodeid(OW_Project *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getnodetype(OW_Project *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_getcoord(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
+  
+  int  DLLEXPORT OW_getnumdemands(OW_Project *modelObj, int nodeIndex, int *numDemands);
+  int  DLLEXPORT OW_getbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand);
+  int  DLLEXPORT OW_getdemandpattern(OW_Project *modelObj, int nodeIndex, int demandIdx, int *pattIdx);
+  
+  int  DLLEXPORT OW_getlinkindex(OW_Project *modelObj, char *id, int *index);
+  int  DLLEXPORT OW_getlinkid(OW_Project *modelObj, int index, char *id);
+  int  DLLEXPORT OW_getlinktype(OW_Project *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getlinknodes(OW_Project *modelObj, int index, int *node1, int *node2);
+  int  DLLEXPORT OW_getlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
+  
+  int  DLLEXPORT OW_getcurve(OW_Project *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
+  
+  int  DLLEXPORT OW_getversion(int *version);
+  
+  int  DLLEXPORT OW_setcontrol(OW_Project *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
+  int  DLLEXPORT OW_setnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_setlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_addpattern(OW_Project *modelObj, char *id);
+  int  DLLEXPORT OW_setpattern(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *f, int len);
+  int  DLLEXPORT OW_setpatternvalue(OW_Project *modelObj, int index, int period, EN_API_FLOAT_TYPE value);
+  int  DLLEXPORT OW_settimeparam(OW_Project *modelObj, int code, long value);
+  int  DLLEXPORT OW_setoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_setstatusreport(OW_Project *modelObj, int code);
+  int  DLLEXPORT OW_setqualtype(OW_Project *modelObj, int qualcode, char *chemname, char *chemunits, char *tracenode);
+  int  DLLEXPORT OW_getqualinfo(OW_Project *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
+  int  DLLEXPORT OW_setbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
+  
+  
+  
+  
   
 #if defined(__cplusplus)
 }

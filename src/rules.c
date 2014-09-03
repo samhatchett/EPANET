@@ -31,6 +31,7 @@ AUTHOR:     L. Rossman
 #endif
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern
@@ -68,24 +69,24 @@ char    *Value[]     = {"XXXX",   w_OPEN, w_CLOSED, w_ACTIVE,NULL};
 **   because some of them utilize the Premise and Action structures
 **   defined locally in this module.
 */
-void    newrule(Model *m);
-int     newpremise(Model *m, int);
-int     newaction(Model *m);
-int     newpriority(Model *m);
-int     evalpremises(Model *m, int);
-void    updateactlist(Model *m, int, struct Action *);
-int     checkaction(Model *m, int, struct Action *);
-int     checkpremise(Model *m, struct Premise *);
-int     checktime(Model *m, struct Premise *);
-int     checkstatus(Model *m, struct Premise *);
-int     checkvalue(Model *m, struct Premise *);
-int     takeactions(Model *m);
-void    clearactlist(Model *m);
-void    clearrules(Model *m);
-void    ruleerrmsg(Model *m, int);
+void    newrule(OW_Project *m);
+int     newpremise(OW_Project *m, int);
+int     newaction(OW_Project *m);
+int     newpriority(OW_Project *m);
+int     evalpremises(OW_Project *m, int);
+void    updateactlist(OW_Project *m, int, struct Action *);
+int     checkaction(OW_Project *m, int, struct Action *);
+int     checkpremise(OW_Project *m, struct Premise *);
+int     checktime(OW_Project *m, struct Premise *);
+int     checkstatus(OW_Project *m, struct Premise *);
+int     checkvalue(OW_Project *m, struct Premise *);
+int     takeactions(OW_Project *m);
+void    clearactlist(OW_Project *m);
+void    clearrules(OW_Project *m);
+void    ruleerrmsg(OW_Project *m, int);
 
 
-void initrules(Model *m)
+void initrules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Initializes rule base.
@@ -98,7 +99,7 @@ void initrules(Model *m)
 }
 
 
-void addrule(Model *m, char *tok)
+void addrule(OW_Project *m, char *tok)
 /*
 **--------------------------------------------------------------
 **    Updates rule count if RULE keyword found in line of input.
@@ -110,7 +111,7 @@ void addrule(Model *m, char *tok)
 }
 
 
-int  allocrules(Model *m)
+int  allocrules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Allocates memory for rule-based controls.
@@ -125,7 +126,7 @@ int  allocrules(Model *m)
 }
 
 
-void freerules(Model *m)
+void freerules(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Frees memory used for rule-based controls.
@@ -138,7 +139,7 @@ void freerules(Model *m)
 }
 
 
-int checkrules(Model *m, long dt)
+int checkrules(OW_Project *m, long dt)
 /*
 **-----------------------------------------------------
 **    Checks which rules should fire at current time.
@@ -178,7 +179,7 @@ int checkrules(Model *m, long dt)
 }
 
 
-int  ruledata(Model *m)
+int  ruledata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Parses a line from [RULES] section of input.
@@ -258,7 +259,7 @@ int  ruledata(Model *m)
 }
 
 
-void  clearactlist(Model *m)
+void  clearactlist(OW_Project *m)
 /*
 **----------------------------------------------------------
 **    Clears memory used for action list
@@ -277,7 +278,7 @@ void  clearactlist(Model *m)
 }
 
 
-void  clearrules(Model *m)
+void  clearrules(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **    Clears memory used for premises & actions for all rules
@@ -316,7 +317,7 @@ void  clearrules(Model *m)
 }
 
 
-void  newrule(Model *m)
+void  newrule(OW_Project *m)
 /*
 **----------------------------------------------------------
 **    Adds new rule to rule base
@@ -333,7 +334,7 @@ void  newrule(Model *m)
 }
 
 
-int  newpremise(Model *mod, int logop)
+int  newpremise(OW_Project *mod, int logop)
 /*
 **--------------------------------------------------------------------
 **   Adds new premise to current rule.
@@ -471,7 +472,7 @@ int  newpremise(Model *mod, int logop)
 }
 
 
-int  newaction(Model *m)
+int  newaction(OW_Project *m)
 /*
 **----------------------------------------------------------
 **   Adds new action to current rule.
@@ -546,7 +547,7 @@ int  newaction(Model *m)
 }
 
 
-int  newpriority(Model *m)
+int  newpriority(OW_Project *m)
 /*
 **---------------------------------------------------
 **    Adds priority rating to current rule
@@ -562,7 +563,7 @@ int  newpriority(Model *m)
 }
 
 
-int  evalpremises(Model *m, int i)
+int  evalpremises(OW_Project *m, int i)
 /*
 **----------------------------------------------------------
 **    Checks if premises to rule i are true
@@ -594,7 +595,7 @@ int  evalpremises(Model *m, int i)
 }
 
  
-int  checkpremise(Model *m, struct Premise *p)
+int  checkpremise(OW_Project *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if a particular premise is true
@@ -610,7 +611,7 @@ int  checkpremise(Model *m, struct Premise *p)
 }
 
 
-int  checktime(Model *m, struct Premise *p)
+int  checktime(OW_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on system time holds
@@ -665,7 +666,7 @@ int  checktime(Model *m, struct Premise *p)
 }
 
 
-int  checkstatus(Model *m, struct Premise *p)
+int  checkstatus(OW_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on link status holds
@@ -679,7 +680,7 @@ int  checkstatus(Model *m, struct Premise *p)
         case IS_OPEN:
         case IS_CLOSED:
         case IS_ACTIVE:
-                i = m->LinkStatus[p->index];
+                i = m->hydraulics.LinkStatus[p->index];
                 if      (i <= CLOSED) j = IS_CLOSED;
                 else if (i == ACTIVE) j = IS_ACTIVE;
                 else                  j = IS_OPEN;
@@ -692,7 +693,7 @@ int  checkstatus(Model *m, struct Premise *p)
 }
 
 
-int  checkvalue(Model *m, struct Premise *p)
+int  checkvalue(OW_Project *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if numerical condition on a variable is true.
@@ -704,14 +705,14 @@ int  checkvalue(Model *m, struct Premise *p)
     double x,
           tol = 1.e-3;
   
-  double *NodeDemand = m->NodeDemand;
-  double *NodeHead = m->NodeHead;
+  double *NodeDemand = m->hydraulics.NodeDemand;
+  double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
   Snode *Node = m->Node;
   Slink *Link = m->Link;
   Stank *Tank = m->Tank;
-  double *LinkFlows = m->LinkFlows;
-  double *LinkSetting = m->LinkSetting;
+  double *LinkFlows = m->hydraulics.LinkFlows;
+  double *LinkSetting = m->hydraulics.LinkSetting;
   int Njuncs = m->Njuncs;
   double Dsystem = m->Dsystem;
   
@@ -773,7 +774,7 @@ int  checkvalue(Model *m, struct Premise *p)
 }
 
 
-void  updateactlist(Model *m, int i, struct Action *actions)
+void  updateactlist(OW_Project *m, int i, struct Action *actions)
 /*
 **---------------------------------------------------
 **    Adds rule's actions to action list
@@ -805,7 +806,7 @@ void  updateactlist(Model *m, int i, struct Action *actions)
 }
 
 
-int  checkaction(Model *m, int i, struct Action *a)
+int  checkaction(OW_Project *m, int i, struct Action *a)
 /*
 **-----------------------------------------------------------
 **    Checks if an action is already on the Action List
@@ -841,7 +842,7 @@ int  checkaction(Model *m, int i, struct Action *a)
 }
 
 
-int  takeactions(Model *m)
+int  takeactions(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **    Implements actions on action list
@@ -858,8 +859,8 @@ int  takeactions(Model *m)
   struct aRule *Rule = m->Rule;
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkSetting = m->LinkSetting;
-  char *LinkStatus = m->LinkStatus;
+  double *LinkSetting = m->hydraulics.LinkSetting;
+  char *LinkStatus = m->hydraulics.LinkStatus;
 
     n = 0;
     item = m->ActList;
@@ -918,7 +919,7 @@ int  takeactions(Model *m)
 }
 
 
-void  ruleerrmsg(Model *m, int err)
+void  ruleerrmsg(OW_Project *m, int err)
 /*
 **-----------------------------------------------------------
 **    Reports error message

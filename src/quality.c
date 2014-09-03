@@ -57,6 +57,7 @@ AUTHOR:     L. Rossman
 #include <math.h>
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern
@@ -89,19 +90,19 @@ AUTHOR:     L. Rossman
 //static    alloc_handle_t *SegPool; // Memory pool for water quality segments   //(2.00.11 - LR)
 
 // replacing defs with some real functions that reference the model wrapper.
-int UP_NODE(Model *m, int iLink) {
+int UP_NODE(OW_Project *m, int iLink) {
   return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N1 : m->Link[(iLink)].N2 );
 }
-int DOWN_NODE(Model *m, int iLink) {
+int DOWN_NODE(OW_Project *m, int iLink) {
   return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N2 : m->Link[(iLink)].N1 );
 }
-int LINKVOL(Model *m, int iLink) {
+int LINKVOL(OW_Project *m, int iLink) {
   return ( 0.785398 * m->Link[(iLink)].Len * SQR(m->Link[(iLink)].Diam) );
 }
 
 
 
-int  openqual(Model *m)
+int  openqual(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -149,7 +150,7 @@ int  openqual(Model *m)
    }
 
 
-void  initqual(Model *m)
+void  initqual(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -223,7 +224,7 @@ void  initqual(Model *m)
 }
 
 
-int runqual(Model *m, long *t)
+int runqual(OW_Project *m, long *t)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -257,8 +258,8 @@ int runqual(Model *m, long *t)
         
         for (int i=1; i<= m->Nlinks; ++i)
         {
-          if (m->LinkStatus[i] <= CLOSED) {
-            m->QLinkFlow[i-1] = m->LinkFlows[i];
+          if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+            m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
           }
         }
 
@@ -272,8 +273,8 @@ int runqual(Model *m, long *t)
         
         for (int i=1; i<= m->Nlinks; ++i)
         {
-          if (m->LinkStatus[i] <= CLOSED) {
-            m->QLinkFlow[i-1] = m->LinkFlows[i];
+          if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+            m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
           }
         }
 
@@ -283,7 +284,7 @@ int runqual(Model *m, long *t)
 }
 
 
-int nextqual(Model *m, long *tstep)
+int nextqual(OW_Project *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -323,14 +324,14 @@ int nextqual(Model *m, long *tstep)
       if (m->Tank[i].A != 0) { // skip reservoirs again
         int n = m->Tank[i].Node;
         m->Tank[i].V = m->QTankVolumes[i-1];
-        m->NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
       }
     }
     
     // restore the previous step's pipe link flows
     for (int i=1; i <= m->Nlinks; i++) {
-      if (m->LinkStatus[i] <= CLOSED) {
-        m->LinkFlows[i] = 0.0;
+      if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+        m->hydraulics.LinkFlows[i] = 0.0;
       }
     }
 
@@ -359,13 +360,13 @@ int nextqual(Model *m, long *tstep)
       if (m->Tank[i].A != 0) { // skip reservoirs again
         int n = m->Tank[i].Node;
         m->Tank[i].V = tankVolumes[i-1];
-        m->NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
       }
     }
     
     for (int i=1; i <= m->Nlinks; ++i) {
-      if (m->LinkStatus[i] <= CLOSED) {
-        m->LinkFlows[i] = m->QLinkFlow[i-1];
+      if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+        m->hydraulics.LinkFlows[i] = m->QLinkFlow[i-1];
       }
     }
     
@@ -376,7 +377,7 @@ int nextqual(Model *m, long *tstep)
 }
 
 
-int stepqual(Model *m, long *tleft)
+int stepqual(OW_Project *m, long *tleft)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -416,7 +417,7 @@ int stepqual(Model *m, long *tleft)
 }
 
 
-int closequal(Model *m)
+int closequal(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -447,7 +448,7 @@ int closequal(Model *m)
 }
 
 
-int  gethyd(Model *m, long *hydtime, long *hydstep)
+int  gethyd(OW_Project *m, long *hydtime, long *hydstep)
 /*
 **-----------------------------------------------------------
 **   Input:   none     
@@ -509,7 +510,7 @@ int  gethyd(Model *m, long *hydtime, long *hydstep)
 }
 
 
-char  setReactflag(Model *m)
+char  setReactflag(OW_Project *m)
 /*
 **-----------------------------------------------------------
 **   Input:   none     
@@ -537,7 +538,7 @@ char  setReactflag(Model *m)
 }
 
 
-void  transport(Model *m, long tstep)
+void  transport(OW_Project *m, long tstep)
 /*
 **--------------------------------------------------------------
 **   Input:   tstep = length of current time step     
@@ -568,7 +569,7 @@ void  transport(Model *m, long tstep)
 }
 
 
-void  initsegs(Model *m)
+void  initsegs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -586,7 +587,7 @@ void  initsegs(Model *m)
 
       /* Establish flow direction */
      m->FlowDir[k] = '+';
-     if (m->LinkFlows[k] < 0.) {
+     if (m->hydraulics.LinkFlows[k] < 0.) {
        m->FlowDir[k] = '-';
      }
 
@@ -636,7 +637,7 @@ void  initsegs(Model *m)
 }
 
 
-void  reorientsegs(Model *m)
+void  reorientsegs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none     
@@ -655,10 +656,10 @@ void  reorientsegs(Model *m)
 
       /* Find new flow direction */
      newdir = '+';
-     if (m->LinkFlows[k] == 0.0) {
+     if (m->hydraulics.LinkFlows[k] == 0.0) {
        newdir = m->FlowDir[k];
      }
-     else if (m->LinkFlows[k] < 0.0) {
+     else if (m->hydraulics.LinkFlows[k] < 0.0) {
        newdir = '-';
      }
 
@@ -683,7 +684,7 @@ void  reorientsegs(Model *m)
 }
 
 
-void  updatesegs(Model *m, long dt)
+void  updatesegs(OW_Project *m, long dt)
 /*
 **-------------------------------------------------------------
 **   Input:   t = time from last WQ segment update     
@@ -734,7 +735,7 @@ void  updatesegs(Model *m, long dt)
 }
 
 
-void  removesegs(Model *m, int k)
+void  removesegs(OW_Project *m, int k)
 /*
 **-------------------------------------------------------------
 **   Input:   k = link index     
@@ -756,7 +757,7 @@ void  removesegs(Model *m, int k)
 }
 
 
-void  addseg(Model *m, int k, double v, double c)
+void  addseg(OW_Project *m, int k, double v, double c)
 /*
 **-------------------------------------------------------------
 **   Input:   k = link segment
@@ -798,7 +799,7 @@ void  addseg(Model *m, int k, double v, double c)
 }
 
 
-void accumulate(Model *m, long dt)
+void accumulate(OW_Project *m, long dt)
 /*
 **-------------------------------------------------------------
 **   Input:   dt = current WQ time step
@@ -850,7 +851,7 @@ void accumulate(Model *m, long dt)
    {
       i = UP_NODE(m,k);               /* Upstream node */
       j = DOWN_NODE(m,k);             /* Downstream node */
-      v = ABS(m->LinkFlows[k])*dt;             /* Flow volume */
+      v = ABS(m->hydraulics.LinkFlows[k])*dt;             /* Flow volume */
 
 ////  Start of deprecated code segment  ////                                   //(2.00.12 - LR)
          
@@ -914,7 +915,7 @@ void accumulate(Model *m, long dt)
 }
 
 
-void updatenodes(Model *m, long dt)
+void updatenodes(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -930,7 +931,7 @@ void updatenodes(Model *m, long dt)
 {
   int i;
   
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   int Njuncs = m->Njuncs;
   char Qualflag = m->Qualflag;
@@ -960,7 +961,7 @@ void updatenodes(Model *m, long dt)
 }
 
 
-void sourceinput(Model *m, long dt)
+void sourceinput(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -975,7 +976,7 @@ void sourceinput(Model *m, long dt)
    double qout, qcutoff;
    Psource source;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Snode *Node = m->Node;
   Stank *Tank = m->Tank;
@@ -1081,7 +1082,7 @@ void sourceinput(Model *m, long dt)
 }
 
 
-void release(Model *m, long dt)
+void release(OW_Project *m, long dt)
 /*
 **---------------------------------------------------------
 **   Input:   dt = current WQ time step
@@ -1096,7 +1097,7 @@ void release(Model *m, long dt)
 
   
   double *NodeQual = m->NodeQual;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
   int Nlinks = m->Nlinks;
   double *TempQual = m->TempQual;
 
@@ -1138,7 +1139,7 @@ void release(Model *m, long dt)
 }
 
 
-void  updatesourcenodes(Model *m, long dt)
+void  updatesourcenodes(OW_Project *m, long dt)
 /*
 **---------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -1183,7 +1184,7 @@ void  updatesourcenodes(Model *m, long dt)
 }
 
 
-void  updatetanks(Model *m, long dt)
+void  updatetanks(OW_Project *m, long dt)
 /*
 **---------------------------------------------------
 **   Input:   dt = current WQ time step     
@@ -1254,7 +1255,7 @@ void  updatetanks(Model *m, long dt)
 
 
 ////  New version of tankmix1  ////                                            //(2.00.12 - LR)
-void  tankmix1(Model *m, int i, long dt)
+void  tankmix1(OW_Project *m, int i, long dt)
 /*
 **---------------------------------------------
 **   Input:   i = tank index
@@ -1268,7 +1269,7 @@ void  tankmix1(Model *m, int i, long dt)
     double cin;
     double c, cmax, vold, vin;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   
@@ -1301,7 +1302,7 @@ void  tankmix1(Model *m, int i, long dt)
 
 /*** Updated 10/25/00 ***/
 ////  New version of tankmix2  ////                                            //(2.00.12 - LR) 
-void  tankmix2(Model *m, int i, long dt)
+void  tankmix2(OW_Project *m, int i, long dt)
 /*
 **------------------------------------------------
 **   Input:   i = tank index
@@ -1321,7 +1322,7 @@ void  tankmix2(Model *m, int i, long dt)
             v1max;      /* Full mixing zone volume */
    Pseg     seg1,seg2;  /* Compartment segments */
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1398,7 +1399,7 @@ void  tankmix2(Model *m, int i, long dt)
 }
 
 
-void  tankmix3(Model *m, int i, long dt)
+void  tankmix3(OW_Project *m, int i, long dt)
 /*
 **----------------------------------------------------------
 **   Input:   i = tank index
@@ -1413,7 +1414,7 @@ void  tankmix3(Model *m, int i, long dt)
    double cin,vsum,csum;
    Pseg  seg;
   
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1501,7 +1502,7 @@ void  tankmix3(Model *m, int i, long dt)
 }   
 
 
-void  tankmix4(Model *m, int i, long dt)
+void  tankmix4(OW_Project *m, int i, long dt)
 /*
 **----------------------------------------------------------
 **   Input:   i = tank index
@@ -1515,7 +1516,7 @@ void  tankmix4(Model *m, int i, long dt)
    double vin, vnet, cin, vsum, csum, vseg;
    Pseg  seg, tmpseg;
 
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
   Stank *Tank = m->Tank;
   int Nlinks = m->Nlinks;
@@ -1613,7 +1614,7 @@ void  tankmix4(Model *m, int i, long dt)
 }         
 
 
-double  sourcequal(Model *m, Psource source)
+double  sourcequal(OW_Project *m, Psource source)
 /*
 **--------------------------------------------------------------
 **   Input:   j = source index
@@ -1642,7 +1643,7 @@ double  sourcequal(Model *m, Psource source)
 }
 
 
-double  avgqual(Model *m, int k)
+double  avgqual(OW_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index
@@ -1670,7 +1671,7 @@ double  avgqual(Model *m, int k)
 }
 
 
-void  ratecoeffs(Model *m)
+void  ratecoeffs(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -1692,7 +1693,7 @@ void  ratecoeffs(Model *m)
 }                         /* End of ratecoeffs */
 
 
-double piperate(Model *m, int k)
+double piperate(OW_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -1707,7 +1708,7 @@ double piperate(Model *m, int k)
   
   double *Ucf = m->Ucf;
   Slink *Link = m->Link;
-  double *LinkFlows = m->LinkFlows;
+  double *LinkFlows = m->hydraulics.LinkFlows;
 
    d = Link[k].Diam;                    /* Pipe diameter, ft */
 
@@ -1753,7 +1754,7 @@ double piperate(Model *m, int k)
 }                         /* End of piperate */
 
 
-double  pipereact(Model *m, int k, double c, double v, long dt)
+double  pipereact(OW_Project *m, int k, double c, double v, long dt)
 /*
 **------------------------------------------------------------
 **   Input:   k = link index
@@ -1796,7 +1797,7 @@ double  pipereact(Model *m, int k, double c, double v, long dt)
 }
 
 
-double  tankreact(Model *m, double c, double v, double kb, long dt)
+double  tankreact(OW_Project *m, double c, double v, double kb, long dt)
 /*
 **-------------------------------------------------------
 **   Input:   c = current WQ in tank
@@ -1830,7 +1831,7 @@ double  tankreact(Model *m, double c, double v, double kb, long dt)
 }
    
 
-double  bulkrate(Model *m, double c, double kb, double order)
+double  bulkrate(OW_Project *m, double c, double kb, double order)
 /*
 **-----------------------------------------------------------
 **   Input:   c = current WQ concentration
@@ -1876,7 +1877,7 @@ double  bulkrate(Model *m, double c, double kb, double order)
 }
 
 
-double  wallrate(Model *m, double c, double d, double kw, double kf)
+double  wallrate(OW_Project *m, double c, double d, double kw, double kf)
 /*
 **------------------------------------------------------------
 **   Input:   c = current WQ concentration

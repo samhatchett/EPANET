@@ -29,6 +29,7 @@ All functions in this module are called from newline() in INPUT2.C.
 #include <math.h>
 #include "hash.h"
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern
@@ -47,7 +48,7 @@ extern char *Fldname[];
 //extern int       Ntokens;
 
 
-int  juncdata(Model *m)
+int  juncdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -108,15 +109,15 @@ int  juncdata(Model *m)
       demand->Pat = p;
       demand->next = Node[m->Njuncs].D;
       Node[m->Njuncs].D = demand;
-      m->NodeDemand[m->Njuncs] = y;
+      m->hydraulics.NodeDemand[m->Njuncs] = y;
    }
-   else m->NodeDemand[m->Njuncs] = MISSING;
+   else m->hydraulics.NodeDemand[m->Njuncs] = MISSING;
 /*** end of update ***/
    return(0);
 }                        /* end of juncdata */
 
 
-int  tankdata(Model *m)
+int  tankdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -229,7 +230,7 @@ int  tankdata(Model *m)
 }                        /* end of tankdata */
 
 
-int  pipedata(Model *m)
+int  pipedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -323,7 +324,7 @@ int  pipedata(Model *m)
 }                        /* end of pipedata */
 
 
-int  pumpdata(Model *mod)
+int  pumpdata(OW_Project *mod)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -376,7 +377,7 @@ int  pumpdata(Model *mod)
   
    Link[Nlinks].N1    = j1;               /* Start-node index.  */
    Link[Nlinks].N2    = j2;               /* End-node index.    */
-   Link[Nlinks].Diam  = Npumps;           /* Pump index.        */
+   Link[Nlinks].pumpLinkIdx  = Npumps;           /* Pump index.        */
    Link[Nlinks].Len   = 0.0;              /* Link length.       */
    Link[Nlinks].Kc    = 1.0;              /* Speed factor.      */
    Link[Nlinks].Km    = 0.0;              /* Horsepower.        */
@@ -444,7 +445,7 @@ int  pumpdata(Model *mod)
 }                        /* end of pumpdata */
 
 
-int  valvedata(Model *m)
+int  valvedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -538,7 +539,7 @@ int  valvedata(Model *m)
 }                        /* end of valvedata */
 
 
-int  patterndata(Model *m)
+int  patterndata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -580,7 +581,7 @@ int  patterndata(Model *m)
 }                        /* end of patterndata */
 
 
-int  curvedata(Model *m)
+int  curvedata(OW_Project *m)
 /*
 **------------------------------------------------------
 **  Input:   none                                        
@@ -629,7 +630,7 @@ int  curvedata(Model *m)
    return(0);
 }
 
-int  coordata(Model *m)
+int  coordata(OW_Project *m)
 /*
  **--------------------------------------------------------------
  **  Input:   none
@@ -686,7 +687,7 @@ int  coordata(Model *m)
   
 }                        /* end of coordata */
 
-int  demanddata(Model *m)
+int  demanddata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -708,7 +709,7 @@ int  demanddata(Model *m)
    STmplist *pat;
   
   char **Tok = m->Tok;
-  double *NodeDemand = m->NodeDemand;
+  double *NodeDemand = m->hydraulics.NodeDemand;
   Snode *Node = m->Node;
 
 /* Extract data from tokens */
@@ -761,7 +762,7 @@ int  demanddata(Model *m)
 }                        /* end of demanddata */
 
 
-int  controldata(Model *m)
+int  controldata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -874,7 +875,7 @@ int  controldata(Model *m)
 }                        /* end of controldata */
 
 
-int  sourcedata(Model *m)
+int  sourcedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -928,7 +929,7 @@ int  sourcedata(Model *m)
 }                        /* end of sourcedata */
 
 
-int  emitterdata(Model *m)
+int  emitterdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -956,7 +957,7 @@ int  emitterdata(Model *m)
 }
 
 
-int  qualdata(Model *m)
+int  qualdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1011,7 +1012,7 @@ int  qualdata(Model *m)
 }                        /* end of qualdata */
 
 
-int  reactdata(Model *m)
+int  reactdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1150,7 +1151,7 @@ int  reactdata(Model *m)
 }                        /* end of reactdata */
 
 
-int  mixingdata(Model *m)
+int  mixingdata(OW_Project *m)
 /*
 **-------------------------------------------------------------
 **  Input:   none                                               
@@ -1189,7 +1190,7 @@ int  mixingdata(Model *m)
 }
 
 
-int  statusdata(Model *m)
+int  statusdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1258,7 +1259,7 @@ int  statusdata(Model *m)
 }              /* end of statusdata */
 
 
-int  energydata(Model *m)
+int  energydata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1352,7 +1353,7 @@ int  energydata(Model *m)
 }
 
 
-int  reportdata(Model *m)
+int  reportdata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1508,7 +1509,7 @@ int  reportdata(Model *m)
 }                        /* end of reportdata */
 
 
-int  timedata(Model *m)
+int  timedata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1591,7 +1592,7 @@ int  timedata(Model *m)
 }                        /* end of timedata */
 
 
-int  optiondata(Model *m)
+int  optiondata(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1609,7 +1610,7 @@ int  optiondata(Model *m)
 }                        /* end of optiondata */
 
 
-int  optionchoice(Model *m, int n)
+int  optionchoice(OW_Project *m, int n)
 /*
 **--------------------------------------------------------------
 **  Input:   n = index of last input token saved in Tok[]          
@@ -1734,7 +1735,7 @@ int  optionchoice(Model *m, int n)
 }                        /* end of optionchoice */
 
 
-int  optionvalue(Model *m, int n)
+int  optionvalue(OW_Project *m, int n)
 /*
 **------------------------------------------------------------- 
 **  Input:   *line = line read from input file                   
@@ -1828,7 +1829,7 @@ int  optionvalue(Model *m, int n)
 }                        /* end of optionvalue */
 
 
-int  getpumpcurve(Model *m, int n)
+int  getpumpcurve(OW_Project *m, int n)
 /*
 **--------------------------------------------------------
 **  Input:   n = number of parameters for pump curve
@@ -1924,7 +1925,7 @@ int  powercurve(double h0, double h1, double h2, double q1,
 }
 
 
-int  valvecheck(Model *m, int type, int j1, int j2)
+int  valvecheck(OW_Project *m, int type, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **  Input:   type = valve type                                   
@@ -1983,7 +1984,7 @@ int  valvecheck(Model *m, int type, int j1, int j2)
 }                   /* End of valvecheck */
 
 
-void  changestatus(Model *m, int j, char status, double y)
+void  changestatus(OW_Project *m, int j, char status, double y)
 /*
 **--------------------------------------------------------------
 **  Input:   j      = link index                                   

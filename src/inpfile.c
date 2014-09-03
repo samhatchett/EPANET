@@ -29,6 +29,7 @@ data describing a piping network to a file in EPANET's text format.
 #include <math.h>
 #include "hash.h"    
 #include "text.h"
+#include "epanet2.h"
 #include "types.h"
 #include "funcs.h"
 #define  EXTERN  extern
@@ -48,7 +49,7 @@ extern char *RptFlagTxt[];
 extern char *SectTxt[];
 
 
-void  saveauxdata(Model *m, FILE *f)                                                     //(2.00.12 - LR)
+void  saveauxdata(OW_Project *m, FILE *f)                                                     //(2.00.12 - LR)
 /*
 ------------------------------------------------------------
   Writes auxilary data from original input file to new file.
@@ -104,7 +105,7 @@ void  saveauxdata(Model *m, FILE *f)                                            
 
 ////  This function was heavily modified.  ////                                //(2.00.12 - LR)
 
-int  saveinpfile(Model *m, char *fname)
+int  saveinpfile(OW_Project *m, char *fname)
 /*
 -------------------------------------------------
   Writes network data to text file.
