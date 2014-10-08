@@ -2041,6 +2041,11 @@ int  DLLEXPORT OW_close(OW_Project *m)
   if (m->Openflag)
     writetime(m,FMT105);
   
+  if (!m->Openflag) {
+    // not actually open.
+    return 0;
+  }
+  
   freedata(m);
   
   if (m->TmpOutFile != m->OutFile)                                                  //(2.00.12 - LR)
