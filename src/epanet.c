@@ -3969,8 +3969,15 @@ int  DLLEXPORT OW_setqualtype(OW_Project *m, int qualcode, char *chemname, char 
 int  DLLEXPORT OW_getqualinfo(OW_Project *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
   OW_getqualtype(m, qualcode, tracenode);
-  strncpy(chemname, m->ChemName,MAXID);
-  strncpy(chemunits, m->ChemUnits,MAXID);
+  if (m->Qualflag == TRACE) {
+    strncpy(chemname, "tracer", MAXID);
+    strncpy(chemunits, "dimensionless", MAXID);
+  }
+  else {
+    strncpy(chemname,m->ChemName,MAXID);
+    strncpy(chemunits,m->ChemUnits,MAXID);
+  }
+
   return 0;
 }
 
