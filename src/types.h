@@ -509,15 +509,14 @@ struct      ActItem         /* Action list item */
 
 typedef struct {
   
-  double         *NodeDemand,           /* Node actual demand           */
+  double  *NodeDemand,           /* Node actual demand           */
+          *EmitterFlows,         /* Emitter flows                */
+          *LinkSetting,          /* Link settings                */
+          *LinkFlows,            /* Link flows                   */
+          *NodeHead;
   
-  *EmitterFlows,                    /* Emitter flows                */
-  *LinkSetting,          /* Link settings                */
-  *LinkFlows,                    /* Link flows                   */
-  *NodeHead;
-  
-  char           *LinkStatus,           /* Link status                  */
-  *OldStat;              /* Previous link/tank status    */
+  char  *LinkStatus,           /* Link status                  */
+        *OldStat;              /* Previous link/tank status    */
   
   
   struct {

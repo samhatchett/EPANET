@@ -467,7 +467,9 @@ int  addpattern(OW_Project *m, char *id)
    STmplist *p;
 
 /* Check if ID is same as last one processed */
-   if (m->Patlist != NULL && strcmp(id, m->Patlist->ID) == 0) return(0);
+  if (m->Patlist != NULL && strcmp(id, m->Patlist->ID) == 0) {
+     return(0);
+  }
 
 /* Check that pattern was not already created */
    if (findID(id,m->Patlist) == NULL)
@@ -476,7 +478,9 @@ int  addpattern(OW_Project *m, char *id)
    /* Update pattern count & create new list element */
       (m->MaxPats)++;
       p = (STmplist *) malloc(sizeof(STmplist));
-      if (p == NULL) return(101);
+     if (p == NULL) {
+        return(101);
+     }
 
    /* Initialize list element properties */
       else
@@ -669,9 +673,12 @@ int     getpatterns(OW_Project *m)
          strcpy(Pattern[i].ID, pat->ID);
 
       /* Give pattern a length of at least 1 */
-         if (Pattern[i].Length == 0) Pattern[i].Length = 1;
+         if (Pattern[i].Length == 0)
+           Pattern[i].Length = 1;
+        
          Pattern[i].F = (double *) calloc(Pattern[i].Length, sizeof(double));
-         if (Pattern[i].F == NULL) return(101);
+         if (Pattern[i].F == NULL)
+           return(101);
 
       /* Start at head of pattern multiplier list */
       /* (which holds multipliers in reverse order)*/
@@ -679,7 +686,8 @@ int     getpatterns(OW_Project *m)
          j = Pattern[i].Length - 1;
 
       /* Use at least one multiplier equal to 1.0 */
-         if (f == NULL) Pattern[i].F[0] = 1.0;
+         if (f == NULL)
+           Pattern[i].F[0] = 1.0;
 
       /* Traverse list, storing multipliers in Pattern array */
          else while (f != NULL && j >= 0)

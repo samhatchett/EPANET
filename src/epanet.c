@@ -835,7 +835,7 @@ int DLLEXPORT ENgetnodeid(int index, char *id)
 }
 
 
-int  DLLEXPORT ENgetnodetype(int index, int *code)
+int  DLLEXPORT ENgetnodetype(int index, EN_NodeType *code)
 /*----------------------------------------------------------------
 **  Input:   index = node index                    
 **  Output:  *code = node type code number (see TOOLKIT.H)
@@ -2762,10 +2762,16 @@ int  DLLEXPORT OW_getstatistic(OW_Project *m, int code, EN_API_FLOAT_TYPE* value
 int  DLLEXPORT OW_getnodeindex(OW_Project *m, char *id, int *index)
 {
   *index = 0;
-  if (!m->Openflag) return(102);
+  if (!m->Openflag) {
+    return(102);
+  }
   *index = findnode(m,id);
-  if (*index == 0) return(203);
-  else return(0);
+  if (*index == 0) {
+    return(203);
+  }
+  else {
+    return(0);
+  }
 }
 
 
@@ -2779,7 +2785,7 @@ int  DLLEXPORT OW_getnodeid(OW_Project *m, int index, char *id)
 }
 
 
-int  DLLEXPORT OW_getnodetype(OW_Project *m, int index, int *code)
+int  DLLEXPORT OW_getnodetype(OW_Project *m, int index, EN_NodeType *code)
 {
   *code = -1;
   if (!m->Openflag) return(102);
@@ -3380,7 +3386,9 @@ int  DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_
       {
         for (demand = m->Node[index].D; demand != NULL; demand = demand ->next)
         {
-          if (demand->next == NULL) demand->Base = value / m->Ucf[FLOW];
+          if (demand->next == NULL) {
+            demand->Base = value / m->Ucf[FLOW];
+          }
         }
       }
       break;
