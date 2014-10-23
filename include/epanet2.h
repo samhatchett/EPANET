@@ -111,19 +111,24 @@
 #define EN_CURVECOUNT   4
 #define EN_CONTROLCOUNT 5
 
-#define EN_JUNCTION     0    /* Node types */
-#define EN_RESERVOIR    1
-#define EN_TANK         2
+typedef enum {
+  EN_JUNCTION  = 0,
+  EN_RESERVOIR = 1,
+  EN_TANK      = 2
+} EN_NodeType;
 
-#define EN_CVPIPE       0    /* Link types. */
-#define EN_PIPE         1    /* See LinkType in TYPES.H */
-#define EN_PUMP         2
-#define EN_PRV          3
-#define EN_PSV          4
-#define EN_PBV          5
-#define EN_FCV          6
-#define EN_TCV          7
-#define EN_GPV          8
+
+typedef enum {
+  EN_CVPIPE       = 0,    /* Link types. */
+  EN_PIPE         = 1,    /* See LinkType in TYPES.H */
+  EN_PUMP         = 2,
+  EN_PRV          = 3,
+  EN_PSV          = 4,
+  EN_PBV          = 5,
+  EN_FCV          = 6,
+  EN_TCV          = 7,
+  EN_GPV          = 8
+} EN_LinkType;
 
 #define EN_NONE         0    /* Quality analysis types. */
 #define EN_CHEM         1    /* See QualType in TYPES.H */
@@ -172,7 +177,10 @@
 
 #define EN_INITFLOW    10   /* Re-initialize flows flag  */
 
-
+// api return error codes
+#define EN_OK      0
+#define EN_NODATA  102
+// etc...
 
 
 // --- Declare the EPANET toolkit functions
@@ -229,7 +237,7 @@ extern "C" {
   
   int  DLLEXPORT ENgetnodeindex(char *id, int *index);
   int  DLLEXPORT ENgetnodeid(int index, char *id);
-  int  DLLEXPORT ENgetnodetype(int index, int *code);
+  int  DLLEXPORT ENgetnodetype(int index, EN_NodeType *code);
   int  DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT ENgetcoord(int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
   
@@ -309,7 +317,7 @@ extern "C" {
   
   int  DLLEXPORT OW_getnodeindex(OW_Project *modelObj, char *id, int *index);
   int  DLLEXPORT OW_getnodeid(OW_Project *modelObj, int index, char *id);
-  int  DLLEXPORT OW_getnodetype(OW_Project *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getnodetype(OW_Project *modelObj, int index, EN_NodeType *code);
   int  DLLEXPORT OW_getnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT OW_getcoord(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
   
@@ -341,8 +349,16 @@ extern "C" {
   int  DLLEXPORT OW_setbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
   
   
+  // network creation api set
   
+  int DLLEXPORT OW_newNetwork(OW_Project **modelObj);
   
+  int DLLEXPORT OW_startEditingNetwork(OW_Project *modelObj);
+  
+  int DLLEXPORT OW_addNode(OW_Project *modelObj, EN_NodeType type, char *name);
+  int DLLEXPORT OW_addLink(OW_Project *modelObj, EN_LinkType type, char *name, char *upstreamNode, char* downstreamNode);
+  
+  int DLLEXPORT OW_stopEditingNetwork(OW_Project *modelObj);
   
 #if defined(__cplusplus)
 }
