@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		222CBF4C19F6E3D00049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
+		222CBF5519F6E4790049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
+		222CBF5719F6FD2D0049A22D /* networkBuilder.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF5619F6FD2D0049A22D /* networkBuilder.c */; };
+		222CBF5819F6FD2D0049A22D /* networkBuilder.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF5619F6FD2D0049A22D /* networkBuilder.c */; };
+		222CBF5B19F6FD710049A22D /* libepanet.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libepanet.dylib */; };
+		222CBF6D19F6FEBF0049A22D /* libepanet.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC0630554660B00DB518D /* libepanet.dylib */; };
+		222CBF6E19F6FEBF0049A22D /* libwdsInpFile.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 222CBF5119F6E46F0049A22D /* libwdsInpFile.dylib */; };
 		22322F851068369500641384 /* enumstxt.h in Headers */ = {isa = PBXBuildFile; fileRef = 22322F701068369500641384 /* enumstxt.h */; };
 		22322F861068369500641384 /* epanet.c in Sources */ = {isa = PBXBuildFile; fileRef = 22322F711068369500641384 /* epanet.c */; };
 		22322F871068369500641384 /* funcs.h in Headers */ = {isa = PBXBuildFile; fileRef = 22322F721068369500641384 /* funcs.h */; };
@@ -55,9 +62,31 @@
 		2255754A17551234009946B1 /* rules.c in Sources */ = {isa = PBXBuildFile; fileRef = 22322F7F1068369500641384 /* rules.c */; };
 		2255754B17551234009946B1 /* smatrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 22322F801068369500641384 /* smatrix.c */; };
 		226537E0179EDEEB00258C60 /* epanet2.h in Headers */ = {isa = PBXBuildFile; fileRef = 22322FA9106836B000641384 /* epanet2.h */; };
+		22C85C4F19F7ED67003F756F /* buildNetwork.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C85C4E19F7ED67003F756F /* buildNetwork.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		222CBF5919F6FD6C0049A22D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
+			remoteInfo = epanet;
+		};
+		222CBF6919F6FEB80049A22D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC0620554660B00DB518D;
+			remoteInfo = epanet;
+		};
+		222CBF6B19F6FEB80049A22D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 222CBF5019F6E46F0049A22D;
+			remoteInfo = wdsInpFile;
+		};
 		22322FAF1068370B00641384 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -67,7 +96,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		222CBF5E19F6FE530049A22D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		222CBF4919F6E3330049A22D /* inpfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inpfile.h; path = ../../../inpfile/inpfile.h; sourceTree = "<group>"; };
+		222CBF4B19F6E3D00049A22D /* inpfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inpfile.c; path = ../../../inpfile/inpfile.c; sourceTree = "<group>"; };
+		222CBF5119F6E46F0049A22D /* libwdsInpFile.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libwdsInpFile.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		222CBF5619F6FD2D0049A22D /* networkBuilder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = networkBuilder.c; path = ../../../src/networkBuilder.c; sourceTree = "<group>"; };
+		222CBF6019F6FE530049A22D /* buildNetwork */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = buildNetwork; sourceTree = BUILT_PRODUCTS_DIR; };
 		22322F66106833BB00641384 /* runepanet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = runepanet; sourceTree = BUILT_PRODUCTS_DIR; };
 		22322F701068369500641384 /* enumstxt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = enumstxt.h; path = ../../../src/enumstxt.h; sourceTree = SOURCE_ROOT; };
 		22322F711068369500641384 /* epanet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = epanet.c; path = ../../../src/epanet.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
@@ -91,10 +137,28 @@
 		22322F841068369500641384 /* vars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vars.h; path = ../../../src/vars.h; sourceTree = SOURCE_ROOT; };
 		22322FA9106836B000641384 /* epanet2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = epanet2.h; path = ../../../include/epanet2.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		2255753B17551217009946B1 /* libepanet-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libepanet-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		22C85C4E19F7ED67003F756F /* buildNetwork.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = buildNetwork.c; path = ../../../inpfile/buildNetwork.c; sourceTree = "<group>"; };
 		D2AAC0630554660B00DB518D /* libepanet.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libepanet.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		222CBF4E19F6E46F0049A22D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				222CBF5B19F6FD710049A22D /* libepanet.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		222CBF5D19F6FE530049A22D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				222CBF6D19F6FEBF0049A22D /* libepanet.dylib in Frameworks */,
+				222CBF6E19F6FEBF0049A22D /* libwdsInpFile.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		22322F64106833BB00641384 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -122,6 +186,7 @@
 		08FB7794FE84155DC02AAC07 /* epanet */ = {
 			isa = PBXGroup;
 			children = (
+				222CBF4A19F6E3B80049A22D /* inpfile */,
 				22322FA8106836A000641384 /* Include */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -152,6 +217,7 @@
 				22322F811068369500641384 /* text.h */,
 				22322F831068369500641384 /* types.h */,
 				22322F841068369500641384 /* vars.h */,
+				222CBF5619F6FD2D0049A22D /* networkBuilder.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -162,8 +228,20 @@
 				D2AAC0630554660B00DB518D /* libepanet.dylib */,
 				22322F66106833BB00641384 /* runepanet */,
 				2255753B17551217009946B1 /* libepanet-static.a */,
+				222CBF5119F6E46F0049A22D /* libwdsInpFile.dylib */,
+				222CBF6019F6FE530049A22D /* buildNetwork */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		222CBF4A19F6E3B80049A22D /* inpfile */ = {
+			isa = PBXGroup;
+			children = (
+				22C85C4E19F7ED67003F756F /* buildNetwork.c */,
+				222CBF4919F6E3330049A22D /* inpfile.h */,
+				222CBF4B19F6E3D00049A22D /* inpfile.c */,
+			);
+			name = inpfile;
 			sourceTree = "<group>";
 		};
 		22322FA8106836A000641384 /* Include */ = {
@@ -177,6 +255,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		222CBF4F19F6E46F0049A22D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2255753917551217009946B1 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -203,6 +288,43 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		222CBF5019F6E46F0049A22D /* wdsInpFile */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 222CBF5219F6E46F0049A22D /* Build configuration list for PBXNativeTarget "wdsInpFile" */;
+			buildPhases = (
+				222CBF4D19F6E46F0049A22D /* Sources */,
+				222CBF4E19F6E46F0049A22D /* Frameworks */,
+				222CBF4F19F6E46F0049A22D /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				222CBF5A19F6FD6C0049A22D /* PBXTargetDependency */,
+			);
+			name = wdsInpFile;
+			productName = wdsInpFile;
+			productReference = 222CBF5119F6E46F0049A22D /* libwdsInpFile.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		222CBF5F19F6FE530049A22D /* buildNetwork */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 222CBF6419F6FE530049A22D /* Build configuration list for PBXNativeTarget "buildNetwork" */;
+			buildPhases = (
+				222CBF5C19F6FE530049A22D /* Sources */,
+				222CBF5D19F6FE530049A22D /* Frameworks */,
+				222CBF5E19F6FE530049A22D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				222CBF6A19F6FEB80049A22D /* PBXTargetDependency */,
+				222CBF6C19F6FEB80049A22D /* PBXTargetDependency */,
+			);
+			name = buildNetwork;
+			productName = buildNetwork;
+			productReference = 222CBF6019F6FE530049A22D /* buildNetwork */;
+			productType = "com.apple.product-type.tool";
+		};
 		22322F65106833BB00641384 /* runepanet */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 22322F6A106833E600641384 /* Build configuration list for PBXNativeTarget "runepanet" */;
@@ -261,6 +383,14 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0500;
+				TargetAttributes = {
+					222CBF5019F6E46F0049A22D = {
+						CreatedOnToolsVersion = 6.1;
+					};
+					222CBF5F19F6FE530049A22D = {
+						CreatedOnToolsVersion = 6.1;
+					};
+				};
 			};
 			buildConfigurationList = 1DEB914E08733D8E0010E9CD /* Build configuration list for PBXProject "epanet" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -279,11 +409,29 @@
 				D2AAC0620554660B00DB518D /* epanet */,
 				22322F65106833BB00641384 /* runepanet */,
 				2255753A17551217009946B1 /* epanet-static */,
+				222CBF5019F6E46F0049A22D /* wdsInpFile */,
+				222CBF5F19F6FE530049A22D /* buildNetwork */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		222CBF4D19F6E46F0049A22D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				222CBF5519F6E4790049A22D /* inpfile.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		222CBF5C19F6FE530049A22D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22C85C4F19F7ED67003F756F /* buildNetwork.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		22322F63106833BB00641384 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -308,6 +456,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				222CBF5819F6FD2D0049A22D /* networkBuilder.c in Sources */,
 				2255753F17551234009946B1 /* epanet.c in Sources */,
 				2255754017551234009946B1 /* hash.c in Sources */,
 				2255754117551234009946B1 /* hydraul.c in Sources */,
@@ -331,12 +480,14 @@
 				22322F861068369500641384 /* epanet.c in Sources */,
 				22322F881068369500641384 /* hash.c in Sources */,
 				22322F8A1068369500641384 /* hydraul.c in Sources */,
+				222CBF4C19F6E3D00049A22D /* inpfile.c in Sources */,
 				22322F8B1068369500641384 /* inpfile.c in Sources */,
 				22322F8C1068369500641384 /* input1.c in Sources */,
 				22322F8D1068369500641384 /* input2.c in Sources */,
 				22322F8E1068369500641384 /* input3.c in Sources */,
 				22322F8F1068369500641384 /* mempool.c in Sources */,
 				22322F911068369500641384 /* output.c in Sources */,
+				222CBF5719F6FD2D0049A22D /* networkBuilder.c in Sources */,
 				22322F921068369500641384 /* quality.c in Sources */,
 				22322F931068369500641384 /* report.c in Sources */,
 				22322F941068369500641384 /* rules.c in Sources */,
@@ -347,6 +498,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		222CBF5A19F6FD6C0049A22D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* epanet */;
+			targetProxy = 222CBF5919F6FD6C0049A22D /* PBXContainerItemProxy */;
+		};
+		222CBF6A19F6FEB80049A22D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC0620554660B00DB518D /* epanet */;
+			targetProxy = 222CBF6919F6FEB80049A22D /* PBXContainerItemProxy */;
+		};
+		222CBF6C19F6FEB80049A22D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 222CBF5019F6E46F0049A22D /* wdsInpFile */;
+			targetProxy = 222CBF6B19F6FEB80049A22D /* PBXContainerItemProxy */;
+		};
 		22322FB01068370B00641384 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC0620554660B00DB518D /* epanet */;
@@ -428,6 +594,116 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = macinclude;
+			};
+			name = Release;
+		};
+		222CBF5319F6E46F0049A22D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		222CBF5419F6E46F0049A22D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		222CBF6519F6FE530049A22D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		222CBF6619F6FE530049A22D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -521,6 +797,24 @@
 			buildConfigurations = (
 				1DEB914F08733D8E0010E9CD /* Debug */,
 				1DEB915008733D8E0010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		222CBF5219F6E46F0049A22D /* Build configuration list for PBXNativeTarget "wdsInpFile" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				222CBF5319F6E46F0049A22D /* Debug */,
+				222CBF5419F6E46F0049A22D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		222CBF6419F6FE530049A22D /* Build configuration list for PBXNativeTarget "buildNetwork" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				222CBF6519F6FE530049A22D /* Debug */,
+				222CBF6619F6FE530049A22D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
