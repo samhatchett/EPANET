@@ -150,11 +150,15 @@ void inithyd(OW_Project *m, int initflag)
            (m->Link[i].Type == PRV || m->Link[i].Type == PSV
             || m->Link[i].Type == FCV)                                            //(2.00.11 - LR)
             && (m->Link[i].Kc != MISSING)
-         ) m->hydraulics.LinkStatus[i] = ACTIVE;                                                      //(2.00.11 - LR)
+          ) {
+        m->hydraulics.LinkStatus[i] = ACTIVE;                                                      //(2.00.11 - LR)
+      }
 
 /*** Updated 3/1/01 ***/
       /* Initialize flows if necessary */
-      if (m->hydraulics.LinkStatus[i] <= CLOSED) m->hydraulics.LinkFlows[i] = QZERO;
+     if (m->hydraulics.LinkStatus[i] <= CLOSED) {
+       m->hydraulics.LinkFlows[i] = QZERO;
+     }
       else if (ABS(m->hydraulics.LinkFlows[i]) <= QZERO || initflag > 0) {
          initlinkflow(m,i, m->hydraulics.LinkStatus[i], m->hydraulics.LinkSetting[i]);
       }
