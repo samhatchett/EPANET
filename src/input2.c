@@ -39,6 +39,7 @@ The following utility functions are all called from INPUT3.C
 #include "funcs.h"
 #define  EXTERN  extern
 #include "vars.h"
+#include "errors.h"
 
 #define   MAXERRS     10  /* Max. input errors reported        */
 // moved to Model*
@@ -218,7 +219,7 @@ int  readdata(OW_Project *m)
             }
             else
             {
-                inperrmsg(m,201,sect,line);
+                inperrmsg(m,OW_ERR_SYNTAX,sect,line);
                 errsum++;
                 break;
             }
@@ -310,7 +311,7 @@ int  newline(OW_Project *m, int sect, char *line)
        case _VERTICES:    return(0);
        case _BACKDROP:    return(0);
    }
-   return(201);
+   return(OW_ERR_SYNTAX);
 }                        /* end of newline */
 
 
@@ -1059,7 +1060,7 @@ void  inperrmsg(OW_Project *m, int err, int sect, char *line)
 /* Copy error messge to string variable fmt */
    switch (err)
    {
-      case 201:   strcpy(fmt,ERR201);  break;
+      case OW_ERR_SYNTAX:   strcpy(fmt,ERR201);  break;
       case 202:   strcpy(fmt,ERR202);  break;
       case 203:   strcpy(fmt,ERR203);  break;
       case 204:   strcpy(fmt,ERR204);  break;
@@ -1094,7 +1095,7 @@ void  inperrmsg(OW_Project *m, int err, int sect, char *line)
 
 /* Echo input line for syntax errors, and   */
 /* errors in CONTROLS and OPTIONS sections. */
-   if (sect == _CONTROLS || err == 201 || err == 213) writeline(m,line);
+   if (sect == _CONTROLS || err == OW_ERR_SYNTAX || err == 213) writeline(m,line);
    else writeline(m,"");
 }
 

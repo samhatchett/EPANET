@@ -3069,12 +3069,12 @@ int  DLLEXPORT OW_getlinkid(OW_Project *m, int index, char *id)
 }
 
 
-int  DLLEXPORT OW_getlinktype(OW_Project *m, int index, int *code)
+int  DLLEXPORT OW_getlinktype(OW_Project *m, int index, EN_LinkType *type)
 {
-  *code = -1;
+  *type = -1;
   if (!m->Openflag) return(102);
   if (index < 1 || index > m->Nlinks) return(204);
-  *code = m->Link[index].Type;
+  *type = m->Link[index].Type;
   return(0);
 }
 

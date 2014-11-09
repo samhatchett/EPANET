@@ -5,20 +5,45 @@
 #include "inpfile.h"
 
 
+
 int   main(int argc, char *argv[])
 {
-  
-  OW_Project *m1;
+  char valveName[32];
+  OW_Project *m;
   long t1;
+  
+  OW_open("/Users/sam/Desktop/gcww_v5.inp", &m, "report.rpt", "bin.out");
+  
+  
+  int nLinks;
+  OW_getcount(m, EN_LINKCOUNT, &nLinks);
+  
+  for (int i = 1; i <= nLinks; ++i) {
+    
+    EN_LinkType type;
+    OW_getlinktype(m, i, &type);
+    
+    if (type == EN_TCV) {
+      
+      OW_getlinkid(m, i, valveName);
+      
+      double val;
+      OW_getlinkvalue(m, i, EN_INITSETTING, &val);
+      
+      
+      
+      if (val >= 10000) {
+        // tcv is assumed closed.
+        fprintf(stdout, "%s      CLOSED\n", valveName);
+      }
+      
+    }
+    
+  }
+  
+  
+  
   /*
-  OW_open("/Users/sam/Desktop/sampletown.inp", &m1, "report.rpt", "bin.out");
-  OW_openH(m1);
-  OW_initH(m1, EN_NOSAVE);
-  OW_runH(m1, &t1);
-  
-  */
-  
-  
   
   OW_Project *model;
   OW_newNetwork(&model);
@@ -54,6 +79,6 @@ int   main(int argc, char *argv[])
   
   fprintf(stdout, "%f", flow);
   
-  
+  */
   
 }

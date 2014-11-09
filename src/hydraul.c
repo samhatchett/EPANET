@@ -465,8 +465,9 @@ void  setlinkstatus(OW_Project *m, int index, char value, char *s, double *k)
       if (m->Link[index].Type == PUMP) *k = 1.0;
 
 /*** Updated 9/7/00 ***/
-      if (m->Link[index].Type >  PUMP
-      &&  m->Link[index].Type != GPV) *k = MISSING;
+      if (m->Link[index].Type >  PUMP &&  m->Link[index].Type != GPV) {
+        *k = MISSING;
+      }
 
       /* Reset link flow if it was originally closed */
 //      if (*s <= CLOSED) initlinkflow(index, OPEN, *k);
@@ -1401,7 +1402,8 @@ int  valvestatus(OW_Project *m)
    for (i=1; i <= m->Nvalves; i++)                   /* Examine each valve   */
    {
       k = m->Valve[i].Link;                        /* Link index of valve  */
-      if (m->hydraulics.LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
+      if (m->hydraulics.LinkSetting[k] == MISSING)
+        continue;            /* Valve status fixed   */
       n1 = m->Link[k].N1;                          /* Start & end nodes    */
       n2 = m->Link[k].N2;
       s  = m->hydraulics.LinkStatus[k];                                /* Save current status  */

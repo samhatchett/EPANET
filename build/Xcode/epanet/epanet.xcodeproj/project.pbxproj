@@ -137,6 +137,7 @@
 		22322F841068369500641384 /* vars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vars.h; path = ../../../src/vars.h; sourceTree = SOURCE_ROOT; };
 		22322FA9106836B000641384 /* epanet2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = epanet2.h; path = ../../../include/epanet2.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		2255753B17551217009946B1 /* libepanet-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libepanet-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		22AD6E461A0B0FC200902471 /* errors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = errors.h; path = ../../../src/errors.h; sourceTree = "<group>"; };
 		22C85C4E19F7ED67003F756F /* buildNetwork.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = buildNetwork.c; path = ../../../inpfile/buildNetwork.c; sourceTree = "<group>"; };
 		D2AAC0630554660B00DB518D /* libepanet.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libepanet.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -218,6 +219,7 @@
 				22322F831068369500641384 /* types.h */,
 				22322F841068369500641384 /* vars.h */,
 				222CBF5619F6FD2D0049A22D /* networkBuilder.c */,
+				22AD6E461A0B0FC200902471 /* errors.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -572,6 +574,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = macinclude;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
@@ -594,6 +597,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = macinclude;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 			};
 			name = Release;
 		};

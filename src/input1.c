@@ -309,19 +309,26 @@ void  adjustdata(OW_Project *m)
    for (i=1; i <= m->Nlinks; i++)
    {
       Slink *Link = m->Link;
-      if (Link[i].Type > PIPE) continue;
-      if (Link[i].Kb == MISSING) Link[i].Kb = m->Kbulk;  /* Bulk coeff. */
+      if (Link[i].Type > PIPE)
+        continue;
+      if (Link[i].Kb == MISSING)
+        Link[i].Kb = m->Kbulk;  /* Bulk coeff. */
       if (Link[i].Kw == MISSING)                      /* Wall coeff. */
       {
       /* Rfactor is the pipe roughness correlation factor */
-         if (m->Rfactor == 0.0)   Link[i].Kw = m->Kwall;
+         if (m->Rfactor == 0.0)
+           Link[i].Kw = m->Kwall;
          else if ((Link[i].Kc > 0.0) && (Link[i].Diam > 0.0))
          {
-            if (m->Formflag == HW) Link[i].Kw = m->Rfactor/Link[i].Kc;
-            if (m->Formflag == DW) Link[i].Kw = m->Rfactor/ABS(log(Link[i].Kc/Link[i].Diam));
-            if (m->Formflag == CM) Link[i].Kw = m->Rfactor*Link[i].Kc;
+            if (m->Formflag == HW)
+              Link[i].Kw = m->Rfactor/Link[i].Kc;
+            if (m->Formflag == DW)
+              Link[i].Kw = m->Rfactor/ABS(log(Link[i].Kc/Link[i].Diam));
+            if (m->Formflag == CM)
+              Link[i].Kw = m->Rfactor*Link[i].Kc;
          }
-         else Link[i].Kw = 0.0;
+         else
+           Link[i].Kw = 0.0;
       }
    }
    for (i=1; i <= m->Ntanks; i++) {
@@ -606,7 +613,9 @@ void  convertunits(OW_Project *m)
       /*    - for Darcy-Weisbach formula, convert roughness    */
       /*      from millifeet (or mm) to ft (or m)              */
       /*    - for US units, convert diameter from inches to ft */
-         if (m->Formflag  == DW) link->Kc /= (1000.0 * Ucf[ELEV]);
+         if (m->Formflag  == DW) {
+           link->Kc /= (1000.0 * Ucf[ELEV]);
+         }
          link->Diam /= Ucf[DIAM];
          link->Len /= Ucf[LENGTH];
 
@@ -652,12 +661,18 @@ void  convertunits(OW_Project *m)
       /* while for other valves convert pressure setting  */
          link->Diam /= Ucf[DIAM];
          link->Km = 0.02517*link->Km/SQR(link->Diam)/SQR(link->Diam);
-         if (link->Kc != MISSING) switch (link->Type)
-         {
-            case FCV: link->Kc /= Ucf[FLOW]; break;
-            case PRV:
-            case PSV:
-            case PBV: link->Kc /= Ucf[PRESSURE]; break;
+         if (link->Kc != MISSING) {
+           switch (link->Type)
+           {
+             case FCV:
+               link->Kc /= Ucf[FLOW];
+               break;
+             case PRV:
+             case PSV:
+             case PBV:
+               link->Kc /= Ucf[PRESSURE];
+               break;
+           }
          }
       }
 

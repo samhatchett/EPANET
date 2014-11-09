@@ -327,7 +327,7 @@ extern "C" {
   
   int  DLLEXPORT OW_getlinkindex(OW_Project *modelObj, char *id, int *index);
   int  DLLEXPORT OW_getlinkid(OW_Project *modelObj, int index, char *id);
-  int  DLLEXPORT OW_getlinktype(OW_Project *modelObj, int index, int *code);
+  int  DLLEXPORT OW_getlinktype(OW_Project *modelObj, int index, EN_LinkType *type);
   int  DLLEXPORT OW_getlinknodes(OW_Project *modelObj, int index, int *node1, int *node2);
   int  DLLEXPORT OW_getlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
   

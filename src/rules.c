@@ -36,7 +36,7 @@ AUTHOR:     L. Rossman
 #include "funcs.h"
 #define  EXTERN  extern
 #include "vars.h"
-
+#include "errors.h"
 
 enum    Rulewords      {r_RULE,r_IF,r_AND,r_OR,r_THEN,r_ELSE,r_PRIORITY,r_ERROR};
 char    *Ruleword[]  = {w_RULE,w_IF,w_AND,w_OR,w_THEN,w_ELSE,w_PRIORITY,NULL};
@@ -199,7 +199,7 @@ int  ruledata(OW_Project *m)
    key = findmatch(m->Tok[0],Ruleword);
    switch (key)
    {
-      case -1:     err = 201;      /* Unrecognized keyword */
+      case -1:     err = OW_ERR_SYNTAX;      /* Unrecognized keyword */
                    break;
       case r_RULE: m->Nrules++;
                    newrule(m);
@@ -245,7 +245,7 @@ int  ruledata(OW_Project *m)
                        m->RuleState = r_PRIORITY;
                        err = newpriority(m);
                        break;
-      default:         err = 201;
+      default:         err = OW_ERR_SYNTAX;
    }
 
    /* Set RuleState to r_ERROR if errors found */
@@ -352,7 +352,7 @@ int  newpremise(OW_Project *mod, int logop)
    struct Premise *p;
 
    /* Check for correct number of tokens */
-   if (mod->Ntokens != 5 && mod->Ntokens != 6) return(201);
+   if (mod->Ntokens != 5 && mod->Ntokens != 6) return(OW_ERR_SYNTAX);
 
    /* Find network object & id if present */
    i = findmatch(mod->Tok[1],Object);
@@ -360,12 +360,12 @@ int  newpremise(OW_Project *mod, int logop)
    { 
       j = 0;
       v = findmatch(mod->Tok[2],Varword);
-      if (v != r_DEMAND && v != r_TIME && v != r_CLOCKTIME) return(201);
+      if (v != r_DEMAND && v != r_TIME && v != r_CLOCKTIME) return(OW_ERR_SYNTAX);
    }
    else
    {
       v = findmatch(mod->Tok[3],Varword);
-      if (v < 0) return(201);
+      if (v < 0) return(OW_ERR_SYNTAX);
       switch (i) 
       {
          case r_NODE:
@@ -376,7 +376,7 @@ int  newpremise(OW_Project *mod, int logop)
          case r_PIPE:
          case r_PUMP:
          case r_VALVE:  k = r_LINK; break;
-         default: return(201);
+         default: return(OW_ERR_SYNTAX);
       }
       i = k;
       if (i == r_NODE)
@@ -393,9 +393,9 @@ int  newpremise(OW_Project *mod, int logop)
 
 /*** Updated 9/7/00 ***/
             case r_FILLTIME:
-            case r_DRAINTIME: if (j <= mod->Njuncs) return(201); break;
+            case r_DRAINTIME: if (j <= mod->Njuncs) return(OW_ERR_SYNTAX); break;
 
-            default: return(201);
+            default: return(OW_ERR_SYNTAX);
          }
       }
       else
@@ -407,7 +407,7 @@ int  newpremise(OW_Project *mod, int logop)
             case r_FLOW:
             case r_STATUS:
             case r_SETTING: break;
-            default: return(201);
+            default: return(OW_ERR_SYNTAX);
          }
       }
    }
@@ -420,7 +420,7 @@ int  newpremise(OW_Project *mod, int logop)
   
    k = findmatch(mod->Tok[m],Operator);
    if (k < 0)
-     return(201);
+     return(OW_ERR_SYNTAX);
    switch(k)
    {
       case IS:    r = EQ; break;
@@ -492,7 +492,7 @@ int  newaction(OW_Project *m)
   struct aRule *Rule = m->Rule;
   
    /* Check for correct number of tokens */
-   if (m->Ntokens != 6) return(201);
+   if (m->Ntokens != 6) return(OW_ERR_SYNTAX);
 
    /* Check that link exists */
    j = findlink(m,m->Tok[2]);
@@ -936,7 +936,7 @@ void  ruleerrmsg(OW_Project *m, int err)
   
    switch (err)
    {
-      case 201:   strcpy(fmt,R_ERR201);  break;
+      case OW_ERR_SYNTAX:   strcpy(fmt,R_ERR201);  break;
       case 202:   strcpy(fmt,R_ERR202);  break;
       case 203:   strcpy(fmt,R_ERR203);  break;
       case 204:   strcpy(fmt,R_ERR204);  break;
