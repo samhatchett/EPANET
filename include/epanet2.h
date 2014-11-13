@@ -273,7 +273,7 @@ extern "C" {
   
   
   // NEW (>2.00.13) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
-  
+  int  DLLEXPORT OW_newModel(OW_Project **modelObj);
   int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelObj, char *rptFile, char *binOutFile);
   int  DLLEXPORT OW_saveinpfile(OW_Project *modelObj, char *filename);
   int  DLLEXPORT OW_close(OW_Project *modelObj);

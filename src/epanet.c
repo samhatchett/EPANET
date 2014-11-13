@@ -1942,20 +1942,10 @@ void writewin(char *s)
 //   open water analytics expanded methods below                   //
 // ================================================================//
 
-int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char *binOutFile)
+int  DLLEXPORT OW_newModel(OW_Project **modelOut)
 {
-  
   *modelOut = 0;
   OW_Project *m = calloc(1, sizeof(OW_Project));
-  
-  
-  int  errcode = 0;
-  
-  /*** Updated 9/7/00 ***/
-  /* Reset math coprocessor */
-#ifdef DLL
-  _fpreset();
-#endif
   
   /* Set system flags */
   m->Openflag  = FALSE;
@@ -1968,14 +1958,6 @@ int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char
   /*** Updated 9/7/00 ***/
   m->Messageflag = TRUE;
   
-  /* If binary output file being used, then   */
-  /* do not write full results to Report file */
-  /* (use it only for status reports).        */
-  m->Rptflag = 0;
-  if (strlen(binOutFile) == 0) {
-    m->Rptflag = 1;
-  }
-  
   /*** Updated 9/7/00 ***/
   /*** Previous code segment ignored. ***/
   /*** Rptflag now always set to 1.   ***/
@@ -1983,6 +1965,35 @@ int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char
   
   /* Initialize global pointers to NULL. */
   initpointers(m);
+  
+  *modelOut = m;
+  
+  return 0;
+}
+
+int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char *binOutFile)
+{
+  
+  OW_Project *m;
+  OW_newModel(&m);
+  
+  
+  int  errcode = 0;
+  
+  /*** Updated 9/7/00 ***/
+  /* Reset math coprocessor */
+#ifdef DLL
+  _fpreset();
+#endif
+  
+  
+  /* If binary output file being used, then   */
+  /* do not write full results to Report file */
+  /* (use it only for status reports).        */
+  m->Rptflag = 0;
+  if (strlen(binOutFile) == 0) {
+    m->Rptflag = 1;
+  }
   
   /* Open input & report files */
   ERRCODE( openfiles(m, inpFile, rptFile, binOutFile) );
@@ -2043,6 +2054,7 @@ int  DLLEXPORT OW_close(OW_Project *m)
   
   if (!m->Openflag) {
     // not actually open.
+    free(m);
     return 0;
   }
   
@@ -2088,6 +2100,7 @@ int  DLLEXPORT OW_close(OW_Project *m)
   
   free(en_defaultModel);
   
+  free(m);
   return(0);
 }
 
