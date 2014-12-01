@@ -1971,6 +1971,13 @@ int  DLLEXPORT OW_newModel(OW_Project **modelOut)
   return 0;
 }
 
+
+int  DLLEXPORT OW_freeModel(OW_Project *modelObj)
+{
+  free(modelObj);
+  return EN_OK;
+}
+
 int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char *binOutFile)
 {
   
@@ -2055,7 +2062,7 @@ int  DLLEXPORT OW_close(OW_Project *m)
   if (!m->Openflag) {
     // not actually open.
     free(m);
-    return 0;
+    return EN_OK;
   }
   
   freedata(m);
@@ -2100,8 +2107,10 @@ int  DLLEXPORT OW_close(OW_Project *m)
   
   free(en_defaultModel);
   
-  free(m);
-  return(0);
+  
+  OW_freeModel(m);
+  
+  return EN_OK;
 }
 
 
