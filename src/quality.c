@@ -64,6 +64,8 @@ AUTHOR:     L. Rossman
 #include "vars.h"
 #include "mempool.h"
 
+#define   QZERO  1.e-6  /* Equivalent to zero flow -- reference QZERO in hydraul.c */
+
 /*
 ** Macros to identify upstream & downstream nodes of a link
 ** under the current flow and to compute link volume
@@ -1098,6 +1100,7 @@ void release(OW_Project *m, long dt)
   
   double *NodeQual = m->NodeQual;
   double *LinkFlows = m->hydraulics.LinkFlows;
+  char *LinkStatus = m->hydraulics.LinkStatus;
   int Nlinks = m->Nlinks;
   double *TempQual = m->TempQual;
 
@@ -1106,14 +1109,14 @@ void release(OW_Project *m, long dt)
    for (k=1; k<=Nlinks; k++)
    {
 
-      /* Ignore links with no flow */
-      if (LinkFlows[k] == 0.0) continue;
-
       /* Find flow volume released to link from upstream node */
       /* (NOTE: Flow volume is allowed to be > link volume.) */
       n = UP_NODE(m,k);
       q = ABS(LinkFlows[k]);
       v = q*dt;
+
+      /* Ignore links with no flow */
+      if (v <= QZERO*dt || LinkStatus[k] <= CLOSED) continue;
 
       /* Include source contribution in quality released from node. */
       c = NodeQual[n] + TempQual[n];
