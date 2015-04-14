@@ -2632,6 +2632,8 @@ int  DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
       *value = m->Hstep;     // find the lesser of the hydraulic time step length, or the time to next fill/empty
       tanktimestep(m,value);
       break;
+    case EN_RULESTEP: *value = m->Rulestep; break;
+    case EN_HALTFLAG: *value = (long)(m->Haltflag); break;
   }
   return(0);
 }
