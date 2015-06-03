@@ -2546,6 +2546,14 @@ int  DLLEXPORT OW_setreport(OW_Project *m, char *s)
 }
 
 
+int DLLEXPORT OW_controlEnabled(OW_Project *m, int controlIndex)
+{
+  if (controlIndex < 1 || controlIndex > m->Ncontrols) {
+    return EN_DISABLE; // of course it's not enabled. it's not even a control.
+  }
+  
+  return m->Control[controlIndex].isEnabled;
+}
 
 int  DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
 {
@@ -2561,17 +2569,24 @@ int  DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, 
   *controlType = m->Control[controlIndex].Type;
   *linkIdx = m->Control[controlIndex].Link;
   s = m->Control[controlIndex].Setting;
-  if (m->Control[controlIndex].Setting != MISSING) switch (m->Link[*linkIdx].Type)
-  {
-    case PRV:
-    case PSV:
-    case PBV: s *= m->Ucf[PRESSURE]; break;
-    case FCV: s *= m->Ucf[FLOW];
+  if (m->Control[controlIndex].Setting != MISSING) {
+    switch (m->Link[*linkIdx].Type)
+    {
+      case PRV:
+      case PSV:
+      case PBV:
+        s *= m->Ucf[PRESSURE];
+        break;
+      case FCV:
+        s *= m->Ucf[FLOW];
+    }
   }
-  else if (m->Control[controlIndex].Status == OPEN) s = 1.0;
-  
-  /*** Updated 3/1/01 ***/
-  else s = 0.0;
+  else if (m->Control[controlIndex].Status == OPEN) {
+    s = 1.0;
+  }
+  else {
+    s = 0.0; /*** Updated 3/1/01 ***/
+  }
   
   *nodeIdx = m->Control[controlIndex].Node;
   if (*nodeIdx > m->Njuncs) {
@@ -3293,6 +3308,21 @@ int  DLLEXPORT OW_getversion(int *v)
 }
 
 
+int DLLEXPORT OW_setControlEnabled(OW_Project *m, int controlIndex, int enable)
+{
+  if (enable != EN_DISABLE || enable != EN_ENABLE) {
+    return EN_ILLEGAL_VALUE;
+  }
+  
+  if (controlIndex < 1 || controlIndex > m->Ncontrols) {
+    return EN_UNDEFINED_CONTROL; // return error. it's not even a control.
+  }
+  
+  m->Control[controlIndex].isEnabled = enable;
+  
+  return EN_OK;
+}
+
 
 int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level)
 {
@@ -3356,6 +3386,7 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
   if (ctype == TIMEOFDAY) t = (long)ROUND(lvl) % SECperDAY;
   
   /* Reset control's parameters */
+  m->Control[cindex].isEnabled = 1;
   m->Control[cindex].Type = (char)ctype;
   m->Control[cindex].Link = lindex;
   m->Control[cindex].Node = nindex;

@@ -686,6 +686,11 @@ int  controls(OW_Project *m)
    for (i=1; i <= m->Ncontrols; i++)
    {
      Scontrol *control = &(m->Control[i]);
+     // enabled?
+     if ( control->isEnabled == EN_DISABLE ) {
+       continue;
+     }
+     
       /* Make sure that link is defined */
       reset = 0;
       if ( (k = control->Link) <= 0) continue;
@@ -835,6 +840,10 @@ void  controltimestep(OW_Project *m, long *tstep)
    {
       t = 0;
       Scontrol *control = &(m->Control[i]);
+      if (control->isEnabled == EN_DISABLE ) {
+        continue;
+      }
+     
       if ( (n = control->Node) > 0)           /* Node control:       */
       {
          if ((j = n - m->Njuncs) <= 0) continue;     /* Node is a tank      */

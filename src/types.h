@@ -431,6 +431,7 @@ typedef struct     /* VALVE OBJECT */
 
 typedef struct     /* CONTROL STATEMENT */
 {
+   int    isEnabled;/* set to enable or disable this control */
    int    Link;     /* Link index         */
    int    Node;     /* Control node index */
    long   Time;     /* Control time       */
