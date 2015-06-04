@@ -237,6 +237,9 @@ int DLLEXPORT ENepanet(char *f1, char *f2, char *f3, void (*pviewprog) (char *))
     int  errcode = 0;
     viewprog = pviewprog;
     ERRCODE(ENopen(f1, f2, f3));
+    if (errcode != EN_OK) {
+      return errcode;
+    }
     if (en_defaultModel->Hydflag != USE) {
       ERRCODE(ENsolveH());
     }
@@ -2603,6 +2606,19 @@ int  DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, 
   return(0);
 }
 
+int  DLLEXPORT OW_getRuleName(OW_Project *m, int ruleIndex, char* id)
+{
+  strcpy(id,"");
+  if (!m->Openflag) {
+    return(102);
+  }
+  if (ruleIndex < 1 || ruleIndex > m->Nrules) {
+    return(205);
+  }
+  strcpy(id,m->Rule[ruleIndex].label);
+  return(0);
+}
+
 
 int  DLLEXPORT OW_getcount(OW_Project *m, int code, int *count)
 {
@@ -2617,6 +2633,7 @@ int  DLLEXPORT OW_getcount(OW_Project *m, int code, int *count)
     case EN_PATCOUNT:     *count = m->Npats;     break;
     case EN_CURVECOUNT:   *count = m->Ncurves;   break;
     case EN_CONTROLCOUNT: *count = m->Ncontrols; break;
+    case EN_RULECOUNT:    *count = m->Nrules;    break;
     default: return(251);
   }
   return(0);
@@ -3386,7 +3403,7 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
   if (ctype == TIMEOFDAY) t = (long)ROUND(lvl) % SECperDAY;
   
   /* Reset control's parameters */
-  m->Control[cindex].isEnabled = 1;
+  m->Control[cindex].isEnabled = EN_ENABLE;
   m->Control[cindex].Type = (char)ctype;
   m->Control[cindex].Link = lindex;
   m->Control[cindex].Node = nindex;
@@ -3396,6 +3413,24 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
   m->Control[cindex].Time = t;
   return(0);
 }
+
+
+int  DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
+{
+  if (enable != EN_DISABLE || enable != EN_ENABLE) {
+    return EN_ILLEGAL_VALUE;
+  }
+  
+  if (ruleIndex < 1 || ruleIndex > m->Nrules) {
+    return EN_UNDEFINED_CONTROL; // return error. it's not even a control.
+  }
+  
+  m->Rule[ruleIndex].isEnabled = enable;
+  
+  return EN_OK;
+}
+
+
 
 
 int  DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)

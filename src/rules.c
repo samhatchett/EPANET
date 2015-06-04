@@ -158,21 +158,28 @@ int checkrules(OW_Project *m, long dt)
    r = 0;
    for (i=1; i <= m->Nrules; i++)
    {
+     // is the rule enabled?
+     if (m->Rule[i].isEnabled == EN_DISABLE) {
+       continue;
+     }
+     
       /* If premises true, add THEN clauses to action list. */
-      if (evalpremises(m,i) == TRUE)
+      if (evalpremises(m,i) == TRUE) {
         updateactlist(m,i,m->Rule[i].Tchain);
+      }
 
       /* If premises false, add ELSE actions to list. */
-      else
-      {
-          if (m->Rule[i].Fchain != NULL)
-            updateactlist(m,i,m->Rule[i].Fchain);
+      else {
+        if (m->Rule[i].Fchain != NULL) {
+          updateactlist(m,i,m->Rule[i].Fchain);
+        }
       }
    }
 
    /* Execute actions then clear list. */
-   if (m->ActList != NULL)
+   if (m->ActList != NULL) {
      r = takeactions(m);
+   }
   
    clearactlist(m);
    return(r);
@@ -326,6 +333,7 @@ void  newrule(OW_Project *m)
 {
   struct aRule *Rule = m->Rule;
    strncpy(Rule[m->Nrules].label, m->Tok[1], MAXID);
+   Rule[m->Nrules].isEnabled = EN_ENABLE;
    Rule[m->Nrules].Pchain = NULL;
    Rule[m->Nrules].Tchain = NULL;
    Rule[m->Nrules].Fchain = NULL;

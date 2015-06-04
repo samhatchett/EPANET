@@ -494,6 +494,7 @@ struct      aRule           /* Control Rule Structure */
 {
   char     label[MAXID+1];    /* Rule character label */
   double    priority;          /* Priority level */
+  int      isEnabled;
   struct   Premise  *Pchain;  /* Linked list of premises */
   struct   Action   *Tchain;  /* Linked list of actions if true */
   struct   Action   *Fchain;  /* Linked list of actions if false */

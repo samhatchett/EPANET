@@ -877,7 +877,7 @@ int  controldata(OW_Project *m)
    m->Ncontrols++;
   int Ncontrols = m->Ncontrols;
    if (Ncontrols > m->MaxControls) return(200);
-   Control[Ncontrols].isEnabled = 1;
+   Control[Ncontrols].isEnabled = EN_ENABLE;
    Control[Ncontrols].Link     = k;
    Control[Ncontrols].Node     = i;
    Control[Ncontrols].Type     = type;

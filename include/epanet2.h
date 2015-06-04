@@ -110,6 +110,7 @@
 #define EN_PATCOUNT     3
 #define EN_CURVECOUNT   4
 #define EN_CONTROLCOUNT 5
+#define EN_RULECOUNT    6
 
 typedef enum {
   EN_JUNCTION  = 0,
@@ -308,9 +309,10 @@ extern "C" {
   int  DLLEXPORT OW_resetreport(OW_Project *modelObj);
   int  DLLEXPORT OW_setreport(OW_Project *modelObj, char *reportFormat);
   
+  int  DLLEXPORT OW_getcount(OW_Project *modelObj, int code, int *count);
   int  DLLEXPORT OW_controlEnabled(OW_Project *modelObj, int controlIndex);
   int  DLLEXPORT OW_getcontrol(OW_Project *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
-  int  DLLEXPORT OW_getcount(OW_Project *modelObj, int code, int *count);
+  int  DLLEXPORT OW_getRuleName(OW_Project *modelObj, int ruleIndex, char* id);
   int  DLLEXPORT OW_getoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT OW_gettimeparam(OW_Project *modelObj, int code, long *value);
   int  DLLEXPORT OW_getflowunits(OW_Project *modelObj, int *code);
@@ -345,6 +347,7 @@ extern "C" {
   
   int  DLLEXPORT OW_setControlEnabled(OW_Project *modelObj, int controlIndex, int enable);
   int  DLLEXPORT OW_setcontrol(OW_Project *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
+  int  DLLEXPORT OW_setRuleEnabled(OW_Project *modelObj, int ruleIndex, int enable);
   int  DLLEXPORT OW_setnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
   int  DLLEXPORT OW_setlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
   int  DLLEXPORT OW_addpattern(OW_Project *modelObj, char *id);
