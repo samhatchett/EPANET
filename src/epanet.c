@@ -2686,6 +2686,8 @@ int  DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
       *value = m->Hstep;     // find the lesser of the hydraulic time step length, or the time to next fill/empty
       tanktimestep(m,value);
       break;
+    case EN_RULESTEP: *value = m->Rulestep; break;
+    case EN_HALTFLAG: *value = (long)(m->Haltflag); break;
   }
   return(0);
 }
@@ -4065,8 +4067,14 @@ int  DLLEXPORT OW_setqualtype(OW_Project *m, int qualcode, char *chemname, char 
 int  DLLEXPORT OW_getqualinfo(OW_Project *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
   OW_getqualtype(m, qualcode, tracenode);
-  strncpy(chemname, m->ChemName,MAXID);
-  strncpy(chemunits, m->ChemUnits,MAXID);
+  if (m->Qualflag == TRACE) {
+    strncpy(chemname, "", MAXID);
+    strncpy(chemunits, "dimensionless", MAXID);
+  }
+  else {
+    strncpy(chemname,m->ChemName,MAXID);
+    strncpy(chemunits,m->ChemUnits,MAXID);
+  }
   return 0;
 }
 
