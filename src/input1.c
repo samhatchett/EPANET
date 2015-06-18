@@ -306,9 +306,9 @@ void  adjustdata(OW_Project *m)
    /*RQtol = RQtol/Hexp;*/
 
 /* See if default reaction coeffs. apply */
-   for (i=1; i <= m->Nlinks; i++)
+   for (i=1; i <= m->network.Nlinks; i++)
    {
-      Slink *Link = m->Link;
+      Slink *Link = m->network.Link;
       if (Link[i].Type > PIPE)
         continue;
       if (Link[i].Kb == MISSING)
@@ -331,15 +331,15 @@ void  adjustdata(OW_Project *m)
            Link[i].Kw = 0.0;
       }
    }
-   for (i=1; i <= m->Ntanks; i++) {
-     if (m->Tank[i].Kb == MISSING) {
-        m->Tank[i].Kb = m->Kbulk;
+   for (i=1; i <= m->network.Ntanks; i++) {
+     if (m->network.Tank[i].Kb == MISSING) {
+        m->network.Tank[i].Kb = m->Kbulk;
      }
    }
 
 /* Use default pattern if none assigned to a demand */
-   for (i=1; i <= m->Nnodes; i++) {
-      for (demand = m->Node[i].D; demand != NULL; demand = demand->next) {
+   for (i=1; i <= m->network.Nnodes; i++) {
+      for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next) {
         if (demand->Pat == 0) {
           demand->Pat = m->DefPat;
         }
@@ -367,10 +367,10 @@ int  inittanks(OW_Project *m)
     int   errcode = 0,
           levelerr;
 
-    for (j=1; j <= m->Ntanks; j++)
+    for (j=1; j <= m->network.Ntanks; j++)
     {
       Scurve *curve;
-      Stank *tank = &(m->Tank[j]);
+      Stank *tank = &(m->network.Tank[j]);
 
     /* Skip reservoirs */
         if (tank->A == 0.0) continue;
@@ -387,8 +387,8 @@ int  inittanks(OW_Project *m)
       
         if (i > 0)
         {
-           curve = &(m->Curve[i]);
-           n = m->Curve[i].Npts - 1;
+           curve = &(m->network.Curve[i]);
+           n = m->network.Curve[i].Npts - 1;
            if (tank->Hmin < curve->X[0] || tank->Hmax > curve->X[n]) {
              levelerr = 1;
            }
@@ -397,7 +397,7 @@ int  inittanks(OW_Project *m)
    /* Report error in levels if found */
         if (levelerr)
         {
-            sprintf(m->Msg,ERR225, m->Node[tank->Node].ID);
+            sprintf(m->Msg,ERR225, m->network.Node[tank->Node].ID);
             writeline(m,m->Msg);
             errcode = 200;
         }
@@ -550,37 +550,37 @@ void  convertunits(OW_Project *m)
    Pdemand demand;   /* Pointer to demand record */
 
   double *Ucf = m->Ucf;
-  Scontrol *Control = m->Control;
-  Snode *Node = m->Node;
+  Scontrol *Control = m->network.Control;
+  Snode *Node = m->network.Node;
   
 /* Convert nodal elevations & initial WQ */
 /* (WQ source units are converted in QUALITY.C */
-   for (i=1; i <= m->Nnodes; i++)
+   for (i=1; i <= m->network.Nnodes; i++)
    {
-      m->Node[i].El /= Ucf[ELEV];
-      m->Node[i].C0 /= Ucf[QUALITY];
+      m->network.Node[i].El /= Ucf[ELEV];
+      m->network.Node[i].C0 /= Ucf[QUALITY];
    }
 
 /* Convert demands */
-   for (i=1; i <= m->Njuncs; i++)
+   for (i=1; i <= m->network.Njuncs; i++)
    {
-       for (demand = m->Node[i].D; demand != NULL; demand = demand->next)
+       for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next)
           demand->Base /= Ucf[DEMAND];
    }
 
 /* Convert emitter discharge coeffs. to head loss coeff. */
    ucf = pow(Ucf[FLOW], m->Qexp) / Ucf[PRESSURE];
-  for (i=1; i <= m->Njuncs; i++) {
-    if (m->Node[i].Ke > 0.0) {
-       m->Node[i].Ke = ucf/pow(m->Node[i].Ke, m->Qexp);
+  for (i=1; i <= m->network.Njuncs; i++) {
+    if (m->network.Node[i].Ke > 0.0) {
+       m->network.Node[i].Ke = ucf/pow(m->network.Node[i].Ke, m->Qexp);
     }
   }
 
 /* Initialize tank variables (convert tank levels to elevations) */
-   for (j=1; j <= m->Ntanks; j++)
+   for (j=1; j <= m->network.Ntanks; j++)
    {
-     Stank *tank = &(m->Tank[j]);
-     Snode *node = &(m->Node[tank->Node]);
+     Stank *tank = &(m->network.Tank[j]);
+     Snode *node = &(m->network.Node[tank->Node]);
       i = tank->Node;
       tank->H0 = node->El + tank->H0 / Ucf[ELEV];
       tank->Hmin = node->El + tank->Hmin / Ucf[ELEV];
@@ -604,9 +604,9 @@ void  convertunits(OW_Project *m)
    m->Kwall /= SECperDAY;
 
 /* Convert units of link parameters */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
-     Slink *link = &(m->Link[k]);
+     Slink *link = &(m->network.Link[k]);
       if (link->Type <= PIPE)
       {
       /* Convert pipe parameter units:                         */
@@ -631,7 +631,7 @@ void  convertunits(OW_Project *m)
       {
       /* Convert units for pump curve parameters */
          i = link->pumpLinkIdx;
-         Spump *pump = &(m->Pump[i]);
+         Spump *pump = &(m->network.Pump[i]);
          if (pump->Ptype == CONST_HP)
          {
          /* For constant hp pump, convert kw to hp */
@@ -681,7 +681,7 @@ void  convertunits(OW_Project *m)
    }
 
 /* Convert units on control settings */
-   for (i=1; i <= m->Ncontrols; i++)
+   for (i=1; i <= m->network.Ncontrols; i++)
    {
       if ( (k = Control[i].Link) == 0)
         continue;
@@ -689,13 +689,13 @@ void  convertunits(OW_Project *m)
       /* j = index of controlling node, and if           */
       /* j > Njuncs, then control is based on tank level */
       /* otherwise control is based on nodal pressure    */
-         if (j > m->Njuncs)
+         if (j > m->network.Njuncs)
               Control[i].Grade = Node[j].El + Control[i].Grade/Ucf[ELEV];
          else Control[i].Grade = Node[j].El + Control[i].Grade/Ucf[PRESSURE];
       }
 
       /* Convert units on valve settings */
-      if (Control[i].Setting != MISSING) switch (m->Link[k].Type)
+      if (Control[i].Setting != MISSING) switch (m->network.Link[k].Type)
       {
          case PRV:
          case PSV:

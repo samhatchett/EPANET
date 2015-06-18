@@ -189,22 +189,22 @@ void  writesummary(OW_Project *m)
    writeline(m," ");
    sprintf(s,FMT19,m->InpFname);
    writeline(m,s);
-   sprintf(s,FMT20,m->Njuncs);
+   sprintf(s,FMT20,m->network.Njuncs);
    writeline(m,s);
-   for (i=1; i <= m->Ntanks; i++) {
-     if (m->Tank[i].A == 0.0) {
+   for (i=1; i <= m->network.Ntanks; i++) {
+     if (m->network.Tank[i].A == 0.0) {
        nres++;
      }
    }
    sprintf(s,FMT21a,nres);
    writeline(m,s);
-   sprintf(s,FMT21b,m->Ntanks-nres);
+   sprintf(s,FMT21b,m->network.Ntanks-nres);
    writeline(m,s);
-   sprintf(s,FMT22,m->Npipes);
+   sprintf(s,FMT22,m->network.Npipes);
    writeline(m,s);
-   sprintf(s,FMT23,m->Npumps);
+   sprintf(s,FMT23,m->network.Npumps);
    writeline(m,s);
-   sprintf(s,FMT24,m->Nvalves);
+   sprintf(s,FMT24,m->network.Nvalves);
    writeline(m,s);
    sprintf(s,FMT25,RptFormTxt[m->Formflag]);
    writeline(m,s);
@@ -227,7 +227,7 @@ void  writesummary(OW_Project *m)
    else if (m->Qualflag == CHEM)
       sprintf(s,FMT30,m->ChemName);
    else if (m->Qualflag == TRACE)
-      sprintf(s,FMT31,m->Node[m->TraceNode].ID);
+      sprintf(s,FMT31,m->network.Node[m->TraceNode].ID);
    else if (m->Qualflag == AGE)
       sprintf(s,FMT32);
    writeline(m,s);
@@ -286,11 +286,11 @@ void  writehydstat(OW_Project *m, int iter, double relerr)
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Stank *Tank = m->Tank;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Stank *Tank = m->network.Tank;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Nlinks = m->Nlinks;
+  int Nlinks = m->network.Nlinks;
   SField *Field = m->Field;
   char *OldStat = m->hydraulics.OldStat;
   
@@ -312,7 +312,7 @@ void  writehydstat(OW_Project *m, int iter, double relerr)
       Old tank status is stored in OldStat[]
       at indexes Nlinks+1 to Nlinks+Ntanks.
    */
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
       n = Tank[i].Node;
       if (ABS(NodeDemand[n]) < 0.001) newstat = CLOSED;
@@ -361,15 +361,15 @@ void  writeenergy(OW_Project *m)
     double csum;
     char   s[MAXLINE+1];
   
-  Slink *Link = m->Link;
-  Spump *Pump = m->Pump;
+  Slink *Link = m->network.Link;
+  Spump *Pump = m->network.Pump;
   
   
-    if (m->Npumps == 0) return;
+    if (m->network.Npumps == 0) return;
     writeline(m," ");
     writeheader(m,ENERHDR,0);
     csum = 0.0;
-    for (j=1; j <= m->Npumps; j++)
+    for (j=1; j <= m->network.Npumps; j++)
     {
         csum += Pump[j].Energy[5];
         if (LineNum == (long)m->PageSize) writeheader(m,ENERHDR,1);
@@ -437,7 +437,7 @@ int  writeresults(OW_Project *mod)
    /* m = larger of # node variables & # link variables */
    /* n = larger of # nodes & # links */
    m = MAX( (QUALITY-DEMAND+1), (FRICTION-FLOW+1) );
-   n = MAX( (mod->Nnodes+1), (mod->Nlinks+1));
+   n = MAX( (mod->network.Nnodes+1), (mod->network.Nlinks+1));
    x = (Pfloat *) calloc(m, sizeof(Pfloat));
    ERRCODE( MEMCHECK(x) );
    if (errcode) return(errcode);
@@ -459,12 +459,12 @@ int  writeresults(OW_Project *mod)
       /* Read in node results & write node table. */
       /* (Remember to offset x[j] by 1 because array is zero-based). */
       for (j = DEMAND; j <= QUALITY; j++)
-         fread((x[j-DEMAND])+1,sizeof(REAL4),mod->Nnodes,mod->OutFile);
+         fread((x[j-DEMAND])+1,sizeof(REAL4),mod->network.Nnodes,mod->OutFile);
       if (nnv > 0 && mod->Nodeflag > 0) writenodetable(mod,x);
 
       /* Read in link results & write link table. */
       for (j=FLOW; j<=FRICTION; j++)
-         fread((x[j-FLOW])+1,sizeof(REAL4),mod->Nlinks,mod->OutFile);
+         fread((x[j-FLOW])+1,sizeof(REAL4),mod->network.Nlinks,mod->OutFile);
       if (nlv > 0 && mod->Linkflag > 0)
         writelinktable(mod,x);
       mod->Htime += mod->Rstep;
@@ -493,8 +493,8 @@ void  writenodetable(OW_Project *m, Pfloat *x)
    double y[MAXVAR];
 
   double *Ucf = m->Ucf;
-  Snode *Node = m->Node;
-  int Njuncs = m->Njuncs;
+  Snode *Node = m->network.Node;
+  int Njuncs = m->network.Njuncs;
   SField *Field = m->Field;
 
   
@@ -502,7 +502,7 @@ void  writenodetable(OW_Project *m, Pfloat *x)
    writeheader(m,NODEHDR,0);
 
    /* For each node: */
-   for (i=1; i <= m->Nnodes; i++)
+   for (i=1; i <= m->network.Nnodes; i++)
    {
 
       /* Place results for each node variable in y */
@@ -561,8 +561,8 @@ void  writelinktable(OW_Project *m, Pfloat *x)
    double y[MAXVAR];
 
   double *Ucf = m->Ucf;
-  Slink *Link = m->Link;
-  int Nlinks = m->Nlinks;
+  Slink *Link = m->network.Link;
+  int Nlinks = m->network.Nlinks;
   SField *Field = m->Field;
   
   
@@ -803,7 +803,7 @@ void  writestatchange(OW_Project *m, int k, char s1, char s2)
 {
    int    j1,j2;
    double setting;
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   double *LinkSetting = m->hydraulics.LinkSetting;
   double *Ucf = m->Ucf;
 
@@ -855,9 +855,9 @@ void writecontrolaction(OW_Project *m, int k, int i)
 {
    int n;
   
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Scontrol *Control = m->Control;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Scontrol *Control = m->network.Control;
   
    switch (Control[i].Type)
    {
@@ -888,7 +888,7 @@ void writeruleaction(OW_Project *m, int k, char *ruleID)
 **--------------------------------------------------------------
 */
 {
-   sprintf(m->Msg,FMT63,clocktime(m->Atime,m->Htime),LinkTxt[m->Link[k].Type], m->Link[k].ID,ruleID);
+   sprintf(m->Msg,FMT63,clocktime(m->Atime,m->Htime),LinkTxt[m->network.Link[k].Type], m->network.Link[k].ID,ruleID);
    writeline(m,m->Msg);
 }
 
@@ -916,16 +916,16 @@ int  writehydwarn(OW_Project *m, int iter, double relerr)
 
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeHead = m->hydraulics.NodeHead;
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Spump *Pump = m->Pump;
-  Svalve *Valve = m->Valve;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Spump *Pump = m->network.Pump;
+  Svalve *Valve = m->network.Valve;
   double *LinkFlows = m->hydraulics.LinkFlows;
   double *LinkSetting = m->hydraulics.LinkSetting;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Njuncs = m->Njuncs;
-  int Npumps = m->Npumps;
-  int Nvalves = m->Nvalves;
+  int Njuncs = m->network.Njuncs;
+  int Npumps = m->network.Npumps;
+  int Nvalves = m->network.Nvalves;
   
   
    /* Check if system unstable */
@@ -1014,7 +1014,7 @@ void  writehyderr(OW_Project *m, int errnode)
 **-----------------------------------------------------------
 */
 {
-   sprintf(m->Msg,FMT62,clocktime(m->Atime,m->Htime), m->Node[errnode].ID);
+   sprintf(m->Msg,FMT62,clocktime(m->Atime,m->Htime), m->network.Node[errnode].ID);
    if (m->Messageflag) writeline(m,m->Msg);
    writehydstat(m,0,0);
    disconnected(m);
@@ -1038,10 +1038,10 @@ int  disconnected(OW_Project *m)
    char *marked;
   
   double *NodeDemand = m->hydraulics.NodeDemand;
-  Snode *Node = m->Node;
-  int Njuncs = m->Njuncs;
-  int Ntanks = m->Ntanks;
-  int Nnodes = m->Nnodes;
+  Snode *Node = m->network.Node;
+  int Njuncs = m->network.Njuncs;
+  int Ntanks = m->network.Ntanks;
+  int Nnodes = m->network.Nnodes;
   char Messageflag = m->Messageflag;
   char *Msg = m->Msg;
 
@@ -1131,7 +1131,7 @@ void  marknodes(OW_Project *mod, int m, int *nodelist, char *marked)
 
       /* Scan all nodes connected to current node */
       i = nodelist[n];
-      for (alink = mod->Adjlist[i]; alink != NULL; alink = alink->next)
+      for (alink = mod->network.Adjlist[i]; alink != NULL; alink = alink->next)
       {
 
          /* Get indexes of connecting link and node */
@@ -1140,11 +1140,11 @@ void  marknodes(OW_Project *mod, int m, int *nodelist, char *marked)
          if (marked[j]) continue;
 
          /* Check if valve connection is in correct direction */
-         switch (mod->Link[k].Type)
+         switch (mod->network.Link[k].Type)
          {
             case CV:
             case PRV:
-            case PSV: if (j == mod->Link[k].N1) continue;
+            case PSV: if (j == mod->network.Link[k].N1) continue;
          }
 
          /* Mark connection node if link not closed */
@@ -1173,14 +1173,14 @@ void getclosedlink(OW_Project *m, int i, char *marked)
    int j,k;
    Padjlist alink;
    marked[i] = 2;
-   for (alink = m->Adjlist[i]; alink != NULL; alink = alink->next)
+   for (alink = m->network.Adjlist[i]; alink != NULL; alink = alink->next)
    {
       k = alink->link;
       j = alink->node;
       if (marked[j] == 2) continue;
       if (marked[j] == 1)
       {
-         sprintf(m->Msg, WARN03c, m->Link[k].ID);
+         sprintf(m->Msg, WARN03c, m->network.Link[k].ID);
          writeline(m,m->Msg);
          return;
       }
@@ -1302,8 +1302,8 @@ int  getnodetype(OW_Project *m, int i)
 **---------------------------------------------------------
 */
 {
-   if (i <= m->Njuncs) return(0);
-   if (m->Tank[i-m->Njuncs].A == 0.0) return(1);
+   if (i <= m->network.Njuncs) return(0);
+   if (m->network.Tank[i-m->network.Njuncs].A == 0.0) return(1);
    return(2);
 }
 

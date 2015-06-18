@@ -166,7 +166,7 @@ int checkrules(OW_Project *m, long dt)
    /* Iterate through each rule */
    m->ActList = NULL;
    r = 0;
-   for (i=1; i <= m->Nrules; i++)
+   for (i=1; i <= m->network.Nrules; i++)
    {
      // is the rule enabled?
      if (m->Rule[i].isEnabled == EN_DISABLE) {
@@ -218,7 +218,7 @@ int  parseRuleData(OW_Project *m)
    {
       case -1:     err = OW_ERR_SYNTAX;      /* Unrecognized keyword */
                    break;
-      case r_RULE: m->Nrules++;
+      case r_RULE: m->network.Nrules++;
                    newrule(m);
                    m->RuleState = r_RULE;
                    break;
@@ -307,7 +307,7 @@ void  clearrules(OW_Project *m)
    struct Action  *a;
    struct Action  *anext;
    int i;
-   for (i=1; i <= m->Nrules; i++)
+   for (i=1; i <= m->network.Nrules; i++)
    {
       p = m->Rule[i]. PremiseChain;
       while (p != NULL)
@@ -342,12 +342,12 @@ void  newrule(OW_Project *m)
 */
 {
   struct aRule *Rule = m->Rule;
-   strncpy(Rule[m->Nrules].label, m->Tok[1], MAXID);
-   Rule[m->Nrules].isEnabled = EN_ENABLE;
-   Rule[m->Nrules]. PremiseChain = NULL;
-   Rule[m->Nrules].TrueChain = NULL;
-   Rule[m->Nrules].FalseChain = NULL;
-   Rule[m->Nrules].priority = 0.0;
+   strncpy(Rule[m->network.Nrules].label, m->Tok[1], MAXID);
+   Rule[m->network.Nrules].isEnabled = EN_ENABLE;
+   Rule[m->network.Nrules]. PremiseChain = NULL;
+   Rule[m->network.Nrules].TrueChain = NULL;
+   Rule[m->network.Nrules].FalseChain = NULL;
+   Rule[m->network.Nrules].priority = 0.0;
    m->Plast = NULL;
 }
 
@@ -415,7 +415,7 @@ int  newpremise(OW_Project *mod, int logop)
 
 /*** Updated 9/7/00 ***/
             case r_FILLTIME:
-            case r_DRAINTIME: if (j <= mod->Njuncs) return(OW_ERR_SYNTAX); break;
+            case r_DRAINTIME: if (j <= mod->network.Njuncs) return(OW_ERR_SYNTAX); break;
 
             default: return(OW_ERR_SYNTAX);
          }
@@ -510,7 +510,7 @@ int  newpremise(OW_Project *mod, int logop)
    /* Add premise to current rule's premise list */
    p->next = NULL;
    if (mod->Plast == NULL)
-     mod->Rule[mod->Nrules]. PremiseChain = p;
+     mod->Rule[mod->network.Nrules]. PremiseChain = p;
    else
      mod->Plast->next = p;
    mod->Plast = p;
@@ -535,7 +535,7 @@ int  newaction(OW_Project *m)
    double x;
    struct Action *a;
 
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   struct aRule *Rule = m->Rule;
   
    /* Check for correct number of tokens */
@@ -584,13 +584,13 @@ int  newaction(OW_Project *m)
    /* Add action to current rule's action list */
    if (m->RuleState == r_THEN)
    {
-     a->next = Rule[m->Nrules].TrueChain;
-     Rule[m->Nrules].TrueChain = a;
+     a->next = Rule[m->network.Nrules].TrueChain;
+     Rule[m->network.Nrules].TrueChain = a;
    }
    else
    {
-      a->next = Rule[m->Nrules].FalseChain;
-      Rule[m->Nrules].FalseChain = a;
+      a->next = Rule[m->network.Nrules].FalseChain;
+      Rule[m->network.Nrules].FalseChain = a;
    }
    return EN_OK;
 }
@@ -607,7 +607,7 @@ int  newpriority(OW_Project *m)
     if (!getfloat(m->Tok[1],&x))
       return(202);
   
-    m->Rule[m->Nrules].priority = x;
+    m->Rule[m->network.Nrules].priority = x;
     return(0);
 }
 
@@ -757,12 +757,12 @@ int  checkvalue(OW_Project *m, struct Premise *premise)
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Stank *Tank = m->Tank;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Stank *Tank = m->network.Tank;
   double *LinkFlows = m->hydraulics.LinkFlows;
   double *LinkSetting = m->hydraulics.LinkSetting;
-  int Njuncs = m->Njuncs;
+  int Njuncs = m->network.Njuncs;
   double Dsystem = m->Dsystem;
   
     i = premise->elementIndex;
@@ -926,7 +926,7 @@ int  takeactions(OW_Project *m)
   
   struct aRule *Rule = m->Rule;
   double *Ucf = m->Ucf;
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   double *LinkSetting = m->hydraulics.LinkSetting;
   char *LinkStatus = m->hydraulics.LinkStatus;
 
@@ -999,7 +999,7 @@ void  ruleerrmsg(OW_Project *m, int err)
    char   fmt[256];
   
   char *Msg = m->Msg;
-  int Nrules = m->Nrules;
+  int Nrules = m->network.Nrules;
   struct aRule *Rule = m->Rule;
   
    switch (err)

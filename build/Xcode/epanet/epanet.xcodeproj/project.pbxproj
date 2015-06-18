@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		220E6FB91B3355CB006CF6B2 /* en_legacy_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */; };
+		220E6FBA1B3355CB006CF6B2 /* en_legacy_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */; };
 		222CBF4C19F6E3D00049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
 		222CBF5519F6E4790049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
 		222CBF5719F6FD2D0049A22D /* networkBuilder.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF5619F6FD2D0049A22D /* networkBuilder.c */; };
@@ -109,6 +111,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = en_legacy_api.c; path = ../../../src/en_legacy_api.c; sourceTree = "<group>"; };
 		222CBF4919F6E3330049A22D /* inpfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inpfile.h; path = ../../../inpfile/inpfile.h; sourceTree = "<group>"; };
 		222CBF4B19F6E3D00049A22D /* inpfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inpfile.c; path = ../../../inpfile/inpfile.c; sourceTree = "<group>"; };
 		222CBF5119F6E46F0049A22D /* libwdsInpFile.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libwdsInpFile.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,18 +123,18 @@
 		22322F721068369500641384 /* funcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = funcs.h; path = ../../../src/funcs.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		22322F731068369500641384 /* hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hash.c; path = ../../../src/hash.c; sourceTree = SOURCE_ROOT; };
 		22322F741068369500641384 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = ../../../src/hash.h; sourceTree = SOURCE_ROOT; };
-		22322F751068369500641384 /* hydraul.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hydraul.c; path = ../../../src/hydraul.c; sourceTree = SOURCE_ROOT; };
-		22322F761068369500641384 /* inpfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inpfile.c; path = ../../../src/inpfile.c; sourceTree = SOURCE_ROOT; };
-		22322F771068369500641384 /* input1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = input1.c; path = ../../../src/input1.c; sourceTree = SOURCE_ROOT; };
-		22322F781068369500641384 /* input2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = input2.c; path = ../../../src/input2.c; sourceTree = SOURCE_ROOT; };
-		22322F791068369500641384 /* input3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = input3.c; path = ../../../src/input3.c; sourceTree = SOURCE_ROOT; };
+		22322F751068369500641384 /* hydraul.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = hydraul.c; path = ../../../src/hydraul.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		22322F761068369500641384 /* inpfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = inpfile.c; path = ../../../src/inpfile.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		22322F771068369500641384 /* input1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = input1.c; path = ../../../src/input1.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		22322F781068369500641384 /* input2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = input2.c; path = ../../../src/input2.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		22322F791068369500641384 /* input3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = input3.c; path = ../../../src/input3.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		22322F7A1068369500641384 /* mempool.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mempool.c; path = ../../../src/mempool.c; sourceTree = SOURCE_ROOT; };
 		22322F7B1068369500641384 /* mempool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mempool.h; path = ../../../src/mempool.h; sourceTree = SOURCE_ROOT; };
-		22322F7C1068369500641384 /* output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = output.c; path = ../../../src/output.c; sourceTree = SOURCE_ROOT; };
+		22322F7C1068369500641384 /* output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = output.c; path = ../../../src/output.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		22322F7D1068369500641384 /* quality.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = quality.c; path = ../../../src/quality.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		22322F7E1068369500641384 /* report.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = report.c; path = ../../../src/report.c; sourceTree = SOURCE_ROOT; };
+		22322F7E1068369500641384 /* report.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = report.c; path = ../../../src/report.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		22322F7F1068369500641384 /* rules.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rules.c; path = ../../../src/rules.c; sourceTree = SOURCE_ROOT; };
-		22322F801068369500641384 /* smatrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = smatrix.c; path = ../../../src/smatrix.c; sourceTree = SOURCE_ROOT; };
+		22322F801068369500641384 /* smatrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; name = smatrix.c; path = ../../../src/smatrix.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		22322F811068369500641384 /* text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = text.h; path = ../../../src/text.h; sourceTree = SOURCE_ROOT; };
 		22322F831068369500641384 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../../src/types.h; sourceTree = SOURCE_ROOT; };
 		22322F841068369500641384 /* vars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vars.h; path = ../../../src/vars.h; sourceTree = SOURCE_ROOT; };
@@ -198,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				22322F711068369500641384 /* epanet.c */,
+				220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */,
 				22322F751068369500641384 /* hydraul.c */,
 				22322F701068369500641384 /* enumstxt.h */,
 				22322F721068369500641384 /* funcs.h */,
@@ -459,6 +463,7 @@
 				222CBF5819F6FD2D0049A22D /* networkBuilder.c in Sources */,
 				2255753F17551234009946B1 /* epanet.c in Sources */,
 				2255754017551234009946B1 /* hash.c in Sources */,
+				220E6FBA1B3355CB006CF6B2 /* en_legacy_api.c in Sources */,
 				2255754117551234009946B1 /* hydraul.c in Sources */,
 				2255754217551234009946B1 /* inpfile.c in Sources */,
 				2255754317551234009946B1 /* input1.c in Sources */,
@@ -477,6 +482,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				220E6FB91B3355CB006CF6B2 /* en_legacy_api.c in Sources */,
 				22322F861068369500641384 /* epanet.c in Sources */,
 				22322F881068369500641384 /* hash.c in Sources */,
 				22322F8A1068369500641384 /* hydraul.c in Sources */,

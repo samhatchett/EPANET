@@ -47,9 +47,9 @@ int DLLEXPORT OW_newNetwork(OW_Project **modelObj)
   
   m->MaxPats = -1;
   addpattern(m,"");
-  m->Pattern[0].Length = 1;
-  m->Pattern[0].F = (double *) calloc(1, sizeof(double));
-  m->Pattern[0].F[0] = 1.0;
+  m->network.Pattern[0].Length = 1;
+  m->network.Pattern[0].F = (double *) calloc(1, sizeof(double));
+  m->network.Pattern[0].F[0] = 1.0;
   
   *modelObj = m;
   return EN_OK;
@@ -74,22 +74,22 @@ int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
     return 203;
   }
   
-  m->Nnodes++;
-  int n_idx = m->Nnodes;
+  m->network.Nnodes++;
+  int n_idx = m->network.Nnodes;
   
   // allocate a new node
   
   int newMemSize = n_idx + 1;
-  m->Node = realloc(m->Node, newMemSize * sizeof(Snode));
+  m->network.Node = realloc(m->network.Node, newMemSize * sizeof(Snode));
   m->NodeQual = realloc(m->NodeQual, newMemSize * sizeof(double));
   m->hydraulics.NodeDemand = realloc(m->hydraulics.NodeDemand, newMemSize * sizeof(double));
   m->hydraulics.NodeHead = realloc(m->hydraulics.NodeHead, newMemSize * sizeof(double));
   
-  Snode *node = &(m->Node[n_idx]);
+  Snode *node = &(m->network.Node[n_idx]);
   /* initialize junction data */
   
   strncpy(node->ID, name, MAXID);
-  ENHashTableInsert(m->NodeHashTable, node->ID, n_idx);        /* see HASH.C */
+  ENHashTableInsert(m->network.NodeHashTable, node->ID, n_idx);        /* see HASH.C */
   node->El  = 0.0;
   node->C0  = 0.0;
   node->S   = NULL;
@@ -108,16 +108,16 @@ int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
   m->hydraulics.NodeDemand[n_idx] = 0;
   
   if (type == EN_JUNCTION) {
-    m->Njuncs++;
+    m->network.Njuncs++;
   }
   if (type == EN_TANK || type == EN_RESERVOIR) {
     
-    m->Ntanks++;
+    m->network.Ntanks++;
     // allocate new tank
-    m->Tank = realloc(m->Tank, (m->Ntanks + 1) * sizeof(Stank));
+    m->network.Tank = realloc(m->network.Tank, (m->network.Ntanks + 1) * sizeof(Stank));
     
-    int iTank = m->Ntanks;
-    Stank *Tank = m->Tank;
+    int iTank = m->network.Ntanks;
+    Stank *Tank = m->network.Tank;
     
     Tank[iTank].Node     = n_idx;    /* Node index.          */
     Tank[iTank].H0       = 0;        /* Init. level.         */
@@ -150,18 +150,18 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
     return 203;
   }
   
-  m->Nlinks++;
-  int l_idx = m->Nlinks;
+  m->network.Nlinks++;
+  int l_idx = m->network.Nlinks;
   
   // allocate new link
   
   int newMemSize = l_idx + 1;
-  m->Link = realloc(m->Link, newMemSize * sizeof(Slink));
+  m->network.Link = realloc(m->network.Link, newMemSize * sizeof(Slink));
   m->hydraulics.LinkFlows = realloc(m->hydraulics.LinkFlows, newMemSize * sizeof(double));
   m->hydraulics.LinkSetting = realloc(m->hydraulics.LinkSetting, newMemSize * sizeof(double));
   m->hydraulics.LinkStatus = realloc(m->hydraulics.LinkStatus, newMemSize * sizeof(char));
   
-  Slink *link = &(m->Link[l_idx]);
+  Slink *link = &(m->network.Link[l_idx]);
   
   // find start/end link
   int n1_idx, n2_idx;
@@ -169,7 +169,7 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
   OW_getnodeindex(m, downstreamNode, &n2_idx);
   
   strncpy(link->ID, name, MAXID);
-  ENHashTableInsert(m->LinkHashTable, link->ID, l_idx);        /* see HASH.C */
+  ENHashTableInsert(m->network.LinkHashTable, link->ID, l_idx);        /* see HASH.C */
   link->N1 = n1_idx;
   link->N2 = n2_idx;
   link->Len = 0;
@@ -181,18 +181,18 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
   link->Type = type;
   link->Stat = OPEN;
   
-  m->hydraulics.LinkStatus[l_idx] = m->Link[l_idx].Stat;
+  m->hydraulics.LinkStatus[l_idx] = m->network.Link[l_idx].Stat;
   
   
   if (type == EN_PIPE) {
     //
   }
   else if (type == EN_PUMP) {
-    m->Npumps++;
-    int pump_idx = m->Npumps;
-    m->Pump = realloc(m->Pump, (pump_idx + 1) * sizeof(Spump));
+    m->network.Npumps++;
+    int pump_idx = m->network.Npumps;
+    m->network.Pump = realloc(m->network.Pump, (pump_idx + 1) * sizeof(Spump));
     
-    Spump *pump = &(m->Pump[pump_idx]);
+    Spump *pump = &(m->network.Pump[pump_idx]);
     pump->Link = l_idx;
     pump->Ptype = NOCURVE;
     pump->Hcurve = 0;
@@ -202,10 +202,10 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
     pump->Epat = 0;
   }
   else /* it's a valve */ {
-    m->Nvalves++;
-    int valve_idx = m->Nvalves;
-    m->Valve = realloc(m->Valve, (valve_idx + 1) * sizeof(Svalve));
-    Svalve *valve = &(m->Valve[valve_idx]);
+    m->network.Nvalves++;
+    int valve_idx = m->network.Nvalves;
+    m->network.Valve = realloc(m->network.Valve, (valve_idx + 1) * sizeof(Svalve));
+    Svalve *valve = &(m->network.Valve[valve_idx]);
     valve->Link = l_idx;
   }
   

@@ -93,13 +93,13 @@ AUTHOR:     L. Rossman
 
 // replacing defs with some real functions that reference the model wrapper.
 int UP_NODE(OW_Project *m, int iLink) {
-  return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N1 : m->Link[(iLink)].N2 );
+  return ( (m->FlowDir[(iLink)]=='+') ? m->network.Link[(iLink)].N1 : m->network.Link[(iLink)].N2 );
 }
 int DOWN_NODE(OW_Project *m, int iLink) {
-  return ( (m->FlowDir[(iLink)]=='+') ? m->Link[(iLink)].N2 : m->Link[(iLink)].N1 );
+  return ( (m->FlowDir[(iLink)]=='+') ? m->network.Link[(iLink)].N2 : m->network.Link[(iLink)].N1 );
 }
 int LINKVOL(OW_Project *m, int iLink) {
-  return ( 0.785398 * m->Link[(iLink)].Len * SQR(m->Link[(iLink)].Diam) );
+  return ( 0.785398 * m->network.Link[(iLink)].Len * SQR(m->network.Link[(iLink)].Diam) );
 }
 
 
@@ -122,17 +122,17 @@ int  openqual(OW_Project *m)
    if (m->SegPool == NULL) errcode = 101;                                         //(2.00.11 - LR)
 
    /* Allocate scratch array & reaction rate array*/
-   m->TempQual  = (double *) calloc(MAX((m->Nnodes+1),(m->Nlinks+1)),sizeof(double));
-   m->PipeRateCoeff  = (double *) calloc((m->Nlinks+1), sizeof(double));
+   m->TempQual  = (double *) calloc(MAX((m->network.Nnodes+1),(m->network.Nlinks+1)),sizeof(double));
+   m->PipeRateCoeff  = (double *) calloc((m->network.Nlinks+1), sizeof(double));
    ERRCODE(MEMCHECK(m->TempQual));
    ERRCODE(MEMCHECK(m->PipeRateCoeff));
 
    /* Allocate memory for WQ solver */
-   n        = m->Nlinks + m->Ntanks + 1;
+   n        = m->network.Nlinks + m->network.Ntanks + 1;
    m->FirstSeg = (Pseg *) calloc(n, sizeof(Pseg));
    m->LastSeg  = (Pseg *) calloc(n, sizeof(Pseg));
    m->FlowDir  = (char *) calloc(n, sizeof(char));
-   n        = m->Nnodes+1;
+   n        = m->network.Nnodes+1;
    m->VolIn    = (double *) calloc(n, sizeof(double));
    m->MassIn   = (double *) calloc(n, sizeof(double));
    ERRCODE(MEMCHECK(m->FirstSeg));
@@ -164,17 +164,17 @@ void  initqual(OW_Project *m)
    int i;
 
    /* Initialize quality, tank volumes, & source mass flows */
-   for (i=1; i <= m->Nnodes; i++) m->NodeQual[i] = m->Node[i].C0;
-   for (i=1; i <= m->Ntanks; i++) m->Tank[i].C = m->Node[m->Tank[i].Node].C0;
-   for (i=1; i <= m->Ntanks; i++) m->Tank[i].V = m->Tank[i].V0;
-   for (i=1; i <= m->Nnodes; i++) {
-     if (m->Node[i].S != NULL) {
-       m->Node[i].S->Smass = 0.0;
+   for (i=1; i <= m->network.Nnodes; i++) m->NodeQual[i] = m->network.Node[i].C0;
+   for (i=1; i <= m->network.Ntanks; i++) m->network.Tank[i].C = m->network.Node[m->network.Tank[i].Node].C0;
+   for (i=1; i <= m->network.Ntanks; i++) m->network.Tank[i].V = m->network.Tank[i].V0;
+   for (i=1; i <= m->network.Nnodes; i++) {
+     if (m->network.Node[i].S != NULL) {
+       m->network.Node[i].S->Smass = 0.0;
      }
    }
   
-   m->QTankVolumes = calloc(m->Ntanks, sizeof(double)); // keep track of previous step's tank volumes.
-   m->QLinkFlow    = calloc(m->Nlinks, sizeof(double)); // keep track of previous step's link flows.
+   m->QTankVolumes = calloc(m->network.Ntanks, sizeof(double)); // keep track of previous step's tank volumes.
+   m->QLinkFlow    = calloc(m->network.Nlinks, sizeof(double)); // keep track of previous step's link flows.
   
    /* Set WQ parameters */
    m->Bucf = 1.0;
@@ -254,11 +254,11 @@ int runqual(OW_Project *m, long *t)
       }
       else {
         // stepwise calculation - hydraulic results are already in memory
-        for (int i=1; i<= m->Ntanks; ++i) {
-          m->QTankVolumes[i-1] = m->Tank[i].V;
+        for (int i=1; i<= m->network.Ntanks; ++i) {
+          m->QTankVolumes[i-1] = m->network.Tank[i].V;
         }
         
-        for (int i=1; i<= m->Nlinks; ++i)
+        for (int i=1; i<= m->network.Nlinks; ++i)
         {
           if (m->hydraulics.LinkStatus[i] <= CLOSED) {
             m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
@@ -269,11 +269,11 @@ int runqual(OW_Project *m, long *t)
    }
    else {
         // stepwise calculation
-        for (int i=1; i<= m->Ntanks; ++i) {
-          m->QTankVolumes[i-1] = m->Tank[i].V;
+        for (int i=1; i<= m->network.Ntanks; ++i) {
+          m->QTankVolumes[i-1] = m->network.Tank[i].V;
         }
         
-        for (int i=1; i<= m->Nlinks; ++i)
+        for (int i=1; i<= m->network.Nlinks; ++i)
         {
           if (m->hydraulics.LinkStatus[i] <= CLOSED) {
             m->QLinkFlow[i-1] = m->hydraulics.LinkFlows[i];
@@ -314,24 +314,24 @@ int nextqual(OW_Project *m, long *tstep)
   
   // if we're operating in stepwise mode, capture the tank levels so we can restore them later.
   if (m->OpenHflag) {
-    tankVolumes = calloc(m->Ntanks, sizeof(double));
-    for (int i=1; i <= m->Ntanks; ++i) {
-      if (m->Tank[i].A != 0) { // skip reservoirs
-        tankVolumes[i-1] = m->Tank[i].V;
+    tankVolumes = calloc(m->network.Ntanks, sizeof(double));
+    for (int i=1; i <= m->network.Ntanks; ++i) {
+      if (m->network.Tank[i].A != 0) { // skip reservoirs
+        tankVolumes[i-1] = m->network.Tank[i].V;
       }
     }
     
     // restore the previous step's tank volumes
-    for (int i=1; i <= m->Ntanks; i++) {
-      if (m->Tank[i].A != 0) { // skip reservoirs again
-        int n = m->Tank[i].Node;
-        m->Tank[i].V = m->QTankVolumes[i-1];
-        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+    for (int i=1; i <= m->network.Ntanks; i++) {
+      if (m->network.Tank[i].A != 0) { // skip reservoirs again
+        int n = m->network.Tank[i].Node;
+        m->network.Tank[i].V = m->QTankVolumes[i-1];
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->network.Tank[i].V);
       }
     }
     
     // restore the previous step's pipe link flows
-    for (int i=1; i <= m->Nlinks; i++) {
+    for (int i=1; i <= m->network.Nlinks; i++) {
       if (m->hydraulics.LinkStatus[i] <= CLOSED) {
         m->hydraulics.LinkFlows[i] = 0.0;
       }
@@ -358,15 +358,15 @@ int nextqual(OW_Project *m, long *tstep)
   
   // restore tank levels to post-runH state, if needed.
   if (m->OpenHflag) {
-    for (int i=1; i <= m->Ntanks; i++) {
-      if (m->Tank[i].A != 0) { // skip reservoirs again
-        int n = m->Tank[i].Node;
-        m->Tank[i].V = tankVolumes[i-1];
-        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->Tank[i].V);
+    for (int i=1; i <= m->network.Ntanks; i++) {
+      if (m->network.Tank[i].A != 0) { // skip reservoirs again
+        int n = m->network.Tank[i].Node;
+        m->network.Tank[i].V = tankVolumes[i-1];
+        m->hydraulics.NodeHead[n] = tankgrade(m, i, m->network.Tank[i].V);
       }
     }
     
-    for (int i=1; i <= m->Nlinks; ++i) {
+    for (int i=1; i <= m->network.Nlinks; ++i) {
       if (m->hydraulics.LinkStatus[i] <= CLOSED) {
         m->hydraulics.LinkFlows[i] = m->QLinkFlow[i-1];
       }
@@ -526,15 +526,15 @@ char  setReactflag(OW_Project *m)
    else if (m->Qualflag == AGE)   return(1);
    else
    {
-      for (i=1; i <= m->Nlinks; i++)
+      for (i=1; i <= m->network.Nlinks; i++)
       {
-         if (m->Link[i].Type <= PIPE)
+         if (m->network.Link[i].Type <= PIPE)
          {
-            if (m->Link[i].Kb != 0.0 || m->Link[i].Kw != 0.0) return(1);
+            if (m->network.Link[i].Kb != 0.0 || m->network.Link[i].Kw != 0.0) return(1);
          }
       }
-      for (i=1; i <= m->Ntanks; i++)
-         if (m->Tank[i].Kb != 0.0) return(1);
+      for (i=1; i <= m->network.Ntanks; i++)
+         if (m->network.Tank[i].Kb != 0.0) return(1);
    }
    return(0);
 }
@@ -584,7 +584,7 @@ void  initsegs(OW_Project *m)
    double   c,v;
 
    /* Examine each link */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
 
       /* Establish flow direction */
@@ -599,40 +599,40 @@ void  initsegs(OW_Project *m)
 
       /* Find quality of downstream node */
       j = DOWN_NODE(m,k);
-      if (j <= m->Njuncs) c = m->NodeQual[j];
-      else             c = m->Tank[j - m->Njuncs].C;
+      if (j <= m->network.Njuncs) c = m->NodeQual[j];
+      else             c = m->network.Tank[j - m->network.Njuncs].C;
 
       /* Fill link with single segment with this quality */
       addseg(m,k,LINKVOL(m,k),c);
    }
 
    /* Initialize segments in tanks that use them */
-   for (j=1; j <= m->Ntanks; j++)
+   for (j=1; j <= m->network.Ntanks; j++)
    {
 
       /* Skip reservoirs & complete mix tanks */
-      if (m->Tank[j].A == 0.0
-      ||  m->Tank[j].MixModel == MIX1) continue;
+      if (m->network.Tank[j].A == 0.0
+      ||  m->network.Tank[j].MixModel == MIX1) continue;
 
       /* Tank segment pointers are stored after those for links */
-      k = m->Nlinks + j;
-      c = m->Tank[j].C;
+      k = m->network.Nlinks + j;
+      c = m->network.Tank[j].C;
       m->LastSeg[k] = NULL;
       m->FirstSeg[k] = NULL;
 
       /* Add 2 segments for 2-compartment model */
-      if (m->Tank[j].MixModel == MIX2)
+      if (m->network.Tank[j].MixModel == MIX2)
       {
-         v = MAX(0, m->Tank[j].V - m->Tank[j].V1max);
+         v = MAX(0, m->network.Tank[j].V - m->network.Tank[j].V1max);
          addseg(m,k,v,c);
-         v = m->Tank[j].V - v;
+         v = m->network.Tank[j].V - v;
          addseg(m,k,v,c);
       }
 
       /* Add one segment for FIFO & LIFO models */
       else
       {
-         v = m->Tank[j].V;
+         v = m->network.Tank[j].V;
          addseg(m,k,v,c);
       }
    }
@@ -653,7 +653,7 @@ void  reorientsegs(OW_Project *m)
    char   newdir;
 
    /* Examine each link */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
 
       /* Find new flow direction */
@@ -700,13 +700,13 @@ void  updatesegs(OW_Project *m, long dt)
    double  cseg, rsum, vsum;
 
    /* Examine each link in network */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
 
       /* Skip zero-length links (pumps & valves) */
       rsum = 0.0;
       vsum = 0.0;
-      if (m->Link[k].Len == 0.0) continue;
+      if (m->network.Link[k].Len == 0.0) continue;
 
       /* Examine each segment of the link */
       seg = m->FirstSeg[k];
@@ -818,13 +818,13 @@ void accumulate(OW_Project *m, long dt)
   Pseg *LastSeg = m->LastSeg;
 
    /* Re-set memory used to accumulate mass & volume */
-   memset(m->VolIn,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->MassIn,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->TempQual,0,(m->Nnodes+1)*sizeof(double));
+   memset(m->VolIn,0,(m->network.Nnodes+1)*sizeof(double));
+   memset(m->MassIn,0,(m->network.Nnodes+1)*sizeof(double));
+   memset(m->TempQual,0,(m->network.Nnodes+1)*sizeof(double));
 
    /* Compute average conc. of segments adjacent to each node */
    /* (For use if there is no transport through the node) */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
       j = DOWN_NODE(m,k);             /* Downstream node */
       if (m->FirstSeg[k] != NULL)      /* Accumulate concentrations */
@@ -840,16 +840,16 @@ void accumulate(OW_Project *m, long dt)
       }
    }
   
-  for (k=1; k <= m->Nnodes; k++) {
+  for (k=1; k <= m->network.Nnodes; k++) {
     if (m->VolIn[k] > 0.0) {
       m->TempQual[k] = m->MassIn[k] / m->VolIn[k];
     }
   }
   
    /* Move mass from first segment of each pipe into downstream node */
-   memset(m->VolIn,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->MassIn,0,(m->Nnodes+1)*sizeof(double));
-   for (k=1; k <= m->Nlinks; k++)
+   memset(m->VolIn,0,(m->network.Nnodes+1)*sizeof(double));
+   memset(m->MassIn,0,(m->network.Nnodes+1)*sizeof(double));
+   for (k=1; k <= m->network.Nlinks; k++)
    {
       i = UP_NODE(m,k);               /* Upstream node */
       j = DOWN_NODE(m,k);             /* Downstream node */
@@ -935,7 +935,7 @@ void updatenodes(OW_Project *m, long dt)
   
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  int Njuncs = m->Njuncs;
+  int Njuncs = m->network.Njuncs;
   char Qualflag = m->Qualflag;
   double *TempQual = m->TempQual;
   double *VolIn = m->VolIn;
@@ -980,11 +980,11 @@ void sourceinput(OW_Project *m, long dt)
 
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  Snode *Node = m->Node;
-  Stank *Tank = m->Tank;
-  int Njuncs = m->Njuncs;
-  int Ntanks = m->Ntanks;
-  int Nnodes = m->Nnodes;
+  Snode *Node = m->network.Node;
+  Stank *Tank = m->network.Tank;
+  int Njuncs = m->network.Njuncs;
+  int Ntanks = m->network.Ntanks;
+  int Nnodes = m->network.Nnodes;
   char Qualflag = m->Qualflag;
   double *TempQual = m->TempQual;
 
@@ -1101,7 +1101,7 @@ void release(OW_Project *m, long dt)
   double *NodeQual = m->NodeQual;
   double *LinkFlows = m->hydraulics.LinkFlows;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Nlinks = m->Nlinks;
+  int Nlinks = m->network.Nlinks;
   double *TempQual = m->TempQual;
 
   
@@ -1156,10 +1156,10 @@ void  updatesourcenodes(OW_Project *m, long dt)
    Psource source;
 
   double *NodeQual = m->NodeQual;
-  Snode *Node = m->Node;
-  Stank *Tank = m->Tank;
-  int Njuncs = m->Njuncs;
-  int Nnodes = m->Nnodes;
+  Snode *Node = m->network.Node;
+  Stank *Tank = m->network.Tank;
+  int Njuncs = m->network.Njuncs;
+  int Nnodes = m->network.Nnodes;
   char Qualflag = m->Qualflag;
   double *TempQual = m->TempQual;
   
@@ -1199,9 +1199,9 @@ void  updatetanks(OW_Project *m, long dt)
     int   i,n;
 
   double *NodeQual = m->NodeQual;
-  Snode *Node = m->Node;
-  Stank *Tank = m->Tank;
-  int Ntanks = m->Ntanks;
+  Snode *Node = m->network.Node;
+  Stank *Tank = m->network.Tank;
+  int Ntanks = m->network.Ntanks;
 
    /* Examine each reservoir & tank */
    for (i=1; i<=Ntanks; i++)
@@ -1274,7 +1274,7 @@ void  tankmix1(OW_Project *m, int i, long dt)
 
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  Stank *Tank = m->Tank;
+  Stank *Tank = m->network.Tank;
   
    /* React contents of tank */
    c = tankreact(m,Tank[i].C,Tank[i].V,Tank[i].Kb,dt);
@@ -1327,8 +1327,8 @@ void  tankmix2(OW_Project *m, int i, long dt)
 
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  Stank *Tank = m->Tank;
-  int Nlinks = m->Nlinks;
+  Stank *Tank = m->network.Tank;
+  int Nlinks = m->network.Nlinks;
   
    /* Identify segments for each compartment */
    k = Nlinks + i;
@@ -1419,8 +1419,8 @@ void  tankmix3(OW_Project *m, int i, long dt)
   
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  Stank *Tank = m->Tank;
-  int Nlinks = m->Nlinks;
+  Stank *Tank = m->network.Tank;
+  int Nlinks = m->network.Nlinks;
   Pseg FreeSeg = m->FreeSeg;
   Pseg *FirstSeg = m->FirstSeg;
   Pseg *LastSeg = m->LastSeg;
@@ -1521,8 +1521,8 @@ void  tankmix4(OW_Project *m, int i, long dt)
 
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeQual = m->NodeQual;
-  Stank *Tank = m->Tank;
-  int Nlinks = m->Nlinks;
+  Stank *Tank = m->network.Tank;
+  int Nlinks = m->network.Nlinks;
   Pseg FreeSeg = m->FreeSeg;
   Pseg *FirstSeg = m->FirstSeg;
   Pseg *LastSeg = m->LastSeg;
@@ -1641,8 +1641,8 @@ double  sourcequal(OW_Project *m, Psource source)
    /* Apply time pattern if assigned */
    i = source->Pat;
    if (i == 0) return(c);
-   k = ((m->Qtime + m->Pstart) / m->Pstep) % (long)m->Pattern[i].Length;
-   return(c * m->Pattern[i].F[k]);
+   k = ((m->Qtime + m->Pstart) / m->Pstep) % (long)m->network.Pattern[i].Length;
+   return(c * m->network.Pattern[i].F[k]);
 }
 
 
@@ -1670,7 +1670,7 @@ double  avgqual(OW_Project *m, int k)
        seg = seg->prev;
    }
    if (vsum > 0.0) return(msum/vsum);
-   else return( (m->NodeQual[m->Link[k].N1] + m->NodeQual[m->Link[k].N2])/2. );
+   else return( (m->NodeQual[m->network.Link[k].N1] + m->NodeQual[m->network.Link[k].N2])/2. );
 }
 
 
@@ -1686,11 +1686,11 @@ void  ratecoeffs(OW_Project *m)
    int   k;
    double kw;
 
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
-      kw = m->Link[k].Kw;
+      kw = m->network.Link[k].Kw;
       if (kw != 0.0) kw = piperate(m,k);
-      m->Link[k].Rc = kw;
+      m->network.Link[k].Rc = kw;
       m->PipeRateCoeff[k] = 0.0;
    }
 }                         /* End of ratecoeffs */
@@ -1710,7 +1710,7 @@ double piperate(OW_Project *m, int k)
    double a,d,u,kf,kw,y,Re,Sh;
   
   double *Ucf = m->Ucf;
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   double *LinkFlows = m->hydraulics.LinkFlows;
 
    d = Link[k].Diam;                    /* Pipe diameter, ft */
@@ -1772,7 +1772,7 @@ double  pipereact(OW_Project *m, int k, double c, double v, long dt)
 {
    double cnew, dc, dcbulk, dcwall, rbulk, rwall;
   
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
 
    /* For water age (hrs), update concentration by timestep */
    if (m->Qualflag == AGE) return(c+(double)dt/3600.0);

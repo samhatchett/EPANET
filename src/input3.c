@@ -64,17 +64,17 @@ int  juncdata(OW_Project *m)
    double    el,y = 0.0;
    Pdemand  demand;
    STmplist *pat;
-   Snode *Node = m->Node;
+   Snode *Node = m->network.Node;
 
 /* Add new junction to data base */
    n = m->Ntokens;
-   if (m->Nnodes == m->MaxNodes)
+   if (m->network.Nnodes == m->MaxNodes)
      return(200);
   
-   m->Njuncs++;
-   m->Nnodes++;
+   m->network.Njuncs++;
+   m->network.Nnodes++;
   
-   if (!addnodeID(m, m->Njuncs, m->Tok[0]))
+   if (!addnodeID(m, m->network.Njuncs, m->Tok[0]))
      return(215);
   
   
@@ -93,11 +93,11 @@ int  juncdata(OW_Project *m)
    }
 
 /* Save junction data */
-   Node[m->Njuncs].El  = el;
-   Node[m->Njuncs].C0  = 0.0;
-   Node[m->Njuncs].S   = NULL;
-   Node[m->Njuncs].Ke  = 0.0;
-   Node[m->Njuncs].Rpt = 0;
+   Node[m->network.Njuncs].El  = el;
+   Node[m->network.Njuncs].C0  = 0.0;
+   Node[m->network.Njuncs].S   = NULL;
+   Node[m->network.Njuncs].Ke  = 0.0;
+   Node[m->network.Njuncs].Rpt = 0;
 
 /* Create a new demand record */
 /*** Updated 6/24/02 ***/
@@ -107,11 +107,11 @@ int  juncdata(OW_Project *m)
       if (demand == NULL) return(101);
       demand->Base = y;
       demand->Pat = p;
-      demand->next = Node[m->Njuncs].D;
-      Node[m->Njuncs].D = demand;
-      m->hydraulics.NodeDemand[m->Njuncs] = y;
+      demand->next = Node[m->network.Njuncs].D;
+      Node[m->network.Njuncs].D = demand;
+      m->hydraulics.NodeDemand[m->network.Njuncs] = y;
    }
-   else m->hydraulics.NodeDemand[m->Njuncs] = MISSING;
+   else m->hydraulics.NodeDemand[m->network.Njuncs] = MISSING;
 /*** end of update ***/
    return(0);
 }                        /* end of juncdata */
@@ -144,20 +144,20 @@ int  tankdata(OW_Project *m)
          diam      = 0.0, /* Diameter */
          area;            /* X-sect. area */
    STmplist *t;
-   Snode *Node = m->Node;
-   Stank *Tank = m->Tank;
+   Snode *Node = m->network.Node;
+   Stank *Tank = m->network.Tank;
    STmplist *Curvelist = m->Curvelist;
    char **Tok = m->Tok;
 
 /* Add new tank to data base */
    n = m->Ntokens;
   
-   if (m->Ntanks == m->MaxTanks ||  m->Nnodes == m->MaxNodes)
+   if (m->network.Ntanks == m->MaxTanks ||  m->network.Nnodes == m->MaxNodes)
      return(200);
   
-   m->Ntanks++;
-   m->Nnodes++;
-   i = m->MaxJuncs + m->Ntanks;                    /* i = node index.     */
+   m->network.Ntanks++;
+   m->network.Nnodes++;
+   i = m->MaxJuncs + m->network.Ntanks;                    /* i = node index.     */
   
    if (!addnodeID(m, i, Tok[0]))
      return(215);    /* Add ID to database. */
@@ -196,7 +196,7 @@ int  tankdata(OW_Project *m)
       }
    }
 
-   int iTank = m->Ntanks;
+   int iTank = m->network.Ntanks;
    Node[i].Rpt           = 0;
    Node[i].El            = el;               /* Elevation.           */
    Node[i].C0            = 0.0;              /* Init. quality.       */
@@ -257,12 +257,12 @@ int  pipedata(OW_Project *m)
   
 /* Add new pipe to data base */
    n = m->Ntokens;
-   if (m->Nlinks == m->MaxLinks)
+   if (m->network.Nlinks == m->MaxLinks)
      return(200);
   
-   m->Npipes++;
-   m->Nlinks++;
-   if (!addlinkID(m, m->Nlinks, Tok[0])) return(215);
+   m->network.Npipes++;
+   m->network.Nlinks++;
+   if (!addlinkID(m, m->network.Nlinks, Tok[0])) return(215);
 
 /* Check for valid data */
    if (n < 6) {
@@ -307,8 +307,8 @@ int  pipedata(OW_Project *m)
    if (lcoeff < 0.0) return(202);
 
 /* Save pipe data */
-   Slink *Link = m->Link;
-   int Nlinks = m->Nlinks;
+   Slink *Link = m->network.Link;
+   int Nlinks = m->network.Nlinks;
   
    Link[Nlinks].N1    = j1;                  /* Start-node index */
    Link[Nlinks].N2    = j2;                  /* End-node index   */
@@ -354,12 +354,12 @@ int  pumpdata(OW_Project *mod)
    n = mod->Ntokens;
   char **Tok = mod->Tok;
   
-   if (mod->Nlinks == mod->MaxLinks ||
-       mod->Npumps == mod->MaxPumps
+   if (mod->network.Nlinks == mod->MaxLinks ||
+       mod->network.Npumps == mod->MaxPumps
       ) return(200);
-   mod->Nlinks++;
-   mod->Npumps++;
-   if (!addlinkID(mod, mod->Nlinks, Tok[0])) return(215);
+   mod->network.Nlinks++;
+   mod->network.Npumps++;
+   if (!addlinkID(mod, mod->network.Nlinks, Tok[0])) return(215);
 
 /* Check for valid data */
    if (n < 4) return(OW_ERR_SYNTAX);
@@ -371,10 +371,10 @@ int  pumpdata(OW_Project *mod)
    if (j1 == j2) return(222);    
 
 /* Save pump data */
-  Slink *Link = mod->Link;
-  Spump *Pump = mod->Pump;
-  int Nlinks = mod->Nlinks;
-  int Npumps = mod->Npumps;
+  Slink *Link = mod->network.Link;
+  Spump *Pump = mod->network.Pump;
+  int Nlinks = mod->network.Nlinks;
+  int Npumps = mod->network.Npumps;
   
    Link[Nlinks].N1    = j1;               /* Start-node index.  */
    Link[Nlinks].N2    = j2;               /* End-node index.    */
@@ -472,12 +472,12 @@ int  valvedata(OW_Project *m)
   
 /* Add new valve to data base */
    n = m->Ntokens;
-   if (m->Nlinks == m->MaxLinks ||
-       m->Nvalves == m->MaxValves
+   if (m->network.Nlinks == m->MaxLinks ||
+       m->network.Nvalves == m->MaxValves
       ) return(200);
-   m->Nvalves++;
-   m->Nlinks++;
-   if (!addlinkID(m,m->Nlinks,Tok[0])) return(215);
+   m->network.Nvalves++;
+   m->network.Nlinks++;
+   if (!addlinkID(m,m->network.Nlinks,Tok[0])) return(215);
 
 /* Check for valid data */
    if (n < 6)
@@ -525,16 +525,16 @@ int  valvedata(OW_Project *m)
 
 /* Check that PRV, PSV, or FCV not connected to a tank & */
 /* check for illegal connections between pairs of valves.*/
-   if ((j1 > m->Njuncs || j2 > m->Njuncs) &&
+   if ((j1 > m->network.Njuncs || j2 > m->network.Njuncs) &&
        (type == PRV || type == PSV || type == FCV)
       ) return(219);
    if (!valvecheck(m,type,j1,j2)) return(220);
 
 /* Save valve data */
-  int Nlinks = m->Nlinks;
-  int Nvalves = m->Nvalves;
-  Slink *Link = &(m->Link[Nlinks]);
-  Svalve *Valve = m->Valve;
+  int Nlinks = m->network.Nlinks;
+  int Nvalves = m->network.Nvalves;
+  Slink *Link = &(m->network.Link[Nlinks]);
+  Svalve *Valve = m->network.Valve;
   
   
    Link->N1     = j1;                 /* Start-node index. */
@@ -589,7 +589,7 @@ int  patterndata(OW_Project *m)
        f->next = p->x;
        p->x = f;
    }
-   m->Pattern[p->i].Length += n;         /* Save # multipliers for pattern */
+   m->network.Pattern[p->i].Length += n;         /* Save # multipliers for pattern */
    PrevPat = p;                       /* Set previous pattern pointer */
    return(0);
 }                        /* end of patterndata */
@@ -637,7 +637,7 @@ int  curvedata(OW_Project *m)
    fy->value = y;
    fy->next = c->y;
    c->y = fy;
-   m->Curve[c->i].Npts++;
+   m->network.Curve[c->i].Npts++;
 
    /* Save the pointer to this curve */
    PrevCurve = c;
@@ -724,7 +724,7 @@ int  demanddata(OW_Project *m)
   
   char **Tok = m->Tok;
   double *NodeDemand = m->hydraulics.NodeDemand;
-  Snode *Node = m->Node;
+  Snode *Node = m->network.Node;
 
 /* Extract data from tokens */
    n = m->Ntokens;
@@ -741,7 +741,7 @@ int  demanddata(OW_Project *m)
 
 /* Otherwise find node (and pattern) being referenced */
    if ((j = findnode(m,Tok[0])) == 0) return(208);
-   if (j > m->Njuncs) return(208);
+   if (j > m->network.Njuncs) return(208);
    if (n >= 3)
    {
       pat = findID(Tok[2],m->Patlist);
@@ -801,8 +801,8 @@ int  controldata(OW_Project *m)
          level = 0.0;          /* Pressure or tank level */
   
   char **Tok = m->Tok;
-  Slink *Link = m->Link;
-  Scontrol *Control = m->Control;
+  Slink *Link = m->network.Link;
+  Scontrol *Control = m->network.Control;
   
 /* Check for sufficient number of input tokens */
    n = m->Ntokens;
@@ -880,8 +880,8 @@ int  controldata(OW_Project *m)
    }
 
 /* Fill in fields of control data structure */
-   m->Ncontrols++;
-  int Ncontrols = m->Ncontrols;
+   m->network.Ncontrols++;
+  int Ncontrols = m->network.Ncontrols;
    if (Ncontrols > m->MaxControls) return(200);
    Control[Ncontrols].isEnabled = EN_ENABLE;
    Control[Ncontrols].Link     = k;
@@ -946,7 +946,7 @@ int  sourcedata(OW_Project *m)
    source->C0 = c0;
    source->Pat = p;
    source->Type = type;
-   m->Node[j].S = source;
+   m->network.Node[j].S = source;
    return(0);
 }                        /* end of sourcedata */
 
@@ -971,10 +971,10 @@ int  emitterdata(OW_Project *m)
   
    if (n < 2) return(OW_ERR_SYNTAX);
    if ((j = findnode(m,Tok[0])) == 0) return(203);
-   if (j > m->Njuncs) return(209);                 /* Not a junction.*/
+   if (j > m->network.Njuncs) return(209);                 /* Not a junction.*/
    if (!getfloat(Tok[1],&k)) return(202);
    if (k < 0.0) return(202);
-   m->Node[j].Ke = k;
+   m->network.Node[j].Ke = k;
    return(0);
 }
 
@@ -996,8 +996,8 @@ int  qualdata(OW_Project *m)
    long  i,i0,i1;
    double c0;
   
-  int Nnodes = m->Nnodes;
-  Snode *Node = m->Node;
+  int Nnodes = m->network.Nnodes;
+  Snode *Node = m->network.Node;
   char **Tok = m->Tok;
   
    if (Nnodes == 0) return(208);        /* No nodes defined yet */
@@ -1057,12 +1057,12 @@ int  reactdata(OW_Project *m)
    long  i,i1,i2;
    double y;
 
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Stank *Tank = m->Tank;
-  int Njuncs = m->Njuncs;
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Stank *Tank = m->network.Tank;
+  int Njuncs = m->network.Njuncs;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
   char **Tok = m->Tok;
   
 /* Skip line if insufficient data */
@@ -1188,9 +1188,9 @@ int  mixingdata(OW_Project *m)
    int   i,j,n;
    double v;
 
-  Stank *Tank = m->Tank;
-  int Njuncs = m->Njuncs;
-  int Nnodes = m->Nnodes;
+  Stank *Tank = m->network.Tank;
+  int Njuncs = m->network.Njuncs;
+  int Nnodes = m->network.Nnodes;
   char **Tok = m->Tok;
   
    if (Nnodes == 0) return(208);        /* No nodes defined yet */
@@ -1230,8 +1230,8 @@ int  statusdata(OW_Project *m)
    double y = 0.0;
    char  status = ACTIVE;
 
-  Slink *Link = m->Link;
-  int Nlinks = m->Nlinks;
+  Slink *Link = m->network.Link;
+  int Nlinks = m->network.Nlinks;
   char **Tok = m->Tok;
 
    if (Nlinks == 0)
@@ -1318,8 +1318,8 @@ int  energydata(OW_Project *m)
    double y;
    STmplist *t;
 
-  Slink *Link = m->Link;
-  Spump *Pump = m->Pump;
+  Slink *Link = m->network.Link;
+  Spump *Pump = m->network.Pump;
   STmplist *Patlist = m->Patlist;
   STmplist *Curvelist = m->Curvelist;
   char **Tok = m->Tok;
@@ -1475,11 +1475,11 @@ int  reportdata(OW_Project *m)
       else if (match(Tok[n],w_ALL))  m->Nodeflag = 1;  /* All nodes */
       else
       {
-         if (m->Nnodes == 0) return(208);
+         if (m->network.Nnodes == 0) return(208);
          for (i=1; i<=n; i++)
          {
             if ( (j = findnode(m,Tok[i])) == 0) return(208);
-            m->Node[j].Rpt = 1;
+            m->network.Node[j].Rpt = 1;
          }
          m->Nodeflag = 2;
       }
@@ -1493,11 +1493,11 @@ int  reportdata(OW_Project *m)
       else if (match(Tok[n],w_ALL))  m->Linkflag = 1;
       else
       {
-         if (m->Nlinks == 0) return(210);
+         if (m->network.Nlinks == 0) return(210);
          for (i=1; i<=n; i++)
          {
             if ( (j = findlink(m,Tok[i])) == 0) return(210);
-            m->Link[j].Rpt = 1;
+            m->network.Link[j].Rpt = 1;
          }
          m->Linkflag = 2;
       }
@@ -1889,13 +1889,13 @@ int  getpumpcurve(OW_Project *m, int n)
 {
    double a,b,c,h0,h1,h2,q1,q2;
 
-  int Npumps = m->Npumps;
+  int Npumps = m->network.Npumps;
   
    if (n == 1)                /* Const. HP curve       */
    {
       if (m->X[0] <= 0.0) return(202);
-      m->Pump[Npumps].Ptype = CONST_HP;
-      m->Link[m->Nlinks].Km = m->X[0];
+      m->network.Pump[Npumps].Ptype = CONST_HP;
+      m->network.Link[m->network.Nlinks].Km = m->X[0];
    }
    else
    {
@@ -1916,14 +1916,14 @@ int  getpumpcurve(OW_Project *m, int n)
          q2 = m->X[4];
       }
       else return(202);
-      m->Pump[Npumps].Ptype = POWER_FUNC;
+      m->network.Pump[Npumps].Ptype = POWER_FUNC;
       if (!powercurve(h0,h1,h2,q1,q2,&a,&b,&c)) return(206);
-      m->Pump[Npumps].H0 = -a;
-      m->Pump[Npumps].R  = -b;
-      m->Pump[Npumps].N  = c;
-      m->Pump[Npumps].Q0 = q1;
-      m->Pump[Npumps].Qmax  = pow((-a/b),(1.0/c));
-      m->Pump[Npumps].Hmax  = h0;
+      m->network.Pump[Npumps].H0 = -a;
+      m->network.Pump[Npumps].R  = -b;
+      m->network.Pump[Npumps].N  = c;
+      m->network.Pump[Npumps].Q0 = q1;
+      m->network.Pump[Npumps].Qmax  = pow((-a/b),(1.0/c));
+      m->network.Pump[Npumps].Hmax  = h0;
    }
    return(0);
 }
@@ -1979,9 +1979,9 @@ int  valvecheck(OW_Project *m, int type, int j1, int j2)
 {
    int  k, vk, vj1, vj2, vtype;
 
-  Slink *Link = m->Link;
-  Svalve *Valve = m->Valve;
-  int Nvalves = m->Nvalves;
+  Slink *Link = m->network.Link;
+  Svalve *Valve = m->network.Valve;
+  int Nvalves = m->network.Nvalves;
   
    /* Examine each existing valve */
    for (k=1; k <= Nvalves; k++)
@@ -2041,7 +2041,7 @@ void  changestatus(OW_Project *m, int j, char status, double y)
 **--------------------------------------------------------------
 */
 {
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   
    if (Link[j].Type == PIPE || Link[j].Type == GPV) {
      if (status != ACTIVE) {

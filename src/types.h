@@ -542,22 +542,20 @@ typedef struct {
 
 
 
-
-/***** MODEL STRUCT ******/
-
-struct OW_Project {
-  /* Array pointers not allocated and freed in same routine */
+typedef struct {
+  int Nnodes,                /* Number of network nodes      */
+      Ntanks,                /* Number of tanks              */
+      Njuncs,                /* Number of junction nodes     */
+      Nlinks,                /* Number of network links      */
+      Npipes,                /* Number of pipes              */
+      Npumps,                /* Number of pumps              */
+      Nvalves,               /* Number of valves             */
+      Ncontrols,             /* Number of simple controls    */
+      Nrules,                /* Number of control rules      */
+      Npats,                 /* Number of time patterns      */
+      Ncurves,               /* Number of data curves        */
+      Ncoords;               /* Number of Coords             */
   
-  double *PipeRateCoeff,        /* Pipe reaction rate           */
-    *X,                    /* General purpose array        */
-    *TempQual;             /* General purpose array for water quality        */
-  double *NodeQual;
-  
-  double *QTankVolumes;
-  double *QLinkFlow;
-  STmplist *Patlist;              /* Temporary time pattern list  */
-  STmplist *Curvelist;            /* Temporary list of curves     */
-  STmplist *Coordlist;            /* Temporary list of coordinates*/
   Spattern *Pattern;              /* Time patterns                */
   Scurve   *Curve;                /* Curve data                   */
   Scoord   *Coord;                /* Coordinate data              */
@@ -570,19 +568,45 @@ struct OW_Project {
   ENHashTable  *NodeHashTable, *LinkHashTable;            /* Hash tables for ID labels    */
   Padjlist *Adjlist;              /* Node adjacency lists         */
   
+} OW_Network;
+
+
+/***** MODEL STRUCT ******/
+
+struct OW_Project {
   
-  int Nnodes,                /* Number of network nodes      */
-  Ntanks,                /* Number of tanks              */
-  Njuncs,                /* Number of junction nodes     */
-  Nlinks,                /* Number of network links      */
-  Npipes,                /* Number of pipes              */
-  Npumps,                /* Number of pumps              */
-  Nvalves,               /* Number of valves             */
-  Ncontrols,             /* Number of simple controls    */
-  Nrules,                /* Number of control rules      */
-  Npats,                 /* Number of time patterns      */
-  Ncurves,               /* Number of data curves        */
-  Ncoords;               /* Number of Coords             */
+/* heirarchy:
+ 
+ Project
+  - network topology
+     - nodes/links/physical characteristics
+  - state arrays
+  - solver
+     - matrix stuff
+  - options (reaction rates, times and hydraulic/wq options)
+  
+  */
+  
+  
+  
+  
+  OW_Network network;
+  
+  
+  double *PipeRateCoeff,        /* Pipe reaction rate           */
+    *X,                    /* General purpose array        */
+    *TempQual;             /* General purpose array for water quality        */
+  double *NodeQual;
+  
+  double *QTankVolumes;
+  double *QLinkFlow;
+  STmplist *Patlist;              /* Temporary time pattern list  */
+  STmplist *Curvelist;            /* Temporary list of curves     */
+  STmplist *Coordlist;            /* Temporary list of coordinates*/
+
+  
+  
+  
   
   
   

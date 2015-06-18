@@ -135,20 +135,20 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* (Leave demands for [DEMANDS] section) */
 
    fprintf(f,"\n\n[JUNCTIONS]");
-   for (i=1; i <= m->Njuncs; i++)
-      fprintf(f,"\n %-31s %12.4f", m->Node[i].ID, m->Node[i].El * m->Ucf[ELEV]);
+   for (i=1; i <= m->network.Njuncs; i++)
+      fprintf(f,"\n %-31s %12.4f", m->network.Node[i].ID, m->network.Node[i].El * m->Ucf[ELEV]);
 
 /* Write [RESERVOIRS] section */
 
    fprintf(f,"\n\n[RESERVOIRS]");
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      if (m->Tank[i].A == 0.0)
+      if (m->network.Tank[i].A == 0.0)
       {
-         n = m->Tank[i].Node;
-         sprintf(s," %-31s %12.4f",m->Node[n].ID, m->Node[n].El * m->Ucf[ELEV]);
-         if ((j = m->Tank[i].Pat) > 0)
-            sprintf(s1," %-31s",m->Pattern[j].ID);
+         n = m->network.Tank[i].Node;
+         sprintf(s," %-31s %12.4f",m->network.Node[n].ID, m->network.Node[n].El * m->Ucf[ELEV]);
+         if ((j = m->network.Tank[i].Pat) > 0)
+            sprintf(s1," %-31s",m->network.Pattern[j].ID);
          else
             strcpy(s1,"");
          fprintf(f, "\n%s %s", s,s1);
@@ -158,21 +158,21 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [TANKS] section */
 
    fprintf(f,"\n\n[TANKS]");
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      if (m->Tank[i].A > 0.0)
+      if (m->network.Tank[i].A > 0.0)
       {
-         n = m->Tank[i].Node;
+         n = m->network.Tank[i].Node;
          sprintf(s," %-31s %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f",
-            m->Node[n].ID,
-            m->Node[n].El * m->Ucf[ELEV],
-            (m->Tank[i].H0 - m->Node[n].El) * m->Ucf[ELEV],
-            (m->Tank[i].Hmin - m->Node[n].El) * m->Ucf[ELEV],
-            (m->Tank[i].Hmax - m->Node[n].El) * m->Ucf[ELEV],
-            sqrt(4.0 * m->Tank[i].A/PI) * m->Ucf[ELEV],
-            m->Tank[i].Vmin*SQR(m->Ucf[ELEV]) * m->Ucf[ELEV]);
-         if ((j = m->Tank[i].Vcurve) > 0)
-            sprintf(s1,"%-31s",m->Curve[j].ID);
+            m->network.Node[n].ID,
+            m->network.Node[n].El * m->Ucf[ELEV],
+            (m->network.Tank[i].H0 - m->network.Node[n].El) * m->Ucf[ELEV],
+            (m->network.Tank[i].Hmin - m->network.Node[n].El) * m->Ucf[ELEV],
+            (m->network.Tank[i].Hmax - m->network.Node[n].El) * m->Ucf[ELEV],
+            sqrt(4.0 * m->network.Tank[i].A/PI) * m->Ucf[ELEV],
+            m->network.Tank[i].Vmin*SQR(m->Ucf[ELEV]) * m->Ucf[ELEV]);
+         if ((j = m->network.Tank[i].Vcurve) > 0)
+            sprintf(s1,"%-31s",m->network.Curve[j].ID);
          else
             strcpy(s1,"");
          fprintf(f, "\n%s %s", s,s1);
@@ -182,22 +182,22 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [PIPES] section */
 
    fprintf(f,"\n\n[PIPES]");
-   for (i=1; i <= m->Nlinks; i++)
+   for (i=1; i <= m->network.Nlinks; i++)
    {
-      if (m->Link[i].Type <= PIPE)
+      if (m->network.Link[i].Type <= PIPE)
       {
-         d = m->Link[i].Diam;
-         kc = m->Link[i].Kc;
+         d = m->network.Link[i].Diam;
+         kc = m->network.Link[i].Kc;
         
          if (m->Formflag == DW)
            kc = kc * m->Ucf[ELEV]*1000.0;
         
-         km = m->Link[i].Km*SQR(d)*SQR(d)/0.02517;
+         km = m->network.Link[i].Km*SQR(d)*SQR(d)/0.02517;
          sprintf(s," %-31s %-31s %-31s %12.4f %12.4f",
-            m->Link[i].ID,
-            m->Node[m->Link[i].N1].ID,
-            m->Node[m->Link[i].N2].ID,
-            m->Link[i].Len * m->Ucf[LENGTH],
+            m->network.Link[i].ID,
+            m->network.Node[m->network.Link[i].N1].ID,
+            m->network.Node[m->network.Link[i].N2].ID,
+            m->network.Link[i].Len * m->Ucf[LENGTH],
             d * m->Ucf[DIAM]);
         
          if (m->Formflag == DW)
@@ -205,9 +205,9 @@ int  saveinpfile(OW_Project *m, char *fname)
          else
            sprintf(s1, "%12.4f %12.4f", kc, km);
         
-         if (m->Link[i].Type == CV)
+         if (m->network.Link[i].Type == CV)
            sprintf(s2,"CV");
-         else if (m->Link[i].Stat == CLOSED)
+         else if (m->network.Link[i].Stat == CLOSED)
            sprintf(s2,"CLOSED");
          else
            strcpy(s2,"");
@@ -219,22 +219,22 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [PUMPS] section */
 
    fprintf(f, "\n\n[PUMPS]");
-   for (i=1; i <= m->Npumps; i++)
+   for (i=1; i <= m->network.Npumps; i++)
    {
-      Spump *pump = &(m->Pump[i]);
+      Spump *pump = &(m->network.Pump[i]);
       n = pump->Link;
       sprintf(s," %-31s %-31s %-31s",
-         m->Link[n].ID,
-         m->Node[m->Link[n].N1].ID,
-         m->Node[m->Link[n].N2].ID);
+         m->network.Link[n].ID,
+         m->network.Node[m->network.Link[n].N1].ID,
+         m->network.Node[m->network.Link[n].N2].ID);
 
    /* Pump has constant power */
       if (pump->Ptype == CONST_HP)
-         sprintf(s1, "  POWER %.4f", m->Link[n].Km);
+         sprintf(s1, "  POWER %.4f", m->network.Link[n].Km);
 
    /* Pump has a head curve */
       else if ((j = pump->Hcurve) > 0)
-         sprintf(s1, "  HEAD %s", m->Curve[j].ID);
+         sprintf(s1, "  HEAD %s", m->network.Curve[j].ID);
 
    /* Old format used for pump curve */
       else
@@ -249,12 +249,12 @@ int  saveinpfile(OW_Project *m, char *fname)
       strcat(s,s1);
 
       if ((j = pump->Upat) > 0)
-         sprintf(s1,"   PATTERN  %s",m->Pattern[j].ID);
+         sprintf(s1,"   PATTERN  %s",m->network.Pattern[j].ID);
       else strcpy(s1,"");
       strcat(s,s1);
 
-      if (m->Link[n].Kc != 1.0)
-         sprintf(s1, "  SPEED %.4f", m->Link[n].Kc);
+      if (m->network.Link[n].Kc != 1.0)
+         sprintf(s1, "  SPEED %.4f", m->network.Link[n].Kc);
       else strcpy(s1,"");
       strcat(s,s1);
 
@@ -264,30 +264,30 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [VALVES] section */
 
    fprintf(f, "\n\n[VALVES]");
-   for (i=1; i <= m->Nvalves; i++)
+   for (i=1; i <= m->network.Nvalves; i++)
    {
-      n = m->Valve[i].Link;
-      d = m->Link[n].Diam;
-      kc = m->Link[n].Kc;
+      n = m->network.Valve[i].Link;
+      d = m->network.Link[n].Diam;
+      kc = m->network.Link[n].Kc;
       if (kc == MISSING) kc = 0.0;
-      switch (m->Link[n].Type)
+      switch (m->network.Link[n].Type)
       {
          case FCV: kc *= m->Ucf[FLOW]; break;
          case PRV:
          case PSV:
          case PBV: kc *= m->Ucf[PRESSURE]; break;
       }
-      km = m->Link[n].Km*SQR(d)*SQR(d)/0.02517;
+      km = m->network.Link[n].Km*SQR(d)*SQR(d)/0.02517;
 
       sprintf(s," %-31s %-31s %-31s %12.4f %5s",
-         m->Link[n].ID,
-         m->Node[m->Link[n].N1].ID,
-         m->Node[m->Link[n].N2].ID,
+         m->network.Link[n].ID,
+         m->network.Node[m->network.Link[n].N1].ID,
+         m->network.Node[m->network.Link[n].N2].ID,
          d * m->Ucf[DIAM],
-         LinkTxt[m->Link[n].Type]);
+         LinkTxt[m->network.Link[n].Type]);
 
-      if (m->Link[n].Type == GPV && (j = ROUND(m->Link[n].Kc)) > 0)
-         sprintf(s1,"%-31s %12.4f", m->Curve[j].ID, km);
+      if (m->network.Link[n].Type == GPV && (j = ROUND(m->network.Link[n].Kc)) > 0)
+         sprintf(s1,"%-31s %12.4f", m->network.Curve[j].ID, km);
       else sprintf(s1,"%12.4f %12.4f",kc,km);
 
       fprintf(f, "\n%s %s", s,s1);
@@ -297,12 +297,12 @@ int  saveinpfile(OW_Project *m, char *fname)
    
    fprintf(f, "\n\n[DEMANDS]");
    ucf = m->Ucf[DEMAND];
-   for (i=1; i <= m->Njuncs; i++)
+   for (i=1; i <= m->network.Njuncs; i++)
    {
-      for (demand = m->Node[i].D; demand != NULL; demand = demand->next)
+      for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next)
       {
-         sprintf(s," %-31s %14.6f", m->Node[i].ID, ucf*demand->Base);
-         if ((j = demand->Pat) > 0) sprintf(s1,"   %s", m->Pattern[j].ID);
+         sprintf(s," %-31s %14.6f", m->network.Node[i].ID, ucf*demand->Base);
+         if ((j = demand->Pat) > 0) sprintf(s1,"   %s", m->network.Pattern[j].ID);
          else strcpy(s1,"");
          fprintf(f,"\n%s %s",s,s1);
       }
@@ -311,43 +311,43 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [EMITTERS] section */
 
    fprintf(f, "\n\n[EMITTERS]");
-   for (i=1; i <= m->Njuncs; i++)
+   for (i=1; i <= m->network.Njuncs; i++)
    {
-      if (m->Node[i].Ke == 0.0) continue;
-      ke = m->Ucf[FLOW]/pow(m->Ucf[PRESSURE] * m->Node[i].Ke, (1.0 / m->Qexp));
-      fprintf(f,"\n %-31s %14.6f",m->Node[i].ID,ke);
+      if (m->network.Node[i].Ke == 0.0) continue;
+      ke = m->Ucf[FLOW]/pow(m->Ucf[PRESSURE] * m->network.Node[i].Ke, (1.0 / m->Qexp));
+      fprintf(f,"\n %-31s %14.6f",m->network.Node[i].ID,ke);
    }
 
 /* Write [STATUS] section */
 
    fprintf(f, "\n\n[STATUS]");
-   for (i=1; i <= m->Nlinks; i++)
+   for (i=1; i <= m->network.Nlinks; i++)
    {
-      if (m->Link[i].Type <= PUMP)
+      if (m->network.Link[i].Type <= PUMP)
       {
-         if (m->Link[i].Stat == CLOSED)
-            fprintf(f, "\n %-31s %s", m->Link[i].ID, StatTxt[CLOSED]);
+         if (m->network.Link[i].Stat == CLOSED)
+            fprintf(f, "\n %-31s %s", m->network.Link[i].ID, StatTxt[CLOSED]);
 
       /* Write pump speed here for pumps with old-style pump curve input */
-         else if (m->Link[i].Type == PUMP)
+         else if (m->network.Link[i].Type == PUMP)
          {
-            n = m->Link[i].pumpLinkIdx;
+            n = m->network.Link[i].pumpLinkIdx;
             if (
-                 m->Pump[n].Hcurve == 0 &&
-                 m->Pump[n].Ptype != CONST_HP &&
-                 m->Link[i].Kc != 1.0
+                 m->network.Pump[n].Hcurve == 0 &&
+                 m->network.Pump[n].Ptype != CONST_HP &&
+                 m->network.Link[i].Kc != 1.0
                )
-               fprintf(f, "\n %-31s %-.4f", m->Link[i].ID, m->Link[i].Kc);
+               fprintf(f, "\n %-31s %-.4f", m->network.Link[i].ID, m->network.Link[i].Kc);
          }
       }
 
    /* Write fixed-status PRVs & PSVs (setting = MISSING) */
-      else if (m->Link[i].Kc == MISSING)
+      else if (m->network.Link[i].Kc == MISSING)
       {
-         if (m->Link[i].Stat == OPEN)
-            fprintf(f, "\n %-31s %s", m->Link[i].ID, StatTxt[OPEN]);
-         if (m->Link[i].Stat == CLOSED)
-            fprintf(f, "\n%-31s %s", m->Link[i].ID, StatTxt[CLOSED]);
+         if (m->network.Link[i].Stat == OPEN)
+            fprintf(f, "\n %-31s %s", m->network.Link[i].ID, StatTxt[OPEN]);
+         if (m->network.Link[i].Stat == CLOSED)
+            fprintf(f, "\n%-31s %s", m->network.Link[i].ID, StatTxt[CLOSED]);
       }
    }
 
@@ -355,72 +355,72 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* (Use 6 pattern factors per line) */
 
    fprintf(f, "\n\n[PATTERNS]");
-   for (i=1; i <= m->Npats; i++)
+   for (i=1; i <= m->network.Npats; i++)
    {
-      for (j=0; j < m->Pattern[i].Length; j++)
+      for (j=0; j < m->network.Pattern[i].Length; j++)
       {
-        if (j % 6 == 0) fprintf(f,"\n %-31s", m->Pattern[i].ID);
-        fprintf(f," %12.4f", m->Pattern[i].F[j]);
+        if (j % 6 == 0) fprintf(f,"\n %-31s", m->network.Pattern[i].ID);
+        fprintf(f," %12.4f", m->network.Pattern[i].F[j]);
       }
    }
 
 /* Write [CURVES] section */
 
    fprintf(f, "\n\n[CURVES]");
-   for (i=1; i <= m->Ncurves; i++)
+   for (i=1; i <= m->network.Ncurves; i++)
    {
-      for (j=0; j < m->Curve[i].Npts; j++)
+      for (j=0; j < m->network.Curve[i].Npts; j++)
          fprintf(f,"\n %-31s %12.4f %12.4f",
-            m->Curve[i].ID, m->Curve[i].X[j], m->Curve[i].Y[j]);
+            m->network.Curve[i].ID, m->network.Curve[i].X[j], m->network.Curve[i].Y[j]);
    }
 
 /* Write [CONTROLS] section */
 
    fprintf(f, "\n\n[CONTROLS]");
-   for (i=1; i <= m->Ncontrols; i++)
+   for (i=1; i <= m->network.Ncontrols; i++)
    {
    /* Check that controlled link exists */
-      if ( (j = m->Control[i].Link) <= 0) continue;
+      if ( (j = m->network.Control[i].Link) <= 0) continue;
 
    /* Get text of control's link status/setting */
-      if (m->Control[i].Setting == MISSING)
-         sprintf(s, " LINK %s %s ", m->Link[j].ID, StatTxt[m->Control[i].Status]);
+      if (m->network.Control[i].Setting == MISSING)
+         sprintf(s, " LINK %s %s ", m->network.Link[j].ID, StatTxt[m->network.Control[i].Status]);
       else
       {
-         kc = m->Control[i].Setting;
-         switch(m->Link[j].Type)
+         kc = m->network.Control[i].Setting;
+         switch(m->network.Link[j].Type)
          {
             case PRV:
             case PSV:
             case PBV: kc *= m->Ucf[PRESSURE]; break;
             case FCV: kc *= m->Ucf[FLOW];     break;
          }
-         sprintf(s, " LINK %s %.4f", m->Link[j].ID, kc);
+         sprintf(s, " LINK %s %.4f", m->network.Link[j].ID, kc);
       }
       
-      switch (m->Control[i].Type)
+      switch (m->network.Control[i].Type)
       {
       /* Print level control */
          case LOWLEVEL:
          case HILEVEL:
-            n = m->Control[i].Node;
-            kc = m->Control[i].Grade - m->Node[n].El;
-            if (n > m->Njuncs) kc *= m->Ucf[HEAD];
+            n = m->network.Control[i].Node;
+            kc = m->network.Control[i].Grade - m->network.Node[n].El;
+            if (n > m->network.Njuncs) kc *= m->Ucf[HEAD];
             else            kc *= m->Ucf[PRESSURE];
             fprintf(f, "\n%s IF NODE %s %s %.4f", s,
-               m->Node[n].ID, ControlTxt[m->Control[i].Type], kc);
+               m->network.Node[n].ID, ControlTxt[m->network.Control[i].Type], kc);
             break;
 
       /* Print timer control */
          case TIMER:
             fprintf(f, "\n%s AT %s %.4f HOURS",
-               s, ControlTxt[TIMER], m->Control[i].Time/3600.);
+               s, ControlTxt[TIMER], m->network.Control[i].Time/3600.);
             break;
                          
       /* Print time-of-day control */
          case TIMEOFDAY:
             fprintf(f, "\n%s AT %s %s",
-               s, ControlTxt[TIMEOFDAY], clocktime(m->Atime, m->Control[i].Time));
+               s, ControlTxt[TIMEOFDAY], clocktime(m->Atime, m->network.Control[i].Time));
             break;
       }
    }            
@@ -429,25 +429,25 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* (Skip nodes with default quality of 0) */
 
    fprintf(f, "\n\n[QUALITY]");
-   for (i=1; i <= m->Nnodes; i++)
+   for (i=1; i <= m->network.Nnodes; i++)
    {
-      if (m->Node[i].C0 == 0.0) continue;
-      fprintf(f, "\n %-31s %14.6f", m->Node[i].ID, m->Node[i].C0 * m->Ucf[QUALITY]);
+      if (m->network.Node[i].C0 == 0.0) continue;
+      fprintf(f, "\n %-31s %14.6f", m->network.Node[i].ID, m->network.Node[i].C0 * m->Ucf[QUALITY]);
    }
       
 /* Write [SOURCES] section */
 
    fprintf(f, "\n\n[SOURCES]");
-   for (i=1; i <= m->Nnodes; i++)
+   for (i=1; i <= m->network.Nnodes; i++)
    {
-      source = m->Node[i].S;
+      source = m->network.Node[i].S;
       if (source == NULL) continue;
       sprintf(s," %-31s %-8s %14.6f",
-         m->Node[i].ID,
+         m->network.Node[i].ID,
          SourceTxt[source->Type],
          source->C0);
       if ((j = source->Pat) > 0)
-         sprintf(s1,"%s",m->Pattern[j].ID);
+         sprintf(s1,"%s",m->network.Pattern[j].ID);
       else strcpy(s1,"");
       fprintf(f,"\n%s %s",s,s1);
    }
@@ -455,13 +455,13 @@ int  saveinpfile(OW_Project *m, char *fname)
 /* Write [MIXING] section */
 
    fprintf(f, "\n\n[MIXING]");
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      if (m->Tank[i].A == 0.0) continue;
+      if (m->network.Tank[i].A == 0.0) continue;
       fprintf(f, "\n %-31s %-8s %12.4f",
-              m->Node[m->Tank[i].Node].ID,
-              MixTxt[m->Tank[i].MixModel],
-              (m->Tank[i].V1max / m->Tank[i].Vmax));
+              m->network.Node[m->network.Tank[i].Node].ID,
+              MixTxt[m->network.Tank[i].MixModel],
+              (m->network.Tank[i].V1max / m->network.Tank[i].Vmax));
    }
 
 /* Write [REACTIONS] section */
@@ -476,20 +476,20 @@ int  saveinpfile(OW_Project *m, char *fname)
    fprintf(f, "\n LIMITING POTENTIAL     %-.6f", m->Climit);
    if (m->Rfactor != MISSING && m->Rfactor != 0.0)
    fprintf(f, "\n ROUGHNESS CORRELATION  %-.6f", m->Rfactor);
-   for (i=1; i <= m->Nlinks; i++)
+   for (i=1; i <= m->network.Nlinks; i++)
    {
-      if (m->Link[i].Type > PIPE) continue;
-      if (m->Link[i].Kb != m->Kbulk)
-         fprintf(f, "\n BULK   %-31s %-.6f", m->Link[i].ID, m->Link[i].Kb*SECperDAY);
-      if (m->Link[i].Kw != m->Kwall)
-         fprintf(f, "\n WALL   %-31s %-.6f", m->Link[i].ID, m->Link[i].Kw*SECperDAY);
+      if (m->network.Link[i].Type > PIPE) continue;
+      if (m->network.Link[i].Kb != m->Kbulk)
+         fprintf(f, "\n BULK   %-31s %-.6f", m->network.Link[i].ID, m->network.Link[i].Kb*SECperDAY);
+      if (m->network.Link[i].Kw != m->Kwall)
+         fprintf(f, "\n WALL   %-31s %-.6f", m->network.Link[i].ID, m->network.Link[i].Kw*SECperDAY);
    }
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      if (m->Tank[i].A == 0.0) continue;
-      if (m->Tank[i].Kb != m->Kbulk)
-         fprintf(f, "\n TANK   %-31s %-.6f",m->Node[m->Tank[i].Node].ID,
-            m->Tank[i].Kb*SECperDAY);
+      if (m->network.Tank[i].A == 0.0) continue;
+      if (m->network.Tank[i].Kb != m->Kbulk)
+         fprintf(f, "\n TANK   %-31s %-.6f",m->network.Node[m->network.Tank[i].Node].ID,
+            m->network.Tank[i].Kb*SECperDAY);
    }
 
 /* Write [ENERGY] section */
@@ -498,20 +498,20 @@ int  saveinpfile(OW_Project *m, char *fname)
    if (m->Ecost != 0.0)
    fprintf(f, "\n GLOBAL PRICE        %-.4f", m->Ecost);
    if (m->Epat != 0)
-   fprintf(f, "\n GLOBAL PATTERN      %s",  m->Pattern[m->Epat].ID);
+   fprintf(f, "\n GLOBAL PATTERN      %s",  m->network.Pattern[m->Epat].ID);
    fprintf(f, "\n GLOBAL EFFIC        %-.4f", m->Epump);
    fprintf(f, "\n DEMAND CHARGE       %-.4f", m->Dcost);
-   for (i=1; i <= m->Npumps; i++)
+   for (i=1; i <= m->network.Npumps; i++)
    {
-      if (m->Pump[i].Ecost > 0.0)
+      if (m->network.Pump[i].Ecost > 0.0)
          fprintf(f, "\n PUMP %-31s PRICE   %-.4f",
-            m->Link[m->Pump[i].Link].ID, m->Pump[i].Ecost);
-      if (m->Pump[i].Epat > 0.0)
+            m->network.Link[m->network.Pump[i].Link].ID, m->network.Pump[i].Ecost);
+      if (m->network.Pump[i].Epat > 0.0)
          fprintf(f, "\n PUMP %-31s PATTERN %s",
-            m->Link[m->Pump[i].Link].ID,m->Pattern[m->Pump[i].Epat].ID);
-      if (m->Pump[i].Ecurve > 0.0)
+            m->network.Link[m->network.Pump[i].Link].ID,m->network.Pattern[m->network.Pump[i].Epat].ID);
+      if (m->network.Pump[i].Ecurve > 0.0)
          fprintf(f, "\n PUMP %-31s EFFIC   %s",
-            m->Link[m->Pump[i].Link].ID,m->Curve[m->Pump[i].Ecurve].ID);
+            m->network.Link[m->network.Pump[i].Link].ID,m->network.Curve[m->network.Pump[i].Ecurve].ID);
    }
 
 /* Write [TIMES] section */
@@ -536,8 +536,8 @@ int  saveinpfile(OW_Project *m, char *fname)
    fprintf(f, "\n UNITS               %s", FlowUnitsTxt[m->Flowflag]);
    fprintf(f, "\n PRESSURE            %s", PressUnitsTxt[m->Pressflag]);
    fprintf(f, "\n HEADLOSS            %s", FormTxt[m->Formflag]);
-   if (m->DefPat >= 1 && m->DefPat <= m->Npats)
-   fprintf(f, "\n PATTERN             %s", m->Pattern[m->DefPat].ID);
+   if (m->DefPat >= 1 && m->DefPat <= m->network.Npats)
+   fprintf(f, "\n PATTERN             %s", m->network.Pattern[m->DefPat].ID);
    if (m->Hydflag == USE)
    fprintf(f, "\n HYDRAULICS USE      %s", m->HydFname);
    if (m->Hydflag == SAVE)
@@ -549,7 +549,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    if (m->Qualflag == CHEM)
    fprintf(f, "\n QUALITY             %s %s", m->ChemName, m->ChemUnits);
    if (m->Qualflag == TRACE)
-   fprintf(f, "\n QUALITY             TRACE %-31s", m->Node[m->TraceNode].ID);
+   fprintf(f, "\n QUALITY             TRACE %-31s", m->network.Node[m->TraceNode].ID);
    if (m->Qualflag == AGE)
    fprintf(f, "\n QUALITY             AGE");
    if (m->Qualflag == NONE)
@@ -583,12 +583,12 @@ int  saveinpfile(OW_Project *m, char *fname)
       break;
       default:
       j = 0;
-      for (i=1; i <= m->Nnodes; i++)
+      for (i=1; i <= m->network.Nnodes; i++)
       {
-         if (m->Node[i].Rpt == 1)
+         if (m->network.Node[i].Rpt == 1)
          {
             if (j % 5 == 0) fprintf(f, "\n NODES               ");
-            fprintf(f, "%s ", m->Node[i].ID);
+            fprintf(f, "%s ", m->network.Node[i].ID);
             j++;
          }
       }
@@ -603,12 +603,12 @@ int  saveinpfile(OW_Project *m, char *fname)
       break;
       default:
       j = 0;
-      for (i=1; i <= m->Nlinks; i++)
+      for (i=1; i <= m->network.Nlinks; i++)
       {
-         if (m->Link[i].Rpt == 1)
+         if (m->network.Link[i].Rpt == 1)
          {
             if (j % 5 == 0) fprintf(f, "\n LINKS               ");
-            fprintf(f, "%s ", m->Link[i].ID);
+            fprintf(f, "%s ", m->network.Link[i].ID);
             j++;
          }
       }

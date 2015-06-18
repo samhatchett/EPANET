@@ -167,17 +167,17 @@ int  readdata(OW_Project *m)
 
    /* Initialize number of network components */
       m->Ntitle    = 0;
-      m->Nnodes    = 0;
-      m->Njuncs    = 0;
-      m->Ntanks    = 0;
-      m->Nlinks    = 0;
-      m->Npipes    = 0;
-      m->Npumps    = 0;
-      m->Nvalves   = 0;
-      m->Ncontrols = 0;
-      m->Nrules    = 0;
-      m->Ncurves   = m->MaxCurves;
-      m->Npats     = m->MaxPats;
+      m->network.Nnodes    = 0;
+      m->network.Njuncs    = 0;
+      m->network.Ntanks    = 0;
+      m->network.Nlinks    = 0;
+      m->network.Npipes    = 0;
+      m->network.Npumps    = 0;
+      m->network.Nvalves   = 0;
+      m->network.Ncontrols = 0;
+      m->network.Nrules    = 0;
+      m->network.Ncurves   = m->MaxCurves;
+      m->network.Npats     = m->MaxPats;
       m->PrevPat   = NULL;
       m->PrevCurve = NULL;
       m->PrevCoord = NULL;
@@ -327,10 +327,10 @@ int  getpumpparams(OW_Project *mod)
    double a,b,c,
 	      h0 = 0.0, h1 = 0.0, h2 = 0.0, q1 = 0.0, q2 = 0.0;
 
-  Spump *Pump = mod->Pump;
-  int Npumps = mod->Npumps;
-  Slink *Link = mod->Link;
-  Scurve *Curve = mod->Curve;
+  Spump *Pump = mod->network.Pump;
+  int Npumps = mod->network.Npumps;
+  Slink *Link = mod->network.Link;
+  Scurve *Curve = mod->network.Curve;
   char *Msg = mod->Msg;
   
    for (i=1; i <= Npumps; i++)
@@ -432,8 +432,8 @@ int   addnodeID(OW_Project *m, int n, char *id)
 */
 {
     if (findnode(m, id)) return(0);         /* see EPANET.C */
-    strncpy(m->Node[n].ID, id, MAXID);
-    ENHashTableInsert(m->NodeHashTable, m->Node[n].ID, n);        /* see HASH.C */
+    strncpy(m->network.Node[n].ID, id, MAXID);
+    ENHashTableInsert(m->network.NodeHashTable, m->network.Node[n].ID, n);        /* see HASH.C */
     return(1);
 }
 
@@ -449,8 +449,8 @@ int   addlinkID(OW_Project *m, int n, char *id)
 */
 {
     if (findlink(m,id)) return(0);         /* see EPANET.C */
-    strncpy(m->Link[n].ID, id, MAXID);
-    ENHashTableInsert(m->LinkHashTable, m->Link[n].ID, n);        /* see HASH.C */
+    strncpy(m->network.Link[n].ID, id, MAXID);
+    ENHashTableInsert(m->network.LinkHashTable, m->network.Link[n].ID, n);        /* see HASH.C */
     return(1);
 }
 
@@ -612,22 +612,22 @@ int  unlinked(OW_Project *m)
    int   i,err, errcode;
    errcode = 0;
    err = 0;
-   marked   = (char *) calloc(m->Nnodes+1,sizeof(char));
+   marked   = (char *) calloc(m->network.Nnodes+1,sizeof(char));
    ERRCODE(MEMCHECK(marked));
    if (!errcode)
    {
-      memset(marked,0,(m->Nnodes+1)*sizeof(char));
-      for (i=1; i <= m->Nlinks; i++)            /* Mark end nodes of each link */
+      memset(marked,0,(m->network.Nnodes+1)*sizeof(char));
+      for (i=1; i <= m->network.Nlinks; i++)            /* Mark end nodes of each link */
       {
-         marked[m->Link[i].N1]++;
-         marked[m->Link[i].N2]++;
+         marked[m->network.Link[i].N1]++;
+         marked[m->network.Link[i].N2]++;
       }
-      for (i=1; i <= m->Njuncs; i++)            /* Check each junction  */
+      for (i=1; i <= m->network.Njuncs; i++)            /* Check each junction  */
       {
          if (marked[i] == 0)               /* If not marked then error */
          {
             err++;
-            sprintf(m->Msg,ERR233, m->Node[i].ID);
+            sprintf(m->Msg,ERR233, m->network.Node[i].ID);
             writeline(m,m->Msg);
          }
          if (err >= MAXERRS) break;
@@ -652,7 +652,7 @@ int     getpatterns(OW_Project *m)
    SFloatlist *f;
    STmplist *pat;
 
-  Spattern *Pattern = m->Pattern;
+  Spattern *Pattern = m->network.Pattern;
   
 /* Start at head of list */
    pat = m->Patlist;
@@ -719,7 +719,7 @@ int     getcurves(OW_Project *m)
 
 /* Start at head of curve list */
   c = m->Curvelist;
-  Scurve *Curve = m->Curve;
+  Scurve *Curve = m->network.Curve;
   int MaxCurves = m->MaxCurves;
   char *Msg = m->Msg;
 
@@ -793,7 +793,7 @@ int getcoords(OW_Project *m)
 	/* Start at head of coordinate list */
 	coordinateList = m->Coordlist;
   
-  Scoord *Coord = m->Coord;
+  Scoord *Coord = m->network.Coord;
   int MaxNodes = m->MaxNodes;
   char *Msg = m->Msg;
   

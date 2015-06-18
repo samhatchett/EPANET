@@ -1,0 +1,7 @@
+---
+Language:        Cpp
+BasedOnStyle:  LLVM
+BreakBeforeBraces: Stroustrup
+AllowShortFunctionsOnASingleLine: false
+ColumnLimit:     160
+ConstructorInitializerAllOnOneLineOrOnePerLine: true

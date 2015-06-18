@@ -101,8 +101,8 @@ int  openhyd(OW_Project *m)
    int  errcode = 0;
    ERRCODE(createsparse(m));     /* See SMATRIX.C  */
    ERRCODE(allocmatrix(m));      /* Allocate solution matrices */
-  for (i=1; i <= m->Nlinks; i++) {   /* Initialize flows */
-      initlinkflow(m,i,m->Link[i].Stat,m->Link[i].Kc);
+  for (i=1; i <= m->network.Nlinks; i++) {   /* Initialize flows */
+      initlinkflow(m,i,m->network.Link[i].Stat,m->network.Link[i].Kc);
   }
    return(errcode);
 }
@@ -122,34 +122,34 @@ void inithyd(OW_Project *m, int initflag)
    int i,j;
 
    /* Initialize tanks */
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      m->Tank[i].V = m->Tank[i].V0;
-      m->hydraulics.NodeHead[m->Tank[i].Node] = m->Tank[i].H0;
+      m->network.Tank[i].V = m->network.Tank[i].V0;
+      m->hydraulics.NodeHead[m->network.Tank[i].Node] = m->network.Tank[i].H0;
 
 /*** Updated 10/25/00 ***/
-      m->hydraulics.NodeDemand[m->Tank[i].Node] = 0.0;
+      m->hydraulics.NodeDemand[m->network.Tank[i].Node] = 0.0;
 
-      m->hydraulics.OldStat[m->Nlinks+i] = TEMPCLOSED;
+      m->hydraulics.OldStat[m->network.Nlinks+i] = TEMPCLOSED;
    }
 
    /* Initialize emitter flows */
-   memset(m->hydraulics.EmitterFlows,0,(m->Nnodes+1)*sizeof(double));
-   for (i=1; i <= m->Njuncs; i++)
-      if (m->Node[i].Ke > 0.0) m->hydraulics.EmitterFlows[i] = 1.0;
+   memset(m->hydraulics.EmitterFlows,0,(m->network.Nnodes+1)*sizeof(double));
+   for (i=1; i <= m->network.Njuncs; i++)
+      if (m->network.Node[i].Ke > 0.0) m->hydraulics.EmitterFlows[i] = 1.0;
 
    /* Initialize links */
-   for (i=1; i <= m->Nlinks; i++)
+   for (i=1; i <= m->network.Nlinks; i++)
    {
    /* Initialize status and setting */
-      m->hydraulics.LinkStatus[i] = m->Link[i].Stat;
-      m->hydraulics.LinkSetting[i] = m->Link[i].Kc;
+      m->hydraulics.LinkStatus[i] = m->network.Link[i].Stat;
+      m->hydraulics.LinkSetting[i] = m->network.Link[i].Kc;
 
       /* Start active control valves in ACTIVE position */                     //(2.00.11 - LR)
       if (
-           (m->Link[i].Type == PRV || m->Link[i].Type == PSV
-            || m->Link[i].Type == FCV)                                            //(2.00.11 - LR)
-            && (m->Link[i].Kc != MISSING)
+           (m->network.Link[i].Type == PRV || m->network.Link[i].Type == PSV
+            || m->network.Link[i].Type == FCV)                                            //(2.00.11 - LR)
+            && (m->network.Link[i].Kc != MISSING)
           ) {
         m->hydraulics.LinkStatus[i] = ACTIVE;                                                      //(2.00.11 - LR)
       }
@@ -168,10 +168,10 @@ void inithyd(OW_Project *m, int initflag)
    }
 
    /* Reset pump energy usage */
-   for (i=1; i <= m->Npumps; i++)
+   for (i=1; i <= m->network.Npumps; i++)
    {
      for (j=0; j<6; j++) {
-       m->Pump[i].Energy[j] = 0.0;
+       m->network.Pump[i].Energy[j] = 0.0;
      }
    }
 
@@ -304,14 +304,14 @@ int  allocmatrix(OW_Project *m)
 */
 {
    int errcode = 0;
-   m->hydraulics.solver.Aii = (double *) calloc(m->Nnodes+1,sizeof(double));
+   m->hydraulics.solver.Aii = (double *) calloc(m->network.Nnodes+1,sizeof(double));
    m->hydraulics.solver.Aij = (double *) calloc(m->Ncoeffs+1,sizeof(double));
-   m->hydraulics.solver.F   = (double *) calloc(m->Nnodes+1,sizeof(double));
-   m->hydraulics.EmitterFlows   = (double *) calloc(m->Nnodes+1,sizeof(double));
-   m->hydraulics.solver.P   = (double *) calloc(m->Nlinks+1,sizeof(double));
-   m->hydraulics.solver.Y   = (double *) calloc(m->Nlinks+1,sizeof(double));
-   m->X   = (double *) calloc(MAX((m->Nnodes+1),(m->Nlinks+1)),sizeof(double));
-   m->hydraulics.OldStat = (char *) calloc(m->Nlinks+m->Ntanks+1, sizeof(char));
+   m->hydraulics.solver.F   = (double *) calloc(m->network.Nnodes+1,sizeof(double));
+   m->hydraulics.EmitterFlows   = (double *) calloc(m->network.Nnodes+1,sizeof(double));
+   m->hydraulics.solver.P   = (double *) calloc(m->network.Nlinks+1,sizeof(double));
+   m->hydraulics.solver.Y   = (double *) calloc(m->network.Nlinks+1,sizeof(double));
+   m->X   = (double *) calloc(MAX((m->network.Nnodes+1),(m->network.Nlinks+1)),sizeof(double));
+   m->hydraulics.OldStat = (char *) calloc(m->network.Nlinks+m->network.Ntanks+1, sizeof(char));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Aii));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Aij));
    ERRCODE(MEMCHECK(m->hydraulics.solver.F));
@@ -361,12 +361,12 @@ void  initlinkflow(OW_Project *m, int i, char s, double k)
   if (s == CLOSED) {
     m->hydraulics.LinkFlows[i] = QZERO;
   }
-  else if (m->Link[i].Type == PUMP) {
-    int pumpIndex = m->Link[i].pumpLinkIdx;
-    m->hydraulics.LinkFlows[i] = k * m->Pump[pumpIndex].Q0;
+  else if (m->network.Link[i].Type == PUMP) {
+    int pumpIndex = m->network.Link[i].pumpLinkIdx;
+    m->hydraulics.LinkFlows[i] = k * m->network.Pump[pumpIndex].Q0;
   }
   else {
-    m->hydraulics.LinkFlows[i] = PI*SQR(m->Link[i].Diam)/4.0;
+    m->hydraulics.LinkFlows[i] = PI*SQR(m->network.Link[i].Diam)/4.0;
   }
 }
 
@@ -386,7 +386,7 @@ void  setlinkflow(OW_Project *m, int k, double dh)
    double h0;
    double  x,y;
 
-   switch (m->Link[k].Type)
+   switch (m->network.Link[k].Type)
    {
        case CV:
        case PIPE:
@@ -395,8 +395,8 @@ void  setlinkflow(OW_Project *m, int k, double dh)
        /* use approx. inverse of formula. */
           if (m->Formflag == DW)
           {
-             x = -log(m->hydraulics.LinkSetting[k]/3.7/m->Link[k].Diam);
-             y = sqrt(ABS(dh)/m->Link[k].R/1.32547);
+             x = -log(m->hydraulics.LinkSetting[k]/3.7/m->network.Link[k].Diam);
+             y = sqrt(ABS(dh)/m->network.Link[k].R/1.32547);
              m->hydraulics.LinkFlows[k] = x*y;
           }
 
@@ -404,7 +404,7 @@ void  setlinkflow(OW_Project *m, int k, double dh)
        /* use inverse of formula. */
           else
           {
-             x = ABS(dh) / m->Link[k].R;
+             x = ABS(dh) / m->network.Link[k].R;
              y = 1.0 / m->Hexp;
              m->hydraulics.LinkFlows[k] = pow(x,y);
           }
@@ -419,16 +419,16 @@ void  setlinkflow(OW_Project *m, int k, double dh)
 
        /* Convert headloss to pump head gain */
           dh = -dh;
-          p = m->Link[k].pumpLinkIdx;
+          p = m->network.Link[k].pumpLinkIdx;
 
        /* For custom pump curve, interpolate from curve */
-          if (m->Pump[p].Ptype == CUSTOM)
+          if (m->network.Pump[p].Ptype == CUSTOM)
           {
              dh = -dh * m->Ucf[HEAD] / SQR(m->hydraulics.LinkSetting[k]);
-             i = m->Pump[p].Hcurve;
-            double curvePoint = interp(m->Curve[i].Npts,
-                                       m->Curve[i].Y,
-                                       m->Curve[i].X,
+             i = m->network.Pump[p].Hcurve;
+            double curvePoint = interp(m->network.Curve[i].Npts,
+                                       m->network.Curve[i].Y,
+                                       m->network.Curve[i].X,
                                        dh);
              m->hydraulics.LinkFlows[k] = curvePoint * m->hydraulics.LinkSetting[k] / m->Ucf[FLOW];
           }
@@ -436,10 +436,10 @@ void  setlinkflow(OW_Project *m, int k, double dh)
        /* Otherwise use inverse of power curve */
           else
           {
-             h0 = -SQR(m->hydraulics.LinkSetting[k])*m->Pump[p].H0;
-             x = pow(m->hydraulics.LinkSetting[k], 2.0 - m->Pump[p].N);
-             x = ABS(h0-dh)/(m->Pump[p].R*x),
-             y = 1.0/m->Pump[p].N;
+             h0 = -SQR(m->hydraulics.LinkSetting[k])*m->network.Pump[p].H0;
+             x = pow(m->hydraulics.LinkSetting[k], 2.0 - m->network.Pump[p].N);
+             x = ABS(h0-dh)/(m->network.Pump[p].R*x),
+             y = 1.0/m->network.Pump[p].N;
              m->hydraulics.LinkFlows[k] = pow(x,y);
           }
           break;
@@ -462,10 +462,10 @@ void  setlinkstatus(OW_Project *m, int index, char value, char *s, double *k)
    if (value == 1)
    {
       /* Adjust link setting for pumps & valves */
-      if (m->Link[index].Type == PUMP) *k = 1.0;
+      if (m->network.Link[index].Type == PUMP) *k = 1.0;
 
 /*** Updated 9/7/00 ***/
-      if (m->Link[index].Type >  PUMP &&  m->Link[index].Type != GPV) {
+      if (m->network.Link[index].Type >  PUMP &&  m->network.Link[index].Type != GPV) {
         *k = MISSING;
       }
 
@@ -478,11 +478,11 @@ void  setlinkstatus(OW_Project *m, int index, char value, char *s, double *k)
    else if (value == 0)
    {
       /* Adjust link setting for pumps & valves */
-      if (m->Link[index].Type == PUMP) *k = 0.0;
+      if (m->network.Link[index].Type == PUMP) *k = 0.0;
 
 /*** Updated 9/7/00 ***/
-      if (m->Link[index].Type >  PUMP
-      &&  m->Link[index].Type != GPV) *k = MISSING;
+      if (m->network.Link[index].Type >  PUMP
+      &&  m->network.Link[index].Type != GPV) *k = MISSING;
       
       /* Reset link flow if it was originally open */
 //      if (*s > CLOSED) initlinkflow(index, CLOSED, *k);
@@ -504,7 +504,7 @@ void  setlinksetting(OW_Project *m, int index, double value, char *s, double *k)
 */
 {
    /* For a pump, status is OPEN if speed > 0, CLOSED otherwise */
-   if (m->Link[index].Type == PUMP)
+   if (m->network.Link[index].Type == PUMP)
    {
       *k = value;
       if (value > 0 && *s <= CLOSED)
@@ -521,7 +521,7 @@ void  setlinksetting(OW_Project *m, int index, double value, char *s, double *k)
 
 /***  Updated 9/7/00  ***/
    /* For FCV, activate it */
-   else if (m->Link[index].Type == FCV)
+   else if (m->network.Link[index].Type == FCV)
    {
 //      if (*s <= CLOSED) initlinkflow(index, OPEN, value);
       *k = value;
@@ -552,9 +552,9 @@ void  resistance(OW_Project *m, int k)
 {
   
    double e,d,L;
-   m->Link[k].R = CSMALL;
+   m->network.Link[k].R = CSMALL;
    //if (Link[k].Type == PIPE || Link[k].Type == CV)                           //(2.00.11 - LR)
-   switch (m->Link[k].Type)
+   switch (m->network.Link[k].Type)
    {
 
    /* Link is a pipe. Compute resistance based on headloss formula. */
@@ -562,22 +562,22 @@ void  resistance(OW_Project *m, int k)
    /* process in pipecoeff() function.                              */
        case CV:
        case PIPE: 
-         e = m->Link[k].Kc;                 /* Roughness coeff. */
-         d = m->Link[k].Diam;               /* Diameter */
-         L = m->Link[k].Len;                /* Length */
+         e = m->network.Link[k].Kc;                 /* Roughness coeff. */
+         d = m->network.Link[k].Diam;               /* Diameter */
+         L = m->network.Link[k].Len;                /* Length */
          switch(m->Formflag)
          {
-            case HW: m->Link[k].R = 4.727*L/pow(e,m->Hexp)/pow(d,4.871);
+            case HW: m->network.Link[k].R = 4.727*L/pow(e,m->Hexp)/pow(d,4.871);
                      break;
-            case DW: m->Link[k].R = L/2.0/32.2/d/SQR(PI*SQR(d)/4.0);
+            case DW: m->network.Link[k].R = L/2.0/32.2/d/SQR(PI*SQR(d)/4.0);
                      break;
-            case CM: m->Link[k].R = SQR(4.0*e/(1.49*PI*d*d)) * pow((d/4.0),-1.333)*L;
+            case CM: m->network.Link[k].R = SQR(4.0*e/(1.49*PI*d*d)) * pow((d/4.0),-1.333)*L;
          }
          break;
 
    /* Link is a pump. Use negligible resistance. */
       case PUMP:
-         m->Link[k].R = CBIG;  //CSMALL;
+         m->network.Link[k].R = CBIG;  //CSMALL;
          break;
 
 
@@ -617,18 +617,18 @@ void  demands(OW_Project *m)
 
    /* Update demand at each node according to its assigned pattern */
    m->Dsystem = 0.0;          /* System-wide demand */
-   for (i=1; i<=m->Njuncs; i++)
+   for (i=1; i<=m->network.Njuncs; i++)
    {
       sum = 0.0;
-      for (demand = m->Node[i].D; demand != NULL; demand = demand->next)
+      for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next)
       {
          /*
             pattern period (k) = (elapsed periods) modulus
                                  (periods per pattern)
          */
          j = demand->Pat;
-         k = p % (long) m->Pattern[j].Length;
-         djunc = (demand->Base) * m->Pattern[j].F[k] * m->Dmult;
+         k = p % (long) m->network.Pattern[j].Length;
+         djunc = (demand->Base) * m->network.Pattern[j].F[k] * m->Dmult;
          if (djunc > 0.0) {
            m->Dsystem += djunc;
          }
@@ -638,29 +638,29 @@ void  demands(OW_Project *m)
    }
 
    /* Update head at fixed grade nodes with time patterns. */
-   for (n=1; n <= m->Ntanks; n++)
+   for (n=1; n <= m->network.Ntanks; n++)
    {
-      if (m->Tank[n].A == 0.0)
+      if (m->network.Tank[n].A == 0.0)
       {
-         j = m->Tank[n].Pat;
+         j = m->network.Tank[n].Pat;
          if (j > 0)
          {
-            k = p % (long) m->Pattern[j].Length;
-            i = m->Tank[n].Node;
-            m->hydraulics.NodeHead[i] = m->Node[i].El * m->Pattern[j].F[k];
+            k = p % (long) m->network.Pattern[j].Length;
+            i = m->network.Tank[n].Node;
+            m->hydraulics.NodeHead[i] = m->network.Node[i].El * m->network.Pattern[j].F[k];
          }
       }
    }
 
    /* Update status of pumps with utilization patterns */
-   for (n=1; n <= m->Npumps; n++)
+   for (n=1; n <= m->network.Npumps; n++)
    {
-      j = m->Pump[n].Upat;
+      j = m->network.Pump[n].Upat;
       if (j > 0)
       {
-         i = m->Pump[n].Link;
-         k = p % (long) m->Pattern[j].Length;
-         setlinksetting(m, i, m->Pattern[j].F[k], &m->hydraulics.LinkStatus[i], &m->hydraulics.LinkSetting[i]);
+         i = m->network.Pump[n].Link;
+         k = p % (long) m->network.Pattern[j].Length;
+         setlinksetting(m, i, m->network.Pattern[j].F[k], &m->hydraulics.LinkStatus[i], &m->hydraulics.LinkSetting[i]);
       }
    }
 }                        /* End of demands */
@@ -683,9 +683,9 @@ int  controls(OW_Project *m)
 
    /* Examine each control statement */
    setsum = 0;
-   for (i=1; i <= m->Ncontrols; i++)
+   for (i=1; i <= m->network.Ncontrols; i++)
    {
-     Scontrol *control = &(m->Control[i]);
+     Scontrol *control = &(m->network.Control[i]);
      // enabled?
      if ( control->isEnabled == EN_DISABLE ) {
        continue;
@@ -700,12 +700,12 @@ int  controls(OW_Project *m)
      
       /* Link is controlled by tank level */
       n = control->Node;
-      if (n > 0 && n > m->Njuncs)
+      if (n > 0 && n > m->network.Njuncs)
       {
          h = m->hydraulics.NodeHead[n];
          vplus = ABS(m->hydraulics.NodeDemand[n]);
-         v1 = tankvolume(m, n - m->Njuncs, h);
-         v2 = tankvolume(m, n - m->Njuncs, m->Control[i].Grade);
+         v1 = tankvolume(m, n - m->network.Njuncs, h);
+         v2 = tankvolume(m, n - m->network.Njuncs, m->network.Control[i].Grade);
          if (control->Type == LOWLEVEL && v1 <= v2 + vplus) {
             reset = 1;
          }
@@ -736,7 +736,7 @@ int  controls(OW_Project *m)
          s2 = control->Status;
          k1 = m->hydraulics.LinkSetting[linkIdx];
          k2 = k1;
-         if (m->Link[linkIdx].Type > PIPE) {
+         if (m->network.Link[linkIdx].Type > PIPE) {
            k2 = control->Setting; // pumps and valves have controllable Setting
          }
          if (s1 != s2 || k1 != k2) {
@@ -786,7 +786,7 @@ long  timestep(OW_Project *m)
    controltimestep(m, &tstep);
 
    /* Evaluate rule-based controls (which will also update tank levels) */
-   if (m->Nrules > 0)
+   if (m->network.Nrules > 0)
      ruletimestep(m, &tstep);
    else
      tanklevels(m, tstep);
@@ -809,20 +809,20 @@ void  tanktimestep(OW_Project *m, long *tstep)
    long   t;
 
    /* (D[n] is net flow rate into (+) or out of (-) tank at node n) */
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
-      if (m->Tank[i].A == 0.0) continue;           /* Skip reservoirs     */
-      n = m->Tank[i].Node;
+      if (m->network.Tank[i].A == 0.0) continue;           /* Skip reservoirs     */
+      n = m->network.Tank[i].Node;
       h = m->hydraulics.NodeHead[n];                                 /* Current tank grade  */
       q = m->hydraulics.NodeDemand[n];                                 /* Flow into tank      */
       if (ABS(q) <= QZERO) continue;
-      if (q > 0.0 && h < m->Tank[i].Hmax)
+      if (q > 0.0 && h < m->network.Tank[i].Hmax)
       {
-         v = m->Tank[i].Vmax - m->Tank[i].V;          /* Volume to fill      */
+         v = m->network.Tank[i].Vmax - m->network.Tank[i].V;          /* Volume to fill      */
       }
-      else if (q < 0.0 && h > m->Tank[i].Hmin)
+      else if (q < 0.0 && h > m->network.Tank[i].Hmin)
       {
-         v = m->Tank[i].Vmin - m->Tank[i].V;          /* Volume to drain (-) */
+         v = m->network.Tank[i].Vmin - m->network.Tank[i].V;          /* Volume to drain (-) */
       }
       else continue;
       t = (long)ROUND(v/q);                     /* Time to fill/drain  */
@@ -845,17 +845,17 @@ void  controltimestep(OW_Project *m, long *tstep)
    double h,q,v;
    long  t,t1,t2;
 
-   for (i=1; i <= m->Ncontrols; i++)
+   for (i=1; i <= m->network.Ncontrols; i++)
    {
       t = 0;
-      Scontrol *control = &(m->Control[i]);
+      Scontrol *control = &(m->network.Control[i]);
       if (control->isEnabled == EN_DISABLE ) {
         continue;
       }
      
       if ( (n = control->Node) > 0)           /* Node control:       */
       {
-         if ((j = n - m->Njuncs) <= 0) continue;     /* Node is a tank      */
+         if ((j = n - m->network.Njuncs) <= 0) continue;     /* Node is a tank      */
          h = m->hydraulics.NodeHead[n];                              /* Current tank grade  */
          q = m->hydraulics.NodeDemand[n];                              /* Flow into tank      */
          if (ABS(q) <= QZERO) {
@@ -870,7 +870,7 @@ void  controltimestep(OW_Project *m, long *tstep)
              q < 0.0)                           /* & is emptying        */
          )
          {                                      /* Time to reach level  */
-            v = tankvolume(m, j,control->Grade) - m->Tank[j].V;
+            v = tankvolume(m, j,control->Grade) - m->network.Tank[j].V;
             t = (long)ROUND(v/q);
          }
       }
@@ -894,7 +894,7 @@ void  controltimestep(OW_Project *m, long *tstep)
          /* Check if rule actually changes link status or setting */
          k = control->Link;
          if (
-              (m->Link[k].Type > PIPE && m->hydraulics.LinkSetting[k] != control->Setting) ||
+              (m->network.Link[k].Type > PIPE && m->hydraulics.LinkSetting[k] != control->Setting) ||
               (m->hydraulics.LinkStatus[k] != control->Status)
             )
             *tstep = t;
@@ -923,7 +923,7 @@ void  ruletimestep(OW_Project *m, long *tstep)
    tmax = tnow + *tstep;
 
    /* If no rules, then time increment equals current time step */
-   if (m->Nrules == 0)
+   if (m->network.Nrules == 0)
    {
       dt = *tstep;
       dt1 = dt;
@@ -1010,14 +1010,14 @@ void  addenergy(OW_Project *mod, long hstep)
    f0 = 1.0;
    if (mod->Epat > 0)
    {
-      m = n % (long)mod->Pattern[mod->Epat].Length;
-      f0 = mod->Pattern[mod->Epat].F[m];
+      m = n % (long)mod->network.Pattern[mod->Epat].Length;
+      f0 = mod->network.Pattern[mod->Epat].F[m];
    }
 
    /* Examine each pump */
-   for (j=1; j <= mod->Npumps; j++)
+   for (j=1; j <= mod->network.Npumps; j++)
    {
-     Spump *pump = &(mod->Pump[j]);
+     Spump *pump = &(mod->network.Pump[j]);
      
       /* Skip closed pumps */
       k = pump->Link;
@@ -1034,8 +1034,8 @@ void  addenergy(OW_Project *mod, long hstep)
 
       if ( (i = pump->Epat) > 0)
       {
-          m = n % (long)mod->Pattern[i].Length;
-          c *= mod->Pattern[i].F[m];
+          m = n % (long)mod->network.Pattern[i].Length;
+          c *= mod->network.Pattern[i].F[m];
       }
       else c *= f0;
 
@@ -1082,17 +1082,17 @@ void  getenergy(OW_Project *m, int k, double *kw, double *eff)
 
    /* Determine flow and head difference */
    q = ABS(m->hydraulics.LinkFlows[k]);
-   dh = ABS(m->hydraulics.NodeHead[m->Link[k].N1] - m->hydraulics.NodeHead[m->Link[k].N2]);
+   dh = ABS(m->hydraulics.NodeHead[m->network.Link[k].N1] - m->hydraulics.NodeHead[m->network.Link[k].N2]);
 
    /* For pumps, find effic. at current flow */
-   if (m->Link[k].Type == PUMP)
+   if (m->network.Link[k].Type == PUMP)
    {
-      j = m->Link[k].pumpLinkIdx;
+      j = m->network.Link[k].pumpLinkIdx;
       e = m->Epump;
-      if ( (i = m->Pump[j].Ecurve) > 0) {
-         e = interp(m->Curve[i].Npts,
-                    m->Curve[i].X,
-                    m->Curve[i].Y,
+      if ( (i = m->network.Pump[j].Ecurve) > 0) {
+         e = interp(m->network.Curve[i].Npts,
+                    m->network.Curve[i].X,
+                    m->network.Curve[i].Y,
                     q * m->Ucf[FLOW]);
       }
       e = MIN(e, 100.0);
@@ -1120,26 +1120,26 @@ void  tanklevels(OW_Project *m, long tstep)
    int   i,n;
    double dv;
 
-   for (i=1; i <= m->Ntanks; i++)
+   for (i=1; i <= m->network.Ntanks; i++)
    {
 
       /* Skip reservoirs */
-      if (m->Tank[i].A == 0.0) continue;
+      if (m->network.Tank[i].A == 0.0) continue;
 
       /* Update the tank's volume & water elevation */
-      n = m->Tank[i].Node;
+      n = m->network.Tank[i].Node;
       dv = m->hydraulics.NodeDemand[n]*tstep;
-      m->Tank[i].V += dv;
+      m->network.Tank[i].V += dv;
 
       /*** Updated 6/24/02 ***/
       /* Check if tank full/empty within next second */
-      if (m->Tank[i].V + m->hydraulics.NodeDemand[n] >= m->Tank[i].Vmax) {
-        m->Tank[i].V = m->Tank[i].Vmax;
+      if (m->network.Tank[i].V + m->hydraulics.NodeDemand[n] >= m->network.Tank[i].Vmax) {
+        m->network.Tank[i].V = m->network.Tank[i].Vmax;
       }
-      else if (m->Tank[i].V - m->hydraulics.NodeDemand[n] <= m->Tank[i].Vmin) {
-        m->Tank[i].V = m->Tank[i].Vmin;
+      else if (m->network.Tank[i].V - m->hydraulics.NodeDemand[n] <= m->network.Tank[i].Vmin) {
+        m->network.Tank[i].V = m->network.Tank[i].Vmin;
       }
-      m->hydraulics.NodeHead[n] = tankgrade(m, i,m->Tank[i].V);
+      m->hydraulics.NodeHead[n] = tankgrade(m, i,m->network.Tank[i].V);
    }
 }                       /* End of tanklevels */
 
@@ -1157,9 +1157,9 @@ double  tankvolume(OW_Project *m, int i, double h)
    int j;
 
    /* Use level*area if no volume curve */
-   j = m->Tank[i].Vcurve;
+   j = m->network.Tank[i].Vcurve;
    if (j == 0) {
-     return(m->Tank[i].Vmin + ((h - m->Tank[i].Hmin) * m->Tank[i].A));
+     return(m->network.Tank[i].Vmin + ((h - m->network.Tank[i].Hmin) * m->network.Tank[i].A));
    }
 
    /* If curve exists, interpolate on h to find volume v */
@@ -1167,10 +1167,10 @@ double  tankvolume(OW_Project *m, int i, double h)
    else {
      return(
             interp(
-                   m->Curve[j].Npts,
-                   m->Curve[j].X,
-                   m->Curve[j].Y,
-                   (h - m->Node[m->Tank[i].Node].El) * m->Ucf[HEAD]) / m->Ucf[VOLUME]
+                   m->network.Curve[j].Npts,
+                   m->network.Curve[j].X,
+                   m->network.Curve[j].Y,
+                   (h - m->network.Node[m->network.Tank[i].Node].El) * m->Ucf[HEAD]) / m->Ucf[VOLUME]
             );
    }
 
@@ -1191,21 +1191,21 @@ double  tankgrade(OW_Project *m, int i, double v)
    int j;
 
    /* Use area if no volume curve */
-   j = m->Tank[i].Vcurve;
+   j = m->network.Tank[i].Vcurve;
    if (j == 0) {
-     return(m->Tank[i].Hmin + (v - m->Tank[i].Vmin)/m->Tank[i].A);
+     return(m->network.Tank[i].Hmin + (v - m->network.Tank[i].Vmin)/m->network.Tank[i].A);
    }
 
    /* If curve exists, interpolate on volume (originally the Y-variable */
    /* but used here as the X-variable) to find new level above bottom.  */
    /* Remember that volume curve is stored in original units.           */
    else {
-     double curvePt = interp(m->Curve[j].Npts,
-                             m->Curve[j].Y,
-                             m->Curve[j].X,
+     double curvePt = interp(m->network.Curve[j].Npts,
+                             m->network.Curve[j].Y,
+                             m->network.Curve[j].X,
                              v * m->Ucf[VOLUME]);
      
-     return(m->Node[m->Tank[i].Node].El + curvePt / m->Ucf[HEAD]);
+     return(m->network.Node[m->network.Tank[i].Node].El + curvePt / m->Ucf[HEAD]);
    }
 
 }                        /* End of tankgrade */
@@ -1273,7 +1273,7 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
       ** Solution for H is returned in F from call to linsolve().
       */
       newcoeffs(m);
-      errcode = linsolve(m, m->Njuncs, m->hydraulics.solver.Aii, m->hydraulics.solver.Aij, m->hydraulics.solver.F);
+      errcode = linsolve(m, m->network.Njuncs, m->hydraulics.solver.Aii, m->hydraulics.solver.Aij, m->hydraulics.solver.F);
 
       /* Take action depending on error code */
       if (errcode < 0) break;    /* Memory allocation problem */
@@ -1287,7 +1287,7 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
 
       /* Update current solution. */
       /* (Row[i] = row of solution matrix corresponding to node i). */
-      for (i=1; i <= m->Njuncs; i++) {
+      for (i=1; i <= m->network.Njuncs; i++) {
         double head = m->hydraulics.solver.F[m->hydraulics.solver.Row[i]];
         m->hydraulics.NodeHead[i] = head;   /* Update heads */
       }
@@ -1346,7 +1346,7 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
    }
 
    /* Add any emitter flows to junction demands */
-   for (i=1; i <= m->Njuncs; i++) {
+   for (i=1; i <= m->network.Njuncs; i++) {
      m->hydraulics.NodeDemand[i] += m->hydraulics.EmitterFlows[i];
    }
    return(errcode);
@@ -1367,25 +1367,25 @@ int  badvalve(OW_Project *m, int n)
 */
 {
    int i,k,n1,n2;
-   for (i=1; i <= m->Nvalves; i++)
+   for (i=1; i <= m->network.Nvalves; i++)
    {
-      k = m->Valve[i].Link;
-      n1 = m->Link[k].N1;
-      n2 = m->Link[k].N2;
+      k = m->network.Valve[i].Link;
+      n1 = m->network.Link[k].N1;
+      n2 = m->network.Link[k].N2;
       if (n == n1 || n == n2)
       {
-         if (m->Link[k].Type == PRV ||
-             m->Link[k].Type == PSV ||
-             m->Link[k].Type == FCV)
+         if (m->network.Link[k].Type == PRV ||
+             m->network.Link[k].Type == PSV ||
+             m->network.Link[k].Type == FCV)
          {
             if (m->hydraulics.LinkStatus[k] == ACTIVE)
             {
                if (m->Statflag == FULL)
                {
-                  sprintf(m->Msg,FMT61,clocktime(m->Atime,m->Htime),m->Link[k].ID);
+                  sprintf(m->Msg,FMT61,clocktime(m->Atime,m->Htime),m->network.Link[k].ID);
                   writeline(m,m->Msg);
                }
-              if (m->Link[k].Type == FCV) {
+              if (m->network.Link[k].Type == FCV) {
                 m->hydraulics.LinkStatus[k] = XFCV;
               }
               else {
@@ -1418,24 +1418,24 @@ int  valvestatus(OW_Project *m)
    char  s;                         /* Valve status settings   */
    double hset;                     /* Valve head setting      */
 
-   for (i=1; i <= m->Nvalves; i++)                   /* Examine each valve   */
+   for (i=1; i <= m->network.Nvalves; i++)                   /* Examine each valve   */
    {
-      k = m->Valve[i].Link;                        /* Link index of valve  */
+      k = m->network.Valve[i].Link;                        /* Link index of valve  */
       if (m->hydraulics.LinkSetting[k] == MISSING)
         continue;            /* Valve status fixed   */
-      n1 = m->Link[k].N1;                          /* Start & end nodes    */
-      n2 = m->Link[k].N2;
+      n1 = m->network.Link[k].N1;                          /* Start & end nodes    */
+      n2 = m->network.Link[k].N2;
       s  = m->hydraulics.LinkStatus[k];                                /* Save current status  */
 
 //      if (s != CLOSED                           /* No change if flow is */  //(2.00.11 - LR)
 //      && ABS(Q[k]) < Qtol) continue;            /* negligible.          */  //(2.00.11 - LR)
 
-      switch (m->Link[k].Type)                     /* Evaluate new status: */
+      switch (m->network.Link[k].Type)                     /* Evaluate new status: */
       {
-         case PRV:  hset = m->Node[n2].El + m->hydraulics.LinkSetting[k];
+         case PRV:  hset = m->network.Node[n2].El + m->hydraulics.LinkSetting[k];
                     m->hydraulics.LinkStatus[k] = prvstatus(m,k,s,hset,m->hydraulics.NodeHead[n1],m->hydraulics.NodeHead[n2]);
                     break;
-         case PSV:  hset = m->Node[n1].El + m->hydraulics.LinkSetting[k];
+         case PSV:  hset = m->network.Node[n1].El + m->hydraulics.LinkSetting[k];
                     m->hydraulics.LinkStatus[k] = psvstatus(m,k,s,hset,m->hydraulics.NodeHead[n1],m->hydraulics.NodeHead[n2]);
                     break;
 
@@ -1483,10 +1483,10 @@ int  linkstatus(OW_Project *m)
    char  status;                     /* Current status          */
 
    /* Examine each link */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
-      n1 = m->Link[k].N1;
-      n2 = m->Link[k].N2;
+      n1 = m->network.Link[k].N1;
+      n2 = m->network.Link[k].N2;
       dh = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
 
       /* Re-open temporarily closed links (status = XHEAD or TEMPCLOSED) */
@@ -1496,19 +1496,19 @@ int  linkstatus(OW_Project *m)
      }
 
       /* Check for status changes in CVs and pumps */
-     if (m->Link[k].Type == CV) {
+     if (m->network.Link[k].Type == CV) {
        m->hydraulics.LinkStatus[k] = cvstatus(m,m->hydraulics.LinkStatus[k],dh,m->hydraulics.LinkFlows[k]);
      }
-     if (m->Link[k].Type == PUMP && m->hydraulics.LinkStatus[k] >= OPEN && m->hydraulics.LinkSetting[k] > 0.0) {                 //(2.00.11 - LR)
+     if (m->network.Link[k].Type == PUMP && m->hydraulics.LinkStatus[k] >= OPEN && m->hydraulics.LinkSetting[k] > 0.0) {                 //(2.00.11 - LR)
          m->hydraulics.LinkStatus[k] = pumpstatus(m,k,-dh);
      }
 
       /* Check for status changes in non-fixed FCVs */
-      if (m->Link[k].Type == FCV && m->hydraulics.LinkSetting[k] != MISSING)                              //(2.00.12 - LR)//
+      if (m->network.Link[k].Type == FCV && m->hydraulics.LinkSetting[k] != MISSING)                              //(2.00.12 - LR)//
          m->hydraulics.LinkStatus[k] = fcvstatus(m,k,status, m->hydraulics.NodeHead[n1], m->hydraulics.NodeHead[n2]);                               //(2.00.12 - LR)//
 
       /* Check for flow into (out of) full (empty) tanks */
-     if (n1 > m->Njuncs || n2 > m->Njuncs) {
+     if (n1 > m->network.Njuncs || n2 > m->network.Njuncs) {
        tankstatus(m,k,n1,n2);
      }
 
@@ -1573,12 +1573,12 @@ char  pumpstatus(OW_Project *m, int k, double dh)
    double hmax;
 
    /* Prevent reverse flow through pump */
-   p = m->Link[k].pumpLinkIdx;
-  if (m->Pump[p].Ptype == CONST_HP) {
+   p = m->network.Link[k].pumpLinkIdx;
+  if (m->network.Pump[p].Ptype == CONST_HP) {
     hmax = BIG;
   }
   else {
-    hmax = SQR(m->hydraulics.LinkSetting[k]) * m->Pump[p].Hmax;
+    hmax = SQR(m->hydraulics.LinkSetting[k]) * m->network.Pump[p].Hmax;
   }
   if (dh > hmax + m->Htol) {
     return(XHEAD);
@@ -1610,7 +1610,7 @@ char  prvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
 
    status = s;
    if (m->hydraulics.LinkSetting[k] == MISSING) return(status);       /* Status fixed by user */
-   hml = m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
+   hml = m->network.Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
 
 /*** Status rules below have changed. ***/                                     //(2.00.11 - LR)
 
@@ -1683,7 +1683,7 @@ char  psvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
   if (m->hydraulics.LinkSetting[k] == MISSING) {
     return(status);       /* Status fixed by user */
   }
-   hml = m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
+   hml = m->network.Link[k].Km*SQR(m->hydraulics.LinkFlows[k]);                /* Head loss when open  */
 
 /*** Status rules below have changed. ***/                                     //(2.00.11 - LR)
 
@@ -1766,10 +1766,10 @@ void  tankstatus(OW_Project *m, int k, int n1, int n2)
 
    /* Make node n1 be the tank */
    q = m->hydraulics.LinkFlows[k];
-   i = n1 - m->Njuncs;
+   i = n1 - m->network.Njuncs;
    if (i <= 0)
    {
-      i = n2 - m->Njuncs;
+      i = n2 - m->network.Njuncs;
       if (i <= 0) return;
       n = n1;
       n1 = n2;
@@ -1779,16 +1779,16 @@ void  tankstatus(OW_Project *m, int k, int n1, int n2)
    h = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
 
    /* Skip reservoirs & closed links */
-   if (m->Tank[i].A == 0.0 || m->hydraulics.LinkStatus[k] <= CLOSED) return;
+   if (m->network.Tank[i].A == 0.0 || m->hydraulics.LinkStatus[k] <= CLOSED) return;
 
    /* If tank full, then prevent flow into it */
-   if (m->hydraulics.NodeHead[n1] >= m->Tank[i].Hmax - m->Htol)
+   if (m->hydraulics.NodeHead[n1] >= m->network.Tank[i].Hmax - m->Htol)
    {
 
       /* Case 1: Link is a pump discharging into tank */
-      if ( m->Link[k].Type == PUMP )
+      if ( m->network.Link[k].Type == PUMP )
       {
-        if (m->Link[k].N2 == n1) {
+        if (m->network.Link[k].N2 == n1) {
           m->hydraulics.LinkStatus[k] = TEMPCLOSED;
         }
       }
@@ -1801,13 +1801,13 @@ void  tankstatus(OW_Project *m, int k, int n1, int n2)
    }
 
    /* If tank empty, then prevent flow out of it */
-   if (m->hydraulics.NodeHead[n1] <= m->Tank[i].Hmin + m->Htol)
+   if (m->hydraulics.NodeHead[n1] <= m->network.Tank[i].Hmin + m->Htol)
    {
 
       /* Case 1: Link is a pump discharging from tank */
-      if ( m->Link[k].Type == PUMP)
+      if ( m->network.Link[k].Type == PUMP)
       {
-        if (m->Link[k].N1 == n1) {
+        if (m->network.Link[k].N1 == n1) {
           m->hydraulics.LinkStatus[k] = TEMPCLOSED;
         }
       }
@@ -1840,20 +1840,20 @@ int  pswitch(OW_Project *m)
    char  s;                 /* Current link status */
 
    /* Check each control statement */
-   for (i=1; i <= m->Ncontrols; i++)
+   for (i=1; i <= m->network.Ncontrols; i++)
    {
       reset = 0;
-      if ( (k = m->Control[i].Link) <= 0) continue;
+      if ( (k = m->network.Control[i].Link) <= 0) continue;
 
       /* Determine if control based on a junction, not a tank */
-      if ( (n = m->Control[i].Node) > 0 && n <= m->Njuncs)
+      if ( (n = m->network.Control[i].Node) > 0 && n <= m->network.Njuncs)
       {
          /* Determine if control conditions are satisfied */
-         if (m->Control[i].Type == LOWLEVEL
-             && m->hydraulics.NodeHead[n] <= m->Control[i].Grade + m->Htol )
+         if (m->network.Control[i].Type == LOWLEVEL
+             && m->hydraulics.NodeHead[n] <= m->network.Control[i].Grade + m->Htol )
              reset = 1;
-         if (m->Control[i].Type == HILEVEL
-             && m->hydraulics.NodeHead[n] >= m->Control[i].Grade - m->Htol )
+         if (m->network.Control[i].Type == HILEVEL
+             && m->hydraulics.NodeHead[n] >= m->network.Control[i].Grade - m->Htol )
              reset = 1;
       }
 
@@ -1862,27 +1862,27 @@ int  pswitch(OW_Project *m)
       {
          change = 0;
          s = m->hydraulics.LinkStatus[k];
-         if (m->Link[k].Type == PIPE)
+         if (m->network.Link[k].Type == PIPE)
          {
-            if (s != m->Control[i].Status) change = 1;
+            if (s != m->network.Control[i].Status) change = 1;
          }
-         if (m->Link[k].Type == PUMP)
+         if (m->network.Link[k].Type == PUMP)
          {
-            if (m->hydraulics.LinkSetting[k] != m->Control[i].Setting) change = 1;
+            if (m->hydraulics.LinkSetting[k] != m->network.Control[i].Setting) change = 1;
          }
-         if (m->Link[k].Type >= PRV)
+         if (m->network.Link[k].Type >= PRV)
          {
-            if (m->hydraulics.LinkSetting[k] != m->Control[i].Setting) change = 1;
+            if (m->hydraulics.LinkSetting[k] != m->network.Control[i].Setting) change = 1;
             else if (m->hydraulics.LinkSetting[k] == MISSING &&
-                     s != m->Control[i].Status) change = 1;
+                     s != m->network.Control[i].Status) change = 1;
          }
 
          /* If a change occurs, update status & setting */
          if (change)
          {
-            m->hydraulics.LinkStatus[k] = m->Control[i].Status;
-           if (m->Link[k].Type > PIPE) {
-             m->hydraulics.LinkSetting[k] = m->Control[i].Setting;
+            m->hydraulics.LinkStatus[k] = m->network.Control[i].Status;
+           if (m->network.Link[k].Type > PIPE) {
+             m->hydraulics.LinkSetting[k] = m->network.Control[i].Setting;
            }
            if (m->Statflag == FULL) {
              writestatchange(m,k,s,m->hydraulics.LinkStatus[k]);
@@ -1914,7 +1914,7 @@ double newflows(OW_Project *m)
    int   k, n, n1, n2;
 
    /* Initialize net inflows (i.e., demands) at tanks */
-   for (n = m->Njuncs+1; n <= m->Nnodes; n++) {
+   for (n = m->network.Njuncs+1; n <= m->network.Nnodes; n++) {
      m->hydraulics.NodeDemand[n] = 0.0;
    }
 
@@ -1923,7 +1923,7 @@ double newflows(OW_Project *m)
    dqsum = 0.0;
 
    /* Update flows in all links */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
 
       /*
@@ -1934,8 +1934,8 @@ double newflows(OW_Project *m)
       ** where P & Y were computed in newcoeffs().   
       */
 
-      n1 = m->Link[k].N1;
-      n2 = m->Link[k].N2;
+      n1 = m->network.Link[k].N1;
+      n2 = m->network.Link[k].N2;
       dh = m->hydraulics.NodeHead[n1] - m->hydraulics.NodeHead[n2];
       dq = m->hydraulics.solver.Y[k] - m->hydraulics.solver.P[k]*dh;
 
@@ -1943,10 +1943,10 @@ double newflows(OW_Project *m)
       dq *= m->RelaxFactor;                                                       //(2.00.11 - LR)
 
       /* Prevent flow in constant HP pumps from going negative */
-      if (m->Link[k].Type == PUMP)
+      if (m->network.Link[k].Type == PUMP)
       {
-         n = m->Link[(k)].pumpLinkIdx;
-         if (m->Pump[n].Ptype == CONST_HP && dq > m->hydraulics.LinkFlows[k]) {
+         n = m->network.Link[(k)].pumpLinkIdx;
+         if (m->network.Pump[n].Ptype == CONST_HP && dq > m->hydraulics.LinkFlows[k]) {
            dq = m->hydraulics.LinkFlows[k]/2.0;
          }
       }
@@ -1959,16 +1959,16 @@ double newflows(OW_Project *m)
       /* Update net flows to tanks */
       if ( m->hydraulics.LinkStatus[k] > CLOSED )                                                     //(2.00.12 - LR)
       {
-         if (n1 > m->Njuncs) m->hydraulics.NodeDemand[n1] -= m->hydraulics.LinkFlows[k];
-         if (n2 > m->Njuncs) m->hydraulics.NodeDemand[n2] += m->hydraulics.LinkFlows[k];
+         if (n1 > m->network.Njuncs) m->hydraulics.NodeDemand[n1] -= m->hydraulics.LinkFlows[k];
+         if (n2 > m->network.Njuncs) m->hydraulics.NodeDemand[n2] += m->hydraulics.LinkFlows[k];
       }
 
    }
 
    /* Update emitter flows */
-   for (k=1; k <= m->Njuncs; k++)
+   for (k=1; k <= m->network.Njuncs; k++)
    {
-      if (m->Node[k].Ke == 0.0) continue;
+      if (m->network.Node[k].Ke == 0.0) continue;
       dq = emitflowchange(m,k);
       m->hydraulics.EmitterFlows[k] -= dq;
       qsum += ABS(m->hydraulics.EmitterFlows[k]);
@@ -1991,12 +1991,12 @@ void   newcoeffs(OW_Project *m)
 **--------------------------------------------------------------
 */
 {
-   memset(m->hydraulics.solver.Aii,0,(m->Nnodes+1)*sizeof(double));   /* Reset coeffs. to 0 */
+   memset(m->hydraulics.solver.Aii,0,(m->network.Nnodes+1)*sizeof(double));   /* Reset coeffs. to 0 */
    memset(m->hydraulics.solver.Aij,0,(m->Ncoeffs+1)*sizeof(double));
-   memset(m->hydraulics.solver.F,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->X,0,(m->Nnodes+1)*sizeof(double));
-   memset(m->hydraulics.solver.P,0,(m->Nlinks+1)*sizeof(double));
-   memset(m->hydraulics.solver.Y,0,(m->Nlinks+1)*sizeof(double));
+   memset(m->hydraulics.solver.F,0,(m->network.Nnodes+1)*sizeof(double));
+   memset(m->X,0,(m->network.Nnodes+1)*sizeof(double));
+   memset(m->hydraulics.solver.P,0,(m->network.Nlinks+1)*sizeof(double));
+   memset(m->hydraulics.solver.Y,0,(m->network.Nlinks+1)*sizeof(double));
    linkcoeffs(m);                            /* Compute link coeffs.  */
    emittercoeffs(m);                         /* Compute emitter coeffs.*/
    nodecoeffs(m);                            /* Compute node coeffs.  */
@@ -2016,10 +2016,10 @@ void  linkcoeffs(OW_Project *m)
    int   k,n1,n2;
 
    /* Examine each link of network */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
-      n1 = m->Link[k].N1;           /* Start node of link */
-      n2 = m->Link[k].N2;           /* End node of link   */
+      n1 = m->network.Link[k].N1;           /* Start node of link */
+      n2 = m->network.Link[k].N2;           /* End node of link   */
 
       int row1 = m->hydraulics.solver.Row[n1];
       int row2 = m->hydraulics.solver.Row[n2];
@@ -2030,7 +2030,7 @@ void  linkcoeffs(OW_Project *m)
       /* FCVs, PRVs, and PSVs with non-fixed status       */
       /* are analyzed later.                              */
 
-      switch (m->Link[k].Type)
+      switch (m->network.Link[k].Type)
       {
          case CV:
          case PIPE:  pipecoeff(m,k); break;
@@ -2055,7 +2055,7 @@ void  linkcoeffs(OW_Project *m)
       m->X[n1] -= m->hydraulics.LinkFlows[k];
       m->X[n2] += m->hydraulics.LinkFlows[k];
       m->hydraulics.solver.Aij[m->hydraulics.solver.Ndx[k]] -= m->hydraulics.solver.P[k];              /* Off-diagonal coeff. */
-      if (n1 <= m->Njuncs)                 /* Node n1 is junction */
+      if (n1 <= m->network.Njuncs)                 /* Node n1 is junction */
       {
          m->hydraulics.solver.Aii[row1] += m->hydraulics.solver.P[k];          /* Diagonal coeff. */
          double rhs = m->hydraulics.solver.Y[k];
@@ -2064,7 +2064,7 @@ void  linkcoeffs(OW_Project *m)
       else {
         m->hydraulics.solver.F[row2] += (m->hydraulics.solver.P[k] * m->hydraulics.NodeHead[n1]);  /* Node n1 is a tank   */
       }
-      if (n2 <= m->Njuncs)                 /* Node n2 is junction */
+      if (n2 <= m->network.Njuncs)                 /* Node n2 is junction */
       {
          m->hydraulics.solver.Aii[row2] += m->hydraulics.solver.P[k];          /* Diagonal coeff. */
          double rhs = m->hydraulics.solver.Y[k];
@@ -2077,7 +2077,7 @@ void  linkcoeffs(OW_Project *m)
      
      // check for nans
      int nank;
-     for (nank=1; nank <= m->Nnodes; nank++)
+     for (nank=1; nank <= m->network.Nnodes; nank++)
      {
        double f = m->hydraulics.solver.F[nank];
        //fprintf(stdout, "%f", f);
@@ -2111,7 +2111,7 @@ void  nodecoeffs(OW_Project *m)
 
    /* For junction nodes, subtract demand flow from net */
    /* flow imbalance & add imbalance to RHS array F.    */
-   for (i=1; i <= m->Njuncs; i++)
+   for (i=1; i <= m->network.Njuncs; i++)
    {
       m->X[i] -= m->hydraulics.NodeDemand[i];
       m->hydraulics.solver.F[m->hydraulics.solver.Row[i]] += m->X[i];
@@ -2131,13 +2131,13 @@ void  valvecoeffs(OW_Project *m)
 {
    int i,k,n1,n2;
 
-   for (i=1; i <= m->Nvalves; i++)                   /* Examine each valve   */
+   for (i=1; i <= m->network.Nvalves; i++)                   /* Examine each valve   */
    {
-      k = m->Valve[i].Link;                        /* Link index of valve  */
+      k = m->network.Valve[i].Link;                        /* Link index of valve  */
       if (m->hydraulics.LinkSetting[k] == MISSING) continue;            /* Valve status fixed   */
-      n1 = m->Link[k].N1;                          /* Start & end nodes    */
-      n2 = m->Link[k].N2;
-      switch (m->Link[k].Type)                     /* Call valve-specific  */
+      n1 = m->network.Link[k].N1;                          /* Start & end nodes    */
+      n2 = m->network.Link[k].N2;
+      switch (m->network.Link[k].Type)                     /* Call valve-specific  */
       {                                         /*   function           */
          case PRV:  prvcoeff(m,k,n1,n2); break;
          case PSV:  psvcoeff(m,k,n1,n2); break;
@@ -2168,10 +2168,10 @@ void  emittercoeffs(OW_Project *m)
    double  q;
    double  y;
    double  z;
-   for (i=1; i <= m->Njuncs; i++)
+   for (i=1; i <= m->network.Njuncs; i++)
    {
-      if (m->Node[i].Ke == 0.0) continue;
-      ke = MAX(CSMALL, m->Node[i].Ke);
+      if (m->network.Node[i].Ke == 0.0) continue;
+      ke = MAX(CSMALL, m->network.Node[i].Ke);
       q = m->hydraulics.EmitterFlows[i];
       z = ke*pow(ABS(q),m->Qexp);
       p = m->Qexp*z/ABS(q);
@@ -2181,7 +2181,7 @@ void  emittercoeffs(OW_Project *m)
         p = 1.0/p;
       y = SGN(q)*z*p;
       m->hydraulics.solver.Aii[m->hydraulics.solver.Row[i]] += p;
-      m->hydraulics.solver.F[m->hydraulics.solver.Row[i]] += y + p * m->Node[i].El;
+      m->hydraulics.solver.F[m->hydraulics.solver.Row[i]] += y + p * m->network.Node[i].El;
       m->X[i] -= q;
    }
 }
@@ -2197,14 +2197,14 @@ double  emitflowchange(OW_Project *m, int i)
 */
 {
    double ke, p;
-   ke = MAX(CSMALL, m->Node[i].Ke);
+   ke = MAX(CSMALL, m->network.Node[i].Ke);
    p = m->Qexp * ke * pow(ABS(m->hydraulics.EmitterFlows[i]),(m->Qexp-1.0));
    if (p < m->RQtol)
       p = 1 / m->RQtol;
    else
       p = 1.0/p;
   
-   return(m->hydraulics.EmitterFlows[i] / m->Qexp - p*(m->hydraulics.NodeHead[i] - m->Node[i].El));
+   return(m->hydraulics.EmitterFlows[i] / m->Qexp - p*(m->hydraulics.NodeHead[i] - m->network.Node[i].El));
 }
 
 
@@ -2240,8 +2240,8 @@ void  pipecoeff(OW_Project *m, int k)
 
    /* Evaluate headloss coefficients */
    q = ABS(m->hydraulics.LinkFlows[k]);                         /* Absolute flow       */
-   ml = m->Link[k].Km;                       /* Minor loss coeff.   */
-   r = m->Link[k].R;                         /* Resistance coeff.   */
+   ml = m->network.Link[k].Km;                       /* Minor loss coeff.   */
+   r = m->network.Link[k].R;                         /* Resistance coeff.   */
    f = 1.0;                               /* D-W friction factor */
   if (m->Formflag == DW) {
     f = DWcoeff(m,k,&dfdq);
@@ -2305,21 +2305,21 @@ double DWcoeff(OW_Project *m, int k, double *dfdq)
    double s,w;
 
    *dfdq = 0.0;
-   if (m->Link[k].Type > PIPE) return(1.0); /* Only apply to pipes */
+   if (m->network.Link[k].Type > PIPE) return(1.0); /* Only apply to pipes */
    q = ABS(m->hydraulics.LinkFlows[k]);
-   s = m->Viscos * m->Link[k].Diam;
+   s = m->Viscos * m->network.Link[k].Diam;
    w = q/s;                       /* w = Re(Pi/4) */
    if (w >= A1)                   /* Re >= 4000; Colebrook Formula */
    {
       y1 = A8/pow(w,0.9);
-      y2 = m->Link[k].Kc/(3.7 * m->Link[k].Diam) + y1;
+      y2 = m->network.Link[k].Kc/(3.7 * m->network.Link[k].Diam) + y1;
       y3 = A9*log(y2);
       f = 1.0/SQR(y3);
       /*  *dfdq = (2.0+AA*y1/(y2*y3))*f; */   /* df/dq */
    }
    else if (w > A2)              /* Re > 2000; Interpolation formula */
    {
-      y2 = m->Link[k].Kc/(3.7 * m->Link[k].Diam) + AB;
+      y2 = m->network.Link[k].Kc/(3.7 * m->network.Link[k].Diam) + AB;
       y3 = A9*log(y2);
       fa = 1.0/SQR(y3);
       fb = (2.0+AC/(y2*y3))*fa;
@@ -2375,25 +2375,25 @@ void  pumpcoeff(OW_Project *m, int k)
 
    q = ABS(m->hydraulics.LinkFlows[k]);
    q = MAX(q,TINY);
-   p = m->Link[k].pumpLinkIdx;
+   p = m->network.Link[k].pumpLinkIdx;
 
    /* Get pump curve coefficients for custom pump curve. */
-   if (m->Pump[p].Ptype == CUSTOM)
+   if (m->network.Pump[p].Ptype == CUSTOM)
    {
       /* Find intercept (h0) & slope (r) of pump curve    */
       /* line segment which contains speed-adjusted flow. */
-      curvecoeff(m, m->Pump[p].Hcurve, q/setting, &h0, &r);
+      curvecoeff(m, m->network.Pump[p].Hcurve, q/setting, &h0, &r);
 
       /* Determine head loss coefficients. */
-      m->Pump[p].H0 = -h0;
-      m->Pump[p].R  = -r;
-      m->Pump[p].N  = 1.0;
+      m->network.Pump[p].H0 = -h0;
+      m->network.Pump[p].R  = -r;
+      m->network.Pump[p].N  = 1.0;
    }
 
    /* Adjust head loss coefficients for pump speed. */
-   h0 = SQR(setting) * m->Pump[p].H0;
-   n  = m->Pump[p].N;
-   r  = m->Pump[p].R * pow(setting,2.0-n);
+   h0 = SQR(setting) * m->network.Pump[p].H0;
+   n  = m->network.Pump[p].N;
+   r  = m->network.Pump[p].R * pow(setting,2.0-n);
    if (n != 1.0) r = n*r*pow(q,n-1.0);
 
    /* Compute inverse headloss gradient (P) and flow correction factor (Y) */
@@ -2421,9 +2421,9 @@ void  curvecoeff(OW_Project *m, int i, double q, double *h0, double *r)
 
    /* Remember that curve is stored in untransformed units */
    q *= m->Ucf[FLOW];
-   x = m->Curve[i].X;           /* x = flow */
-   y = m->Curve[i].Y;           /* y = head */
-   npts = m->Curve[i].Npts;
+   x = m->network.Curve[i].X;           /* x = flow */
+   y = m->network.Curve[i].Y;           /* y = head */
+   npts = m->network.Curve[i].Npts;
 
    /* Find linear segment of curve that brackets flow q */
    k2 = 0;
@@ -2497,7 +2497,7 @@ void  pbvcoeff(OW_Project *m, int k)
    else
    {
       /* Treat as a pipe if minor loss > valve setting */
-      if (m->Link[k].Km*SQR(m->hydraulics.LinkFlows[k]) > m->hydraulics.LinkSetting[k]) valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
+      if (m->network.Link[k].Km*SQR(m->hydraulics.LinkFlows[k]) > m->hydraulics.LinkSetting[k]) valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
 
       /* Otherwise force headloss across valve to be equal to setting */
       else
@@ -2521,17 +2521,17 @@ void  tcvcoeff(OW_Project *m, int k)
    double km;
 
    /* Save original loss coeff. for open valve */
-   km = m->Link[k].Km;
+   km = m->network.Link[k].Km;
 
    /* If valve not fixed OPEN or CLOSED, compute its loss coeff. */
    if (m->hydraulics.LinkSetting[k] != MISSING) {
-     m->Link[k].Km = 0.02517 * m->hydraulics.LinkSetting[k]/(SQR(m->Link[k].Diam)*SQR(m->Link[k].Diam));
+     m->network.Link[k].Km = 0.02517 * m->hydraulics.LinkSetting[k]/(SQR(m->network.Link[k].Diam)*SQR(m->network.Link[k].Diam));
    }
    /* Then apply usual pipe formulas */
    valvecoeff(m,k);  //pipecoeff(k);                                             //(2.00.11 - LR)
 
    /* Restore original loss coeff. */
-   m->Link[k].Km = km;
+   m->network.Link[k].Km = km;
 }                        /* End of tcvcoeff */
 
 
@@ -2551,7 +2551,7 @@ void  prvcoeff(OW_Project *m, int k, int n1, int n2)
    double hset;                      /* Valve head setting      */
    i  = m->hydraulics.solver.Row[n1];                    /* Matrix rows of nodes    */
    j  = m->hydraulics.solver.Row[n2];
-   hset   = m->Node[n2].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
+   hset   = m->network.Node[n2].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
 
    if (m->hydraulics.LinkStatus[k] == ACTIVE)
    {
@@ -2599,7 +2599,7 @@ void  psvcoeff(OW_Project *m, int k, int n1, int n2)
    double hset;                      /* Valve head setting      */
    i  = m->hydraulics.solver.Row[n1];                    /* Matrix rows of nodes    */
    j  = m->hydraulics.solver.Row[n2];
-   hset   = m->Node[n1].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
+   hset   = m->network.Node[n1].El + m->hydraulics.LinkSetting[k];     /* Valve setting           */
 
    if (m->hydraulics.LinkStatus[k] == ACTIVE)
    {
@@ -2703,9 +2703,9 @@ void valvecoeff(OW_Project *m, int k)
    }
 
    // Account for any minor headloss through the valve
-   if (m->Link[k].Km > 0.0)
+   if (m->network.Link[k].Km > 0.0)
    {
-      p = 2.0 * m->Link[k].Km * fabs(m->hydraulics.LinkFlows[k]);
+      p = 2.0 * m->network.Link[k].Km * fabs(m->hydraulics.LinkFlows[k]);
       if ( p < m->RQtol ) {
         p = m->RQtol;
       }

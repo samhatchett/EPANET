@@ -47,14 +47,14 @@ int  savenetdata(OW_Project *m)
    int   errcode = 0;
 
   double *Ucf = m->Ucf;
-  Snode *Node = m->Node;
-  Slink *Link = m->Link;
-  Stank *Tank = m->Tank;
-  int Ntanks = m->Ntanks;
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
-  int Npumps = m->Npumps;
-  int Nvalves = m->Nvalves;
+  Snode *Node = m->network.Node;
+  Slink *Link = m->network.Link;
+  Stank *Tank = m->network.Tank;
+  int Ntanks = m->network.Ntanks;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
+  int Npumps = m->network.Npumps;
+  int Nvalves = m->network.Nvalves;
   FILE *OutFile = m->OutFile;
   SField *Field = m->Field;
   
@@ -164,8 +164,8 @@ int  savehyd(OW_Project *m, long *htime)
   double *LinkFlows = m->hydraulics.LinkFlows;
   double *LinkSetting = m->hydraulics.LinkSetting;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
   FILE *HydFile = m->HydFile;
 
   
@@ -246,8 +246,8 @@ int  saveenergy(OW_Project *m)
            t;                /* pumping duration */
 
   
-  Spump *Pump = m->Pump;
-  int Npumps = m->Npumps;
+  Spump *Pump = m->network.Pump;
+  int Npumps = m->network.Npumps;
   FILE *OutFile = m->OutFile;
 
   
@@ -313,8 +313,8 @@ int  readhyd(OW_Project *m, long *hydtime)
   double *LinkFlows = m->hydraulics.LinkFlows;
   double *LinkSetting = m->hydraulics.LinkSetting;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
   FILE *HydFile = m->HydFile;
 
   
@@ -375,7 +375,7 @@ int  saveoutput(OW_Project *m)
 {
    int   j;
    int   errcode = 0;
-   REAL4 *x = (REAL4 *) calloc(MAX(m->Nnodes, m->Nlinks) + 1, sizeof(REAL4));
+   REAL4 *x = (REAL4 *) calloc(MAX(m->network.Nnodes, m->network.Nlinks) + 1, sizeof(REAL4));
    if ( x == NULL ) return 101;
 
    /* Write out node results, then link results */
@@ -402,8 +402,8 @@ int  nodeoutput(OW_Project *m, int j, REAL4 *x, double ucf)
   double *NodeDemand = m->hydraulics.NodeDemand;
   double *NodeHead = m->hydraulics.NodeHead;
   double *NodeQual = m->NodeQual;
-  Snode *Node = m->Node;
-  int Nnodes = m->Nnodes;
+  Snode *Node = m->network.Node;
+  int Nnodes = m->network.Nnodes;
   FILE *TmpOutFile = m->TmpOutFile;
   
    /* Load computed results (in proper units) into buffer x */
@@ -445,12 +445,12 @@ int  linkoutput(OW_Project *m, int j, REAL4 *x, double ucf)
 
   double *NodeHead = m->hydraulics.NodeHead;
   double *Ucf = m->Ucf;
-  Slink *Link = m->Link;
+  Slink *Link = m->network.Link;
   double *LinkFlows = m->hydraulics.LinkFlows;
   double *LinkSetting = m->hydraulics.LinkSetting;
   double *PipeRateCoeff = m->PipeRateCoeff;
   char *LinkStatus = m->hydraulics.LinkStatus;
-  int Nlinks = m->Nlinks;
+  int Nlinks = m->network.Nlinks;
   FILE *TmpOutFile = m->TmpOutFile;
   char Qualflag = m->Qualflag;
   
@@ -555,8 +555,8 @@ int  savefinaloutput(OW_Project *m)
    int errcode = 0;
    REAL4 *x;
 
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
   FILE *OutFile = m->OutFile;
   FILE *TmpOutFile = m->TmpOutFile;
   
@@ -602,8 +602,8 @@ int  savetimestat(OW_Project *m, REAL4 *x, char objtype)
   double *NodeQual = m->NodeQual;
   double *Ucf = m->Ucf;
   double *LinkFlows = m->hydraulics.LinkFlows;
-  int Nnodes = m->Nnodes;
-  int Nlinks = m->Nlinks;
+  int Nnodes = m->network.Nnodes;
+  int Nlinks = m->network.Nlinks;
   int Nperiods = m->Nperiods;
   FILE *OutFile = m->OutFile;
   FILE *TmpOutFile = m->TmpOutFile;

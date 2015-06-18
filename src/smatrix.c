@@ -64,7 +64,7 @@ int  createsparse(OW_Project *m)
    if (errcode) return(errcode);
 
    /* Build node-link adjacency lists with parallel links removed. */
-   m->hydraulics.solver.Degree = (int *) calloc(m->Nnodes+1, sizeof(int));
+   m->hydraulics.solver.Degree = (int *) calloc(m->network.Nnodes+1, sizeof(int));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Degree));
    ERRCODE(buildlists(m, TRUE));
    if (!errcode)
@@ -76,19 +76,19 @@ int  createsparse(OW_Project *m)
    /* Re-order nodes to minimize number of non-zero coeffs.    */
    /* in factorized solution matrix. At same time, adjacency   */
    /* list is updated with links representing non-zero coeffs. */
-   m->Ncoeffs = m->Nlinks;
+   m->Ncoeffs = m->network.Nlinks;
    ERRCODE(reordernodes(m));
 
    /* Allocate memory for sparse storage of positions of non-zero */
    /* coeffs. and store these positions in vector NZSUB. */
-   ERRCODE(storesparse(m, m->Njuncs));
+   ERRCODE(storesparse(m, m->network.Njuncs));
 
    /* Free memory used for adjacency lists and sort */
    /* row indexes in NZSUB to optimize linsolve().  */
    if (!errcode)
      freelists(m);
   
-   ERRCODE(ordersparse(m, m->Njuncs));
+   ERRCODE(ordersparse(m, m->network.Njuncs));
 
    /* Re-build adjacency lists without removing parallel */
    /* links for use in future connectivity checking.     */
@@ -110,11 +110,11 @@ int  allocsparse(OW_Project *m)
 */
 {
    int errcode = 0;
-   m->Adjlist = (Padjlist *) calloc(m->Nnodes+1,  sizeof(Padjlist));
-   m->hydraulics.solver.Order  = (int *)   calloc(m->Nnodes+1,  sizeof(int));
-   m->hydraulics.solver.Row    = (int *)   calloc(m->Nnodes+1,  sizeof(int));
-   m->hydraulics.solver.Ndx    = (int *)   calloc(m->Nlinks+1,  sizeof(int));
-   ERRCODE(MEMCHECK(m->Adjlist));
+   m->network.Adjlist = (Padjlist *) calloc(m->network.Nnodes+1,  sizeof(Padjlist));
+   m->hydraulics.solver.Order  = (int *)   calloc(m->network.Nnodes+1,  sizeof(int));
+   m->hydraulics.solver.Row    = (int *)   calloc(m->network.Nnodes+1,  sizeof(int));
+   m->hydraulics.solver.Ndx    = (int *)   calloc(m->network.Nlinks+1,  sizeof(int));
+   ERRCODE(MEMCHECK(m->network.Adjlist));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Order));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Row));
    ERRCODE(MEMCHECK(m->hydraulics.solver.Ndx));
@@ -132,7 +132,7 @@ void  freesparse(OW_Project *m)
 */
 {
    freelists(m);
-   free(m->Adjlist);
+   free(m->network.Adjlist);
    free(m->hydraulics.solver.Order);
    free(m->hydraulics.solver.Row);
    free(m->hydraulics.solver.Ndx);
@@ -157,10 +157,10 @@ int  buildlists(OW_Project *m, int paraflag)
    Padjlist  alink;
 
    /* For each link, update adjacency lists of its end nodes */
-   for (k=1; k <= m->Nlinks; k++)
+   for (k=1; k <= m->network.Nlinks; k++)
    {
-      i = m->Link[k].N1;
-      j = m->Link[k].N2;
+      i = m->network.Link[k].N1;
+      j = m->network.Link[k].N2;
       if (paraflag) pmark = paralink(m, i,j,k);  /* Parallel link check */
 
       /* Include link in start node i's list */
@@ -169,8 +169,8 @@ int  buildlists(OW_Project *m, int paraflag)
       if (!pmark) alink->node = j;
       else        alink->node = 0;           /* Parallel link marker */
       alink->link = k;
-      alink->next = m->Adjlist[i];
-      m->Adjlist[i] = alink;
+      alink->next = m->network.Adjlist[i];
+      m->network.Adjlist[i] = alink;
 
       /* Include link in end node j's list */
       alink = (struct Sadjlist *) malloc(sizeof(struct Sadjlist));
@@ -178,8 +178,8 @@ int  buildlists(OW_Project *m, int paraflag)
       if (!pmark) alink->node = i;
       else        alink->node = 0;           /* Parallel link marker */
       alink->link = k;
-      alink->next = m->Adjlist[j];
-      m->Adjlist[j] = alink;
+      alink->next = m->network.Adjlist[j];
+      m->network.Adjlist[j] = alink;
    }
    return(errcode);
 }                        /* End of buildlists */
@@ -198,7 +198,7 @@ int  paralink(OW_Project *m, int i, int j, int k)
 */
 {
    Padjlist alink;
-   for (alink = m->Adjlist[i]; alink != NULL; alink = alink->next)
+   for (alink = m->network.Adjlist[i]; alink != NULL; alink = alink->next)
    {
       if (alink->node == j)     /* Link || to k (same end nodes) */
       {
@@ -225,9 +225,9 @@ void  xparalinks(OW_Project *m)
              blink;       /* Previous item in adjacency list */
 
    /* Scan adjacency list of each node */
-   for (i=1; i <= m->Nnodes; i++)
+   for (i=1; i <= m->network.Nnodes; i++)
    {
-      alink = m->Adjlist[i];              /* First item in list */
+      alink = m->network.Adjlist[i];              /* First item in list */
       blink = NULL;
       while (alink != NULL)
       {
@@ -235,9 +235,9 @@ void  xparalinks(OW_Project *m)
          {
             if (blink == NULL)      /* This holds at start of list */
             {
-               m->Adjlist[i] = alink->next;
+               m->network.Adjlist[i] = alink->next;
                free(alink);             /* Remove item from list */
-               alink = m->Adjlist[i];
+               alink = m->network.Adjlist[i];
             }
             else                    /* This holds for interior of list */
             {
@@ -268,11 +268,11 @@ void  freelists(OW_Project *m)
    int   i;
    Padjlist alink;
 
-   for (i=0; i <= m->Nnodes; i++)
+   for (i=0; i <= m->network.Nnodes; i++)
    {
-      for (alink = m->Adjlist[i]; alink != NULL; alink = m->Adjlist[i])
+      for (alink = m->network.Adjlist[i]; alink != NULL; alink = m->network.Adjlist[i])
       {
-         m->Adjlist[i] = alink->next;
+         m->network.Adjlist[i] = alink->next;
          free(alink);
       }
    }
@@ -290,13 +290,13 @@ void  countdegree(OW_Project *m)
 {
     int   i;
     Padjlist alink;
-    memset(m->hydraulics.solver.Degree,0,(m->Nnodes+1)*sizeof(int));
+    memset(m->hydraulics.solver.Degree,0,(m->network.Nnodes+1)*sizeof(int));
 
    /* NOTE: For purposes of node re-ordering, Tanks (nodes with  */
    /*       indexes above Njuncs) have zero degree of adjacency. */
 
-    for (i=1; i <= m->Njuncs; i++)
-        for (alink = m->Adjlist[i]; alink != NULL; alink = alink->next)
+    for (i=1; i <= m->network.Njuncs; i++)
+        for (alink = m->network.Adjlist[i]; alink != NULL; alink = alink->next)
             if (alink->node > 0) m->hydraulics.solver.Degree[i]++;
 }
 
@@ -312,12 +312,12 @@ int   reordernodes(OW_Project *m)
 */
 {
    int k, knode, p, n;
-   for (k=1; k <= m->Nnodes; k++)
+   for (k=1; k <= m->network.Nnodes; k++)
    {
       m->hydraulics.solver.Row[k] = k;
       m->hydraulics.solver.Order[k] = k;
    }
-   n = m->Njuncs;
+   n = m->network.Njuncs;
    for (k=1; k<=n; k++)                   /* Examine each junction    */
    {
       p = mindegree(m, k, n);                 /* Node with lowest degree  */
@@ -376,7 +376,7 @@ int  growlist(OW_Project *m, int knode)
    Padjlist alink;
 
    /* Iterate through all nodes connected to knode */
-   for (alink = m->Adjlist[knode]; alink != NULL; alink = alink -> next)
+   for (alink = m->network.Adjlist[knode]; alink != NULL; alink = alink -> next)
    {
       node = alink->node;       /* End node of connecting link  */
       if (m->hydraulics.solver.Degree[node] > 0)     /* End node is active           */
@@ -446,7 +446,7 @@ int  linked(OW_Project *m, int i, int j)
 */
 {
    Padjlist alink;
-   for (alink = m->Adjlist[i]; alink != NULL; alink = alink->next)
+   for (alink = m->network.Adjlist[i]; alink != NULL; alink = alink->next)
       if (alink->node == j) return(1);
    return(0);
 }                        /* End of linked */
@@ -468,8 +468,8 @@ int  addlink(OW_Project *m, int i, int j, int n)
    if (alink == NULL) return(0);
    alink->node = j;
    alink->link = n;
-   alink->next = m->Adjlist[i];
-   m->Adjlist[i] = alink;
+   alink->next = m->network.Adjlist[i];
+   m->network.Adjlist[i] = alink;
    return(1);
 }                        /* End of addlink */
 
@@ -504,7 +504,7 @@ int  storesparse(OW_Project *mod, int n)
    {
        m = 0;
        ii = mod->hydraulics.solver.Order[i];
-       for (alink = mod->Adjlist[ii]; alink != NULL; alink = alink->next)
+       for (alink = mod->network.Adjlist[ii]; alink != NULL; alink = alink->next)
        {
           j = mod->hydraulics.solver.Row[alink->node];    /* row */
           l = alink->link;
