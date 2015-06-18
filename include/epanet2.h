@@ -181,13 +181,83 @@ typedef enum {
 
 #define EN_INITFLOW    10   /* Re-initialize flows flag  */
 
-// api return error codes
-#define EN_OK                0
-#define EN_NODATA            102
-#define EN_ILLEGAL_VALUE     202
-#define EN_UNDEFINED_CONTROL 241
-// etc...
 
+#pragma mark - error codes
+
+#define EN_OK                0
+#define OW_ERR_INSUFFICIENT_MEMORY 101
+#define OW_ERR_NO_DATA 102
+#define OW_ERR_HYDRAULICS_NOT_INITIALIZED 103
+#define OW_ERR_NO_HYDRAULICS 104
+#define OW_ERR_WQ_NOT_INITIALIZED 105
+#define OW_ERR_NO_RESULTS_SAVED 106
+#define OW_ERR_HYDRUAULICS_EXT_FILE 107
+#define OW_ERR_CANT_USE_EXT_FILE 108
+#define OW_ERR_CANT_CHANGE_TIME_PARAM 109
+#define OW_ERR_CANT_SOLVE_HYD 110
+#define OW_ERR_CANT_SOLVE_WQ 120
+
+#define OW_ERR_INPUT_FILE_ERROR 200
+#define OW_ERR_SYNTAX 201
+#define OW_ERR_ILLEGAL_NUMERIC_VALUE 202
+#define OW_ERR_UNDEF_NODE 203
+#define OW_ERR_UNDEF_LINK 204
+#define OW_ERR_UNDEF_TIME_PAT 205
+#define OW_ERR_UNDEF_CURVE 206
+#define OW_ERR_CONTROL_CV 207
+
+#define OW_ERR_SPEC_UNDEF_NODE 208
+#define OW_ERR_ILLEGAL_VAL_NODE 209
+#define OW_ERR_SPEC_UNDEF_LINK 210
+#define OW_ERR_ILLEGAL_VAL_LINK 211
+#define OW_ERR_UNDEF_TRACE_NODE 212
+#define OW_ERR_ILLEGAL_OPTION 213
+#define OW_ERR_TOO_MANY_CHARACTERS 214
+#define OW_ERR_DUPLICATE_ID 215
+#define OW_ERR_DATA_UNDEF_PUMP 216
+#define OW_ERR_DATA_INVALID_PUMP 217
+#define OW_ERR_ILLEGAL_TANK_CONN 219
+#define OW_ERR_ILLEGAL_VALVE_CONN 220
+
+/*** Updated on 10/25/00 ***/
+#define OW_ERR_SAME_START_END_NODES 222
+
+#define OW_ERR_NOT_ENOUGH_NODES 223
+#define OW_ERR_NO_TANKS 224
+#define OW_ERR_INVALID_TANK_LEVELS 225
+#define OW_ERR_NO_HEAD_CURVE 226
+#define OW_ERR_INV_HEAD_CURVE 227
+#define OW_ERR_CURVE_NONINCREASE 230
+#define OW_ERR_NODE_UNCONNECTED 233
+#define OW_ERR_UNDEF_SOURCE 240
+#define OW_ERR_UNDEF_CONTROL 241
+#define OW_ERR_FN_INVALID_FORMAT 250
+#define OW_ERR_FN_INVALID_CODE 251
+
+#define OW_ERR_FILE_IDENTICAL 301
+#define OW_ERR_FILE_CANT_OPEN_INP 302
+#define OW_ERR_FILE_CANT_OPEN_RPT 303
+#define OW_ERR_FILE_CANT_OPEN_BIN 304
+/*
+ #define OW_ERR_FILE 305 "File Error 305: cannot open hydraulics file."
+ #define OW_ERR_ 306 "File Error 306: hydraulics file does not match network data."
+ #define OW_ERR_ 307 "File Error 307: cannot read hydraulics file."
+ #define OW_ERR_ 308 "File Error 308: cannot save results to file."
+ #define OW_ERR_ 309 "File Error 309: cannot save results to report file."
+ 
+ #define OW_ERR_ 401 "Sync Error 401: Qstep is not dividable by Hstep. Can't sync."
+ 
+ #define R_ERR201 "Input Error 201: syntax error in following line of "
+ #define R_ERR202 "Input Error 202: illegal numeric value in following line of "
+ #define R_ERR203 "Input Error 203: undefined node in following line of "
+ #define R_ERR204 "Input Error 204: undefined link in following line of "
+ #define R_ERR207 "Input Error 207: attempt to control a CV in following line of "
+ 
+ #define R_ERR221 "Input Error 221: mis-placed clause in following line of "
+ */
+
+
+#pragma mark - API
 
 // --- Declare the EPANET toolkit functions
 #if defined(__cplusplus)
@@ -196,8 +266,7 @@ extern "C" {
   
   typedef struct OW_Project OW_Project;
   
-  // OLD (<= 2.00.13) api functions use the global default model pointer.
-  //
+  // OLD (<= 2.1) api functions use the global default model pointer.
   int  DLLEXPORT ENepanet(char *inpFile, char *rptFile, char *binOutFile, void (*callback) (char *));
   
   int  DLLEXPORT ENopen(char *inpFile, char *rptFile, char *binOutFile);
@@ -275,17 +344,19 @@ extern "C" {
   int  DLLEXPORT ENgetqualinfo(int *qualcode, char *chemname, char *chemunits, int *tracenode);
   int  DLLEXPORT ENsetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
   
+#pragma mark - Threadsafe API (>2.2) functions
   
-  
-  
-  // NEW (>2.00.13) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
+
+  // NEW (>2.1) api functions are threadsafe. the have the same name format, except with a different prefix and underscore ("OW_[...]")
   int  DLLEXPORT OW_newModel(OW_Project **modelObj);
   int  DLLEXPORT OW_freeModel(OW_Project *modelObj);
   
+  // Project Management
   int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelObj, char *rptFile, char *binOutFile);
   int  DLLEXPORT OW_saveinpfile(OW_Project *modelObj, char *filename);
   int  DLLEXPORT OW_close(OW_Project *modelObj);
   
+  // Hydraulic solver
   int  DLLEXPORT OW_solveH(OW_Project *modelObj);
   int  DLLEXPORT OW_saveH(OW_Project *modelObj);
   int  DLLEXPORT OW_openH(OW_Project *modelObj);
@@ -295,7 +366,9 @@ extern "C" {
   int  DLLEXPORT OW_closeH(OW_Project *modelObj);
   int  DLLEXPORT OW_savehydfile(OW_Project *modelObj, char *filename);
   int  DLLEXPORT OW_usehydfile(OW_Project *modelObj, char *filename);
+  int  DLLEXPORT OW_getstatistic(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE* value);
   
+  // Water Quality solver
   int  DLLEXPORT OW_solveQ(OW_Project *modelObj);
   int  DLLEXPORT OW_openQ(OW_Project *modelObj);
   int  DLLEXPORT OW_initQ(OW_Project *modelObj, int saveFlag);
@@ -303,73 +376,81 @@ extern "C" {
   int  DLLEXPORT OW_nextQ(OW_Project *modelObj, long *tStep);
   int  DLLEXPORT OW_stepQ(OW_Project *modelObj, long *timeLeft);
   int  DLLEXPORT OW_closeQ(OW_Project *modelObj);
+  int  DLLEXPORT OW_setqualtype(OW_Project *modelObj, int qualcode, char *chemname, char *chemunits, char *tracenode);
+  int  DLLEXPORT OW_getqualinfo(OW_Project *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
   
+  // Reporting
   int  DLLEXPORT OW_writeline(OW_Project *modelObj, char *line);
   int  DLLEXPORT OW_report(OW_Project *modelObj);
   int  DLLEXPORT OW_resetreport(OW_Project *modelObj);
   int  DLLEXPORT OW_setreport(OW_Project *modelObj, char *reportFormat);
+  int  DLLEXPORT OW_setstatusreport(OW_Project *modelObj, int code);
   
+  // Get/Set basic network info
   int  DLLEXPORT OW_getcount(OW_Project *modelObj, int code, int *count);
-  int  DLLEXPORT OW_controlEnabled(OW_Project *modelObj, int controlIndex);
-  int  DLLEXPORT OW_getcontrol(OW_Project *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
-  int  DLLEXPORT OW_getRuleName(OW_Project *modelObj, int ruleIndex, char* id);
   int  DLLEXPORT OW_getoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_setoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE v);
   int  DLLEXPORT OW_gettimeparam(OW_Project *modelObj, int code, long *value);
+  int  DLLEXPORT OW_settimeparam(OW_Project *modelObj, int code, long value);
   int  DLLEXPORT OW_getflowunits(OW_Project *modelObj, int *code);
+  int  DLLEXPORT OW_getqualtype(OW_Project *modelObj, int *qualcode, int *tracenode);
+  int  DLLEXPORT OW_geterror(int errcode, char *errmsg, int maxLen);
+  int  DLLEXPORT OW_getversion(int *version);
+  
+  // Controls & Rules
+  int  DLLEXPORT OW_controlEnabled(OW_Project *modelObj, int controlIndex);
+  int  DLLEXPORT OW_setControlEnabled(OW_Project *modelObj, int controlIndex, int enable);
+  int  DLLEXPORT OW_setcontrol(OW_Project *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
+  int  DLLEXPORT OW_getcontrol(OW_Project *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
+  
+  int  DLLEXPORT OW_ruleEnabled(OW_Project *modelObj, int ruleIndex);
+  int  DLLEXPORT OW_setRuleEnabled(OW_Project *modelObj, int ruleIndex, int enable);
+  int  DLLEXPORT OW_getRuleName(OW_Project *modelObj, int ruleIndex, char* id);
+  int  DLLEXPORT OW_getRuleAffectedLinks(OW_Project *m, int ruleIndex, int* nLinks, int* linkIndexes);
+  int  DLLEXPORT OW_freeRuleAffectedLinks(int* linkIndexes);
+  
+  // Patterns
   int  DLLEXPORT OW_getpatternindex(OW_Project *modelObj, char *id, int *index);
   int  DLLEXPORT OW_getpatternid(OW_Project *modelObj, int index, char *id);
   int  DLLEXPORT OW_getpatternlen(OW_Project *modelObj, int index, int *len);
   int  DLLEXPORT OW_getpatternvalue(OW_Project *modelObj, int index, int period, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT OW_getaveragepatternvalue(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *value);
-  int  DLLEXPORT OW_getqualtype(OW_Project *modelObj, int *qualcode, int *tracenode);
-  int  DLLEXPORT OW_geterror(int errcode, char *errmsg, int maxLen);
-  int  DLLEXPORT OW_getstatistic(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE* value);
+  int  DLLEXPORT OW_addpattern(OW_Project *modelObj, char *id);
+  int  DLLEXPORT OW_setpattern(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *f, int len);
+  int  DLLEXPORT OW_setpatternvalue(OW_Project *modelObj, int index, int period, EN_API_FLOAT_TYPE value);
   
+  // Node elements
   int  DLLEXPORT OW_getnodeindex(OW_Project *modelObj, char *id, int *index);
   int  DLLEXPORT OW_getnodeid(OW_Project *modelObj, int index, char *id);
   int  DLLEXPORT OW_getnodetype(OW_Project *modelObj, int index, EN_NodeType *code);
   int  DLLEXPORT OW_getnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
+  int  DLLEXPORT OW_setnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
   int  DLLEXPORT OW_getcoord(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
   
+  // Demands
   int  DLLEXPORT OW_getnumdemands(OW_Project *modelObj, int nodeIndex, int *numDemands);
   int  DLLEXPORT OW_getbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand);
   int  DLLEXPORT OW_getdemandpattern(OW_Project *modelObj, int nodeIndex, int demandIdx, int *pattIdx);
+  int  DLLEXPORT OW_setbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
   
+  // Link elements
   int  DLLEXPORT OW_getlinkindex(OW_Project *modelObj, char *id, int *index);
   int  DLLEXPORT OW_getlinkid(OW_Project *modelObj, int index, char *id);
   int  DLLEXPORT OW_getlinktype(OW_Project *modelObj, int index, EN_LinkType *type);
   int  DLLEXPORT OW_getlinknodes(OW_Project *modelObj, int index, int *node1, int *node2);
   int  DLLEXPORT OW_getlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
-  
-  int  DLLEXPORT OW_getcurve(OW_Project *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
-  
-  int  DLLEXPORT OW_getversion(int *version);
-  
-  int  DLLEXPORT OW_setControlEnabled(OW_Project *modelObj, int controlIndex, int enable);
-  int  DLLEXPORT OW_setcontrol(OW_Project *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
-  int  DLLEXPORT OW_setRuleEnabled(OW_Project *modelObj, int ruleIndex, int enable);
-  int  DLLEXPORT OW_setnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
   int  DLLEXPORT OW_setlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
-  int  DLLEXPORT OW_addpattern(OW_Project *modelObj, char *id);
-  int  DLLEXPORT OW_setpattern(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *f, int len);
-  int  DLLEXPORT OW_setpatternvalue(OW_Project *modelObj, int index, int period, EN_API_FLOAT_TYPE value);
-  int  DLLEXPORT OW_settimeparam(OW_Project *modelObj, int code, long value);
-  int  DLLEXPORT OW_setoption(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE v);
-  int  DLLEXPORT OW_setstatusreport(OW_Project *modelObj, int code);
-  int  DLLEXPORT OW_setqualtype(OW_Project *modelObj, int qualcode, char *chemname, char *chemunits, char *tracenode);
-  int  DLLEXPORT OW_getqualinfo(OW_Project *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
-  int  DLLEXPORT OW_setbasedemand(OW_Project *modelObj, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand);
+  
+  // Curves
+  int  DLLEXPORT OW_getcurve(OW_Project *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
   
   
   // network creation api set
   
   int DLLEXPORT OW_newNetwork(OW_Project **modelObj);
-  
   int DLLEXPORT OW_startEditingNetwork(OW_Project *modelObj);
-  
   int DLLEXPORT OW_addNode(OW_Project *modelObj, EN_NodeType type, char *name);
   int DLLEXPORT OW_addLink(OW_Project *modelObj, EN_LinkType type, char *name, char *upstreamNode, char* downstreamNode);
-  
   int DLLEXPORT OW_stopEditingNetwork(OW_Project *modelObj);
   
 #if defined(__cplusplus)

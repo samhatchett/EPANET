@@ -109,6 +109,11 @@ execute function x and set the error code equal to its return value.
 *******************************************************************************
 */
 
+/**
+ @file
+ @brief The main epanet library API definitions file
+ */
+
 /*** Need to define WINDOWS to use the getTmpName function ***/                //(2.00.12 - LR)
 // --- define WINDOWS
 #undef WINDOWS
@@ -2549,6 +2554,12 @@ int  DLLEXPORT OW_setreport(OW_Project *m, char *s)
 }
 
 
+/**
+ @brief Test for whether a control is enabled
+ @param m The model object pointer
+ @param controlIndex The index of the control in question
+ @return EN_DISABLE if the control is disabled or could not be found, EN_ENABLE if the control is enabled.
+ */
 int DLLEXPORT OW_controlEnabled(OW_Project *m, int controlIndex)
 {
   if (controlIndex < 1 || controlIndex > m->Ncontrols) {
@@ -2557,6 +2568,22 @@ int DLLEXPORT OW_controlEnabled(OW_Project *m, int controlIndex)
   
   return m->Control[controlIndex].isEnabled;
 }
+
+/**
+ @brief Test for whether a rule is enabled
+ @param m The model object pointer
+ @param ruleIndex The index of the rule in question
+ @return EN_DISABLE if the rule is disabled or could not be found, EN_ENABLE if the rule is enabled.
+ */
+int DLLEXPORT OW_ruleEnabled(OW_Project *m, int ruleIndex)
+{
+  if (ruleIndex < 1 || ruleIndex > m->Nrules) {
+    return EN_DISABLE; // of course it's not enabled. it's not even a control.
+  }
+  
+  return m->Rule[ruleIndex].isEnabled;
+}
+
 
 int  DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
 {
@@ -2610,13 +2637,86 @@ int  DLLEXPORT OW_getRuleName(OW_Project *m, int ruleIndex, char* id)
 {
   strcpy(id,"");
   if (!m->Openflag) {
-    return(102);
+    return(OW_ERR_NO_DATA);
   }
   if (ruleIndex < 1 || ruleIndex > m->Nrules) {
-    return(205);
+    return(OW_ERR_UNDEF_TIME_PAT);
   }
   strcpy(id,m->Rule[ruleIndex].label);
-  return(0);
+  return EN_OK;
+}
+
+/**
+ @brief Get a list of links affected by this rule. Array is allocated by this library. Be sure to free it using OW_freeRuleAffectedLinks
+ @param m The model object pointer
+ @param ruleIndex The index of the rule in question
+ @param[out] nLinks The number of links affected
+ @param[out] linkIndexes An array of link indexes affected, base-zero and length = nLinks
+ @return EN_OK if ok, other code as appropriate.
+ */
+int  DLLEXPORT OW_getRuleAffectedLinks(OW_Project *m, int ruleIndex, int* nLinks, int* linkIndexes)
+{
+  if (!m->Openflag) {
+    return OW_ERR_NO_DATA;
+  }
+  if (ruleIndex < 1 || ruleIndex > m->Nrules) {
+    return(OW_ERR_UNDEF_TIME_PAT);
+  }
+  
+  *nLinks = 0;
+  linkIndexes = calloc(1, sizeof(int));
+  
+  struct Action *trueActionChain = m->Rule[ruleIndex].TrueChain;
+  struct Action *falseActionChain = m->Rule[ruleIndex].FalseChain;
+  
+  while (trueActionChain != NULL) {
+    int link = trueActionChain->link;
+    // link already included?
+    int found = 0;
+    for (int i = 0; i < *nLinks; ++i) {
+      if (linkIndexes[i] == link) {
+        found = 1;
+      }
+    }
+    if (!found) {
+      linkIndexes = realloc(linkIndexes, (*nLinks+1)*sizeof(int));
+      linkIndexes[*nLinks] = link;
+      ++*nLinks;
+    }
+    trueActionChain = trueActionChain->next;
+  }
+  
+  while (falseActionChain != NULL) {
+    int link = falseActionChain->link;
+    // link already included?
+    int found = 0;
+    for (int i = 0; i < *nLinks; ++i) {
+      if (linkIndexes[i] == link) {
+        found = 1;
+      }
+    }
+    if (!found) {
+      linkIndexes = realloc(linkIndexes, (*nLinks+1)*sizeof(int));
+      linkIndexes[*nLinks] = link;
+      ++*nLinks;
+    }
+    falseActionChain = falseActionChain->next;
+  }
+  return EN_OK;
+}
+
+/**
+ @brief Free the list of affected link indexes
+ @param linkIndexes The array of link indexes.
+ @return EN_OK if ok, other code as appropriate.
+ */
+int  DLLEXPORT OW_freeRuleAffectedLinks(int* linkIndexes)
+{
+  if (linkIndexes == NULL) {
+    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+  }
+  free(linkIndexes);
+  return EN_OK;
 }
 
 
@@ -3326,15 +3426,21 @@ int  DLLEXPORT OW_getversion(int *v)
   return(0);
 }
 
-
+/**
+ @brief Set a Control to enabled or disable
+ @param m The model object pointer
+ @param controlIndex The index of the control in question
+ @param enable Either EN_ENABLE or EN_DISABLE
+ @return EN_OK if successful. Other error codes as appropriate for the failure condition: OW_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of the two acceptable values, or OW_ERR_UNDEF_CONTROL if the control could not be found.
+ */
 int DLLEXPORT OW_setControlEnabled(OW_Project *m, int controlIndex, int enable)
 {
   if (enable != EN_DISABLE || enable != EN_ENABLE) {
-    return EN_ILLEGAL_VALUE;
+    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
   }
   
   if (controlIndex < 1 || controlIndex > m->Ncontrols) {
-    return EN_UNDEFINED_CONTROL; // return error. it's not even a control.
+    return OW_ERR_UNDEF_CONTROL; // return error. it's not even a control.
   }
   
   m->Control[controlIndex].isEnabled = enable;
@@ -3350,10 +3456,12 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
   double s = setting, lvl = level;
   
   /* Check that input file opened */
-  if (!m->Openflag) return(102);
+  if (!m->Openflag)
+    return(OW_ERR_NO_DATA);
   
   /* Check that control exists */
-  if (cindex < 1 || cindex > m->Ncontrols) return(241);
+  if (cindex < 1 || cindex > m->Ncontrols)
+    return(OW_ERR_UNDEF_CONTROL);
   
   /* Check that controlled link exists */
   if (lindex == 0)
@@ -3361,19 +3469,25 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
     m->Control[cindex].Link = 0;
     return(0);
   }
-  if (lindex < 0 || lindex > m->Nlinks) return(204);
+  if (lindex < 0 || lindex > m->Nlinks)
+    return(OW_ERR_UNDEF_LINK);
   
   /* Cannot control check valve. */
-  if (m->Link[lindex].Type == CV) return(207);
+  if (m->Link[lindex].Type == CV)
+    return(OW_ERR_CONTROL_CV);
   
   /* Check for valid parameters */
-  if (ctype < 0 || ctype > EN_TIMEOFDAY) return(251);
+  if (ctype < 0 || ctype > EN_TIMEOFDAY)
+    return(OW_ERR_FN_INVALID_CODE);
+  
   if (ctype == EN_LOWLEVEL || ctype == EN_HILEVEL)
   {
-    if (nindex < 1 || nindex > m->Nnodes) return(203);
+    if (nindex < 1 || nindex > m->Nnodes)
+      return(OW_ERR_UNDEF_NODE);
   }
   else nindex = 0;
-  if (s < 0.0 || lvl < 0.0) return(202);
+  if (s < 0.0 || lvl < 0.0)
+    return(OW_ERR_ILLEGAL_NUMERIC_VALUE);
   
   /* Adjust units of control parameters */
   switch (m->Link[lindex].Type)
@@ -3394,16 +3508,24 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
       
     case PIPE:
     case PUMP: status = OPEN;
-      if (s == 0.0) status = CLOSED;
+      if (s == 0.0) {
+        status = CLOSED;
+      }
   }
   if (ctype == LOWLEVEL || ctype == HILEVEL)
   {
-    if (nindex > m->Njuncs) lvl = m->Node[nindex].El + (level / m->Ucf[ELEV]);
-    else lvl = m->Node[nindex].El + (level / m->Ucf[PRESSURE]);
+    if (nindex > m->Njuncs) {
+      lvl = m->Node[nindex].El + (level / m->Ucf[ELEV]);
+    } else {
+      lvl = m->Node[nindex].El + (level / m->Ucf[PRESSURE]);
+    }
   }
-  if (ctype == TIMER)     t = (long)ROUND(lvl);
-  if (ctype == TIMEOFDAY) t = (long)ROUND(lvl) % SECperDAY;
-  
+  if (ctype == TIMER) {
+    t = (long)ROUND(lvl);
+  }
+  if (ctype == TIMEOFDAY) {
+    t = (long)ROUND(lvl) % SECperDAY;
+  }
   /* Reset control's parameters */
   m->Control[cindex].isEnabled = EN_ENABLE;
   m->Control[cindex].Type = (char)ctype;
@@ -3413,18 +3535,26 @@ int  DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, E
   m->Control[cindex].Setting = s;
   m->Control[cindex].Grade = lvl;
   m->Control[cindex].Time = t;
-  return(0);
+  
+  return EN_OK;
 }
 
 
+/**
+ @brief Set a Rule to enabled or disable
+ @param m The model object pointer
+ @param ruleIndex The index of the Rule in question
+ @param enable Either EN_ENABLE or EN_DISABLE
+ @return EN_OK if successful. Other error codes as appropriate for the failure condition: OW_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of the two acceptable values, or OW_ERR_UNDEF_CONTROL if the rule could not be found.
+ */
 int  DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
 {
   if (enable != EN_DISABLE || enable != EN_ENABLE) {
-    return EN_ILLEGAL_VALUE;
+    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
   }
   
   if (ruleIndex < 1 || ruleIndex > m->Nrules) {
-    return EN_UNDEFINED_CONTROL; // return error. it's not even a control.
+    return OW_ERR_UNDEF_CONTROL; // return error. it's not even a control.
   }
   
   m->Rule[ruleIndex].isEnabled = enable;

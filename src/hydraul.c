@@ -675,7 +675,7 @@ int  controls(OW_Project *m)
 **---------------------------------------------------------------------
 */
 {
-   int   i, k, n, reset, setsum;
+   int   i, linkIdx, n, reset, setsum;
    double h, vplus;
    double v1, v2;
    double k1, k2;
@@ -693,48 +693,57 @@ int  controls(OW_Project *m)
      
       /* Make sure that link is defined */
       reset = 0;
-      if ( (k = control->Link) <= 0) continue;
-
+      linkIdx = control->Link;
+      if (linkIdx <= 0) {
+        continue; // invalid link
+      }
+     
       /* Link is controlled by tank level */
-      if ((n = control->Node) > 0 && n > m->Njuncs)
+      n = control->Node;
+      if (n > 0 && n > m->Njuncs)
       {
          h = m->hydraulics.NodeHead[n];
          vplus = ABS(m->hydraulics.NodeDemand[n]);
          v1 = tankvolume(m, n - m->Njuncs, h);
          v2 = tankvolume(m, n - m->Njuncs, m->Control[i].Grade);
-         if (control->Type == LOWLEVEL && v1 <= v2 + vplus)
+         if (control->Type == LOWLEVEL && v1 <= v2 + vplus) {
             reset = 1;
-         if (control->Type == HILEVEL && v1 >= v2 - vplus)
+         }
+         if (control->Type == HILEVEL && v1 >= v2 - vplus) {
             reset = 1;
+         }
       }
 
       /* Link is time-controlled */
-      if (control->Type == TIMER)
-      {
+      if (control->Type == TIMER) {
           if (control->Time == m->Htime) reset = 1;
       }
 
       /* Link is time-of-day controlled */
-      if (control->Type == TIMEOFDAY)
-      {
-          if ((m->Htime + m->Tstart) % SECperDAY == control->Time) reset = 1;
+      if (control->Type == TIMEOFDAY) {
+         if ((m->Htime + m->Tstart) % SECperDAY == control->Time) {
+           reset = 1;
+         }
       }
 
       /* Update link status & pump speed or valve setting */
-      if (reset == 1)
-      {
-         if (m->hydraulics.LinkStatus[k] <= CLOSED) s1 = CLOSED;
-         else                s1 = OPEN;
+      if (reset == 1) {
+         if (m->hydraulics.LinkStatus[linkIdx] <= CLOSED) {
+           s1 = CLOSED;
+         } else {
+           s1 = OPEN;
+         }
          s2 = control->Status;
-         k1 = m->hydraulics.LinkSetting[k];
+         k1 = m->hydraulics.LinkSetting[linkIdx];
          k2 = k1;
-         if (m->Link[k].Type > PIPE) k2 = control->Setting;
-         if (s1 != s2 || k1 != k2)
-         {
-            m->hydraulics.LinkStatus[k] = s2;
-            m->hydraulics.LinkSetting[k] = k2;
+         if (m->Link[linkIdx].Type > PIPE) {
+           k2 = control->Setting; // pumps and valves have controllable Setting
+         }
+         if (s1 != s2 || k1 != k2) {
+            m->hydraulics.LinkStatus[linkIdx] = s2;
+            m->hydraulics.LinkSetting[linkIdx] = k2;
            if (m->Statflag) {
-             writecontrolaction(m,k,i);
+             writecontrolaction(m,linkIdx,i);
            }
  //           if (s1 != s2) initlinkflow(k, S[k], K[k]);
             setsum++;
@@ -932,7 +941,8 @@ void  ruletimestep(OW_Project *m, long *tstep)
    /* Make sure time increment is no larger than current time step */
    dt = MIN(dt, *tstep);
    dt1 = MIN(dt1, *tstep);
-   if (dt1 == 0) dt1 = dt;
+   if (dt1 == 0)
+     dt1 = dt;
 
    /* Step through time, updating tank levels, until either  */
    /* a rule fires or we reach the end of evaluation period. */

@@ -114,7 +114,7 @@ void    changestatus(OW_Project *m, int, char, double);  /* Changes status of a 
 void    initrules(OW_Project *m);                  /* Initializes rule base      */
 void    addrule(OW_Project *m, char *);                  /* Adds rule to rule base     */
 int     allocrules(OW_Project *m);                 /* Allocates memory for rule  */
-int     ruledata(OW_Project *m);                   /* Processes rule input data  */
+int     parseRuleData(OW_Project *m);                   /* Processes rule input data  */
 int     checkrules(OW_Project *m, long);                 /* Checks all rules           */
 void    freerules(OW_Project *m);                  /* Frees rule base memory     */
 

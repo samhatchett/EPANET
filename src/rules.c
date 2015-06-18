@@ -16,7 +16,7 @@ AUTHOR:     L. Rossman
      initrules()  -- called from ENopen() in EPANET.C
      addrule()    -- called from netsize() in INPUT2.C
      allocrules() -- called from allocdata() in EPANET.C
-     ruledata()   -- called from newline() in INPUT2.C
+     parseRuleData()   -- called from newline() in INPUT2.C
      freerules()  -- called from freedata() in EPANET.C
      checkrules() -- called from ruletimestep() in HYDRAUL.C
 
@@ -36,7 +36,6 @@ AUTHOR:     L. Rossman
 #include "funcs.h"
 #define  EXTERN  extern
 #include "vars.h"
-#include "errors.h"
 
 enum    Rulewords      {r_RULE,r_IF,r_AND,r_OR,r_THEN,r_ELSE,r_PRIORITY,r_ERROR};
 char    *Ruleword[]  = {w_RULE,w_IF,w_AND,w_OR,w_THEN,w_ELSE,w_PRIORITY,NULL};
@@ -54,7 +53,18 @@ char    *Object[]    = {w_JUNC,w_RESERV,w_TANK,w_PIPE,w_PUMP,w_VALVE,
                         w_NODE,w_LINK,w_SYSTEM,NULL};
 
 /* NOTE: place "<=" & ">=" before "<" & ">" so that findmatch() works correctly. */
-enum    Operators      { EQ, NE,  LE,  GE,  LT, GT, IS,  NOT,  BELOW,  ABOVE};
+enum Operators {
+        OPERATOR_EQUAL,
+        OPERATOR_NOTEQUAL,
+        OPERATOR_LESSTHANOREQUAL,
+        OPERATOR_GREATERTHANOREQUAL,
+        OPERATOR_LESSTHAN,
+        OPERATOR_GREATERTHAN,
+        OPERATOR_IS,
+        OPERATOR_ISNOT,
+        OPERATOR_BELOW,
+        OPERATOR_ABOVE
+    };
 char    *Operator[]  = {"=","<>","<=",">=","<",">",w_IS,w_NOT,w_BELOW,w_ABOVE,NULL};
 
 enum    Values         {IS_NUMBER,IS_OPEN,IS_CLOSED,IS_ACTIVE};
@@ -165,13 +175,13 @@ int checkrules(OW_Project *m, long dt)
      
       /* If premises true, add THEN clauses to action list. */
       if (evalpremises(m,i) == TRUE) {
-        updateactlist(m,i,m->Rule[i].Tchain);
+        updateactlist(m,i,m->Rule[i].TrueChain);
       }
 
       /* If premises false, add ELSE actions to list. */
       else {
-        if (m->Rule[i].Fchain != NULL) {
-          updateactlist(m,i,m->Rule[i].Fchain);
+        if (m->Rule[i].FalseChain != NULL) {
+          updateactlist(m,i,m->Rule[i].FalseChain);
         }
       }
    }
@@ -186,7 +196,7 @@ int checkrules(OW_Project *m, long dt)
 }
 
 
-int  ruledata(OW_Project *m)
+int  parseRuleData(OW_Project *m)
 /*
 **--------------------------------------------------------------
 **    Parses a line from [RULES] section of input.
@@ -299,21 +309,21 @@ void  clearrules(OW_Project *m)
    int i;
    for (i=1; i <= m->Nrules; i++)
    {
-      p = m->Rule[i].Pchain;
+      p = m->Rule[i]. PremiseChain;
       while (p != NULL)
       {
          pnext = p->next;
          free(p);
          p = pnext;
       }
-      a = m->Rule[i].Tchain;
+      a = m->Rule[i].TrueChain;
       while (a != NULL)
       {
          anext = a->next;
          free(a);
          a = anext;
       }
-      a = m->Rule[i].Fchain;
+      a = m->Rule[i].FalseChain;
       while (a != NULL)
       {
          anext = a->next;
@@ -334,9 +344,9 @@ void  newrule(OW_Project *m)
   struct aRule *Rule = m->Rule;
    strncpy(Rule[m->Nrules].label, m->Tok[1], MAXID);
    Rule[m->Nrules].isEnabled = EN_ENABLE;
-   Rule[m->Nrules].Pchain = NULL;
-   Rule[m->Nrules].Tchain = NULL;
-   Rule[m->Nrules].Fchain = NULL;
+   Rule[m->Nrules]. PremiseChain = NULL;
+   Rule[m->Nrules].TrueChain = NULL;
+   Rule[m->Nrules].FalseChain = NULL;
    Rule[m->Nrules].priority = 0.0;
    m->Plast = NULL;
 }
@@ -355,7 +365,7 @@ int  newpremise(OW_Project *mod, int logop)
 **---------------------------------------------------------------------
 */
 {
-   int   i,j,k,m,r,s,v;
+   int   elementType,j,k,m,r,s,word;
    double x;
    struct Premise *p;
 
@@ -363,18 +373,22 @@ int  newpremise(OW_Project *mod, int logop)
    if (mod->Ntokens != 5 && mod->Ntokens != 6) return(OW_ERR_SYNTAX);
 
    /* Find network object & id if present */
-   i = findmatch(mod->Tok[1],Object);
-   if (i == r_SYSTEM)
+   elementType = findmatch(mod->Tok[1],Object);
+   if (elementType == r_SYSTEM)
    { 
       j = 0;
-      v = findmatch(mod->Tok[2],Varword);
-      if (v != r_DEMAND && v != r_TIME && v != r_CLOCKTIME) return(OW_ERR_SYNTAX);
+      word = findmatch(mod->Tok[2],Varword);
+      if (word != r_DEMAND && word != r_TIME && word != r_CLOCKTIME) {
+        return(OW_ERR_SYNTAX);
+      }
    }
    else
    {
-      v = findmatch(mod->Tok[3],Varword);
-      if (v < 0) return(OW_ERR_SYNTAX);
-      switch (i) 
+      word = findmatch(mod->Tok[3],Varword);
+      if (word < 0) {
+        return(OW_ERR_SYNTAX);
+      }
+      switch (elementType)
       {
          case r_NODE:
          case r_JUNC:
@@ -386,12 +400,12 @@ int  newpremise(OW_Project *mod, int logop)
          case r_VALVE:  k = r_LINK; break;
          default: return(OW_ERR_SYNTAX);
       }
-      i = k;
-      if (i == r_NODE)
+      elementType = k;
+      if (elementType == r_NODE)
       {
          j = findnode(mod,mod->Tok[2]);
          if (j == 0) return(203);
-         switch (v)
+         switch (word)
          {
             case r_DEMAND:
             case r_HEAD:
@@ -406,77 +420,102 @@ int  newpremise(OW_Project *mod, int logop)
             default: return(OW_ERR_SYNTAX);
          }
       }
-      else
+      else // type is link
       {
          j = findlink(mod,mod->Tok[2]);
-         if (j == 0) return(204);
-         switch (v)
+         if (j == 0) {
+           return(204);
+         }
+         switch (word)
          {
             case r_FLOW:
             case r_STATUS:
-            case r_SETTING: break;
-            default: return(OW_ERR_SYNTAX);
+            case r_SETTING:
+             break;
+            default:
+             return(OW_ERR_SYNTAX);
          }
       }
    }
 
    /* Parse relational operator (r) and check for synonyms */
-   if (i == r_SYSTEM)
+   if (elementType == r_SYSTEM) {
      m = 3;
-   else
+   } else {
      m = 4;
+   }
   
    k = findmatch(mod->Tok[m],Operator);
-   if (k < 0)
+   if (k < 0) {
      return(OW_ERR_SYNTAX);
+   }
    switch(k)
    {
-      case IS:    r = EQ; break;
-      case NOT:   r = NE; break;
-      case BELOW: r = LT; break;
-      case ABOVE: r = GT; break;
-      default:    r = k;
+     case OPERATOR_IS:
+       r = OPERATOR_EQUAL;
+       break;
+     case OPERATOR_ISNOT:
+       r = OPERATOR_NOTEQUAL;
+       break;
+     case OPERATOR_BELOW:
+       r = OPERATOR_LESSTHAN;
+       break;
+     case OPERATOR_ABOVE:
+       r = OPERATOR_GREATERTHAN;
+       break;
+     default:
+       r = k;
    }
 
    /* Parse for status (s) or numerical value (x) */
    s = 0;
    x = MISSING;
-   if (v == r_TIME || v == r_CLOCKTIME)
+   if (word == r_TIME || word == r_CLOCKTIME)
    {
       if (mod->Ntokens == 6)
          x = hour(mod->Tok[4],mod->Tok[5])*3600.;
       else
          x = hour(mod->Tok[4],"")*3600.;
       if (x < 0.0) return(202);
-   }
-   else if ((k = findmatch(mod->Tok[mod->Ntokens-1],Value)) > IS_NUMBER) s = k;
-   else
-   {
-      if (!getfloat(mod->Tok[mod->Ntokens-1],&x)) return(202);
-      if (v == r_FILLTIME || v == r_DRAINTIME) x = x*3600.0;                   //(2.00.11 - LR)
+   } else if ((k = findmatch(mod->Tok[mod->Ntokens-1],Value)) > IS_NUMBER) {
+     // status open, closed, active
+     s = k;
+   } else {
+     // numerical value
+     if (!getfloat(mod->Tok[mod->Ntokens-1],&x)) {
+       return(202);
+     }
+     if (word == r_FILLTIME || word == r_DRAINTIME)  {
+       x = x*3600.0;
+     }
    }
 
    
          
    /* Create new premise structure */
    p = (struct Premise *) malloc(sizeof(struct Premise));
-   if (p == NULL) return(101);
-   p->object = i;
-   p->index =  j;
-   p->variable = v;
+  
+   if (p == NULL) {
+     return(OW_ERR_INSUFFICIENT_MEMORY);
+   }
+  
+   p->object = elementType;
+   p->elementIndex =  j;
+   p->variable = word;
    p->relop = r;
-   p->logop = logop;
+   p->logicOperator = logop;
    p->status   = s;
    p->value    = x;
 
    /* Add premise to current rule's premise list */
    p->next = NULL;
    if (mod->Plast == NULL)
-     mod->Rule[mod->Nrules].Pchain = p;
+     mod->Rule[mod->Nrules]. PremiseChain = p;
    else
      mod->Plast->next = p;
    mod->Plast = p;
-   return(0);
+  
+   return EN_OK;
 }
 
 
@@ -535,7 +574,9 @@ int  newaction(OW_Project *m)
 
    /* Create a new action structure */
    a = (struct Action *) malloc(sizeof(struct Action));
-   if (a == NULL) return(101);
+   if (a == NULL) {
+     return(OW_ERR_INSUFFICIENT_MEMORY);
+   }
    a->link = j;
    a->status = s;
    a->setting = x;
@@ -543,15 +584,15 @@ int  newaction(OW_Project *m)
    /* Add action to current rule's action list */
    if (m->RuleState == r_THEN)
    {
-     a->next = Rule[m->Nrules].Tchain;
-     Rule[m->Nrules].Tchain = a;
+     a->next = Rule[m->Nrules].TrueChain;
+     Rule[m->Nrules].TrueChain = a;
    }
    else
    {
-      a->next = Rule[m->Nrules].Fchain;
-      Rule[m->Nrules].Fchain = a;
+      a->next = Rule[m->Nrules].FalseChain;
+      Rule[m->Nrules].FalseChain = a;
    }
-   return(0);
+   return EN_OK;
 }
 
 
@@ -582,10 +623,10 @@ int  evalpremises(OW_Project *m, int i)
     struct Premise *p;
 
     result = TRUE;
-    p = m->Rule[i].Pchain;
+    p = m->Rule[i]. PremiseChain;
     while (p != NULL)
     {
-        if (p->logop == r_OR)
+        if (p->logicOperator == r_OR)
         {
             if (result == FALSE)
             {
@@ -647,14 +688,14 @@ int  checktime(OW_Project *m, struct Premise *p)
    switch (p->relop)
    {
       /* For inequality, test against current time */
-        case LT: if (t2 >= x) return(0); break;
-        case LE: if (t2 >  x) return(0); break;
-        case GT: if (t2 <= x) return(0); break;
-        case GE: if (t2 <  x) return(0); break;
+        case OPERATOR_LESSTHAN: if (t2 >= x) return(0); break;
+        case OPERATOR_LESSTHANOREQUAL: if (t2 >  x) return(0); break;
+        case OPERATOR_GREATERTHAN: if (t2 <= x) return(0); break;
+        case OPERATOR_GREATERTHANOREQUAL: if (t2 <  x) return(0); break;
 
       /* For equality, test if within interval */
-        case EQ:
-        case NE:
+        case OPERATOR_EQUAL:
+        case OPERATOR_NOTEQUAL:
            flag = FALSE;
            if (t2 < t1)     /* E.g., 11:00 am to 1:00 am */
            {
@@ -664,8 +705,8 @@ int  checktime(OW_Project *m, struct Premise *p)
            {
               if (x >= t1 && x <= t2) flag = TRUE;
            }
-           if (p->relop == EQ && flag == FALSE) return(0);
-           if (p->relop == NE && flag == TRUE)  return(0);
+           if (p->relop == OPERATOR_EQUAL && flag == FALSE) return(0);
+           if (p->relop == OPERATOR_NOTEQUAL && flag == TRUE)  return(0);
            break;
    }
 
@@ -688,20 +729,20 @@ int  checkstatus(OW_Project *m, struct Premise *p)
         case IS_OPEN:
         case IS_CLOSED:
         case IS_ACTIVE:
-                i = m->hydraulics.LinkStatus[p->index];
+                i = m->hydraulics.LinkStatus[p->elementIndex];
                 if      (i <= CLOSED) j = IS_CLOSED;
                 else if (i == ACTIVE) j = IS_ACTIVE;
                 else                  j = IS_OPEN;
                 if (j == p->status &&
-                p->relop == EQ)     return(1);
+                p->relop == OPERATOR_EQUAL)     return(1);
                 if (j != p->status &&
-                p->relop == NE) return(1);
+                p->relop == OPERATOR_NOTEQUAL) return(1);
     }
     return(0);
 }
 
 
-int  checkvalue(OW_Project *m, struct Premise *p)
+int  checkvalue(OW_Project *m, struct Premise *premise)
 /*
 **----------------------------------------------------------
 **    Checks if numerical condition on a variable is true.
@@ -724,14 +765,16 @@ int  checkvalue(OW_Project *m, struct Premise *p)
   int Njuncs = m->Njuncs;
   double Dsystem = m->Dsystem;
   
-    i = p->index;
-    v = p->variable;
+    i = premise->elementIndex;
+    v = premise->variable;
     switch (v)
     {
 
 /*** Updated 10/25/00 ***/
-        case r_DEMAND:    if (p->object == r_SYSTEM) x = Dsystem * Ucf[DEMAND];
-                          else x = NodeDemand[i]*Ucf[DEMAND];
+        case r_DEMAND:    if (premise->object == r_SYSTEM)
+                            x = Dsystem * Ucf[DEMAND];
+                          else
+                            x = NodeDemand[i]*Ucf[DEMAND];
                           break;
 
         case r_HEAD:
@@ -767,18 +810,35 @@ int  checkvalue(OW_Project *m, struct Premise *p)
                           break;
         default:          return(0);
     }
-    switch (p->relop)
+  
+    switch (premise->relop)
     {
-        case EQ:        if (ABS(x - p->value) > tol) return(0);
-                        break;
-        case NE:        if (ABS(x - p->value) < tol) return(0);
-                        break;
-        case LT:        if (x > p->value + tol) return(0); break;
-        case LE:        if (x > p->value - tol) return(0); break;
-        case GT:        if (x < p->value - tol) return(0); break;
-        case GE:        if (x < p->value + tol) return(0); break;
+      case OPERATOR_EQUAL:
+        if (ABS(x - premise->value) > tol)
+          return FALSE;
+        break;
+      case OPERATOR_NOTEQUAL:
+        if (ABS(x - premise->value) <= tol)
+          return FALSE;
+        break;
+      case OPERATOR_LESSTHAN:
+        if (x > premise->value + tol)
+          return FALSE;
+        break;
+      case OPERATOR_LESSTHANOREQUAL:
+        if (x > premise->value - tol)
+          return FALSE;
+        break;
+      case OPERATOR_GREATERTHAN:
+        if (x < premise->value - tol)
+          return FALSE;
+        break;
+      case OPERATOR_GREATERTHANOREQUAL:
+        if (x < premise->value + tol)
+          return FALSE;
+        break;
     }
-    return(1);
+    return TRUE;
 }
 
 

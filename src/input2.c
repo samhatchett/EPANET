@@ -39,7 +39,6 @@ The following utility functions are all called from INPUT3.C
 #include "funcs.h"
 #define  EXTERN  extern
 #include "vars.h"
-#include "errors.h"
 
 #define   MAXERRS     10  /* Max. input errors reported        */
 // moved to Model*
@@ -291,7 +290,7 @@ int  newline(OW_Project *m, int sect, char *line)
        case _CURVES:      return(curvedata(m));
        case _DEMANDS:     return(demanddata(m));
        case _CONTROLS:    return(controldata(m));
-       case _RULES:       return(ruledata(m));   /* See RULES.C */
+       case _RULES:       return(parseRuleData(m));   /* See RULES.C */
        case _SOURCES:     return(sourcedata(m));
        case _EMITTERS:    return(emitterdata(m));
        case _QUALITY:     return(qualdata(m));

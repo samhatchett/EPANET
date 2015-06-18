@@ -34,7 +34,6 @@ All functions in this module are called from newline() in INPUT2.C.
 #include "funcs.h"
 #define  EXTERN  extern
 #include "vars.h"
-#include "errors.h"
 
 ///* Defined in enumstxt.h in EPANET.C */
 extern char *MixTxt[];
@@ -807,21 +806,28 @@ int  controldata(OW_Project *m)
   
 /* Check for sufficient number of input tokens */
    n = m->Ntokens;
-   if (n < 6) return(OW_ERR_SYNTAX);
-
+   if (n < 6) {
+     return(OW_ERR_SYNTAX);
+   }
 /* Check that controlled link exists */
    k = findlink(m,Tok[1]);
-   if (k == 0) return(204);
+   if (k == 0) {
+     return(OW_ERR_UNDEF_LINK);
+   }
    type = Link[k].Type;
-   if (type == CV) return(207);         /* Cannot control check valve. */
-
+   if (type == CV) {
+     return(OW_ERR_CONTROL_CV);         /* Cannot control check valve. */
+   }
 /*** Updated 9/7/00 ***/
 /* Parse control setting into a status level or numerical setting. */
    if (match(Tok[2],w_OPEN))
    {
-      status = OPEN;
-      if (type == PUMP) setting = 1.0;
-      if (type == GPV)  setting = Link[k].Kc;
+     status = OPEN;
+     if (type == PUMP) {
+       setting = 1.0;
+     } else if (type == GPV) {
+       setting = Link[k].Kc;
+     }
    }
    else if (match(Tok[2],w_CLOSED))
    {

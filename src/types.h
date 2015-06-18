@@ -185,7 +185,7 @@ enum ControlType               /* Control condition type:             */
   TIMEOFDAY};    /*    act when time of day occurs      */
 
 enum StatType                  /* Link/Tank status:                   */
-{XHEAD,        /*   pump cannot deliver head (closed) */
+{ XHEAD,        /*   pump cannot deliver head (closed) */
   TEMPCLOSED,   /*   temporarily closed                */
   CLOSED,       /*   closed                            */
   OPEN,         /*   open                              */
@@ -432,13 +432,13 @@ typedef struct     /* VALVE OBJECT */
 typedef struct     /* CONTROL STATEMENT */
 {
    int    isEnabled;/* set to enable or disable this control */
-   int    Link;     /* Link index         */
-   int    Node;     /* Control node index */
+   int    Link;     /* Controlled Link index         */
+   int    Node;     /* Control input node index */
    long   Time;     /* Control time       */
    double Grade;    /* Control grade      */
-   double Setting;  /* New link setting   */
-   char   Status;   /* New link status    */
-   char   Type;     /* Control type       */
+   double Setting;  /* New (triggered) link setting   */
+   char   Status;   /* New (triggered) link status    */
+   char   Type;     /* Control type - time/grade      */
                    /* (see ControlType below) */
 }  Scontrol;
 
@@ -472,9 +472,9 @@ typedef struct            /* FIELD OBJECT of report table */
 /***** RULES *****/
 struct      Premise         /* Rule Premise Clause */
 {
-  int      logop;          /* Logical operator */
+  int      logicOperator;          /* Logical operator */
   int      object;         /* Node or link */
-  int      index;          /* Object's index */
+  int      elementIndex;          /* Object's index */
   int      variable;       /* Pressure, flow, etc. */
   int      relop;          /* Relational operator */
   int      status;         /* Variable's status */
@@ -495,9 +495,9 @@ struct      aRule           /* Control Rule Structure */
   char     label[MAXID+1];    /* Rule character label */
   double    priority;          /* Priority level */
   int      isEnabled;
-  struct   Premise  *Pchain;  /* Linked list of premises */
-  struct   Action   *Tchain;  /* Linked list of actions if true */
-  struct   Action   *Fchain;  /* Linked list of actions if false */
+  struct   Premise  * PremiseChain;  /* Linked list of premises */
+  struct   Action   *TrueChain;  /* Linked list of actions if true */
+  struct   Action   *FalseChain;  /* Linked list of actions if false */
   struct   aRule    *next;
 };
 
