@@ -956,6 +956,9 @@ int DLLEXPORT OW_getoption(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
   case EN_DEMANDMULT:
     v = m->Dmult;
     break;
+  case EN_HEADLOSSFORMULA:
+    v = (int)m->Formflag;
+    break;
   default:
     return (251);
   }

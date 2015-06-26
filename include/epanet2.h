@@ -157,6 +157,7 @@ typedef enum {
 #define EN_TOLERANCE    2
 #define EN_EMITEXPON    3
 #define EN_DEMANDMULT   4
+#define EN_HEADLOSSFORMULA  5
 
 #define EN_LOWLEVEL     0   /* Control types.  */
 #define EN_HILEVEL      1   /* See ControlType */
