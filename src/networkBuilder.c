@@ -56,9 +56,15 @@ int DLLEXPORT OW_newNetwork(OW_Project **modelObj)
 }
 
 // network creation api set
-int DLLEXPORT OW_startEditingNetwork(OW_Project *modelObj)
+int DLLEXPORT OW_startEditingNetwork(OW_Project *m)
 {
   
+  if (m->OpenHflag) {
+    OW_closeH(m);
+  }
+  
+  
+  return EN_OK;
 }
 
 int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
@@ -217,4 +223,6 @@ int DLLEXPORT OW_stopEditingNetwork(OW_Project *m)
 {
   
   adjustdata(m); // fill in missing data with defaults
+  return EN_OK;
+  
 }

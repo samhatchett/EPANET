@@ -122,22 +122,20 @@ void inithyd(OW_Project *m, int initflag)
    int i,j;
 
    /* Initialize tanks */
-   for (i=1; i <= m->network.Ntanks; i++)
-   {
+   for (i=1; i <= m->network.Ntanks; i++) {
       m->network.Tank[i].V = m->network.Tank[i].V0;
       m->hydraulics.NodeHead[m->network.Tank[i].Node] = m->network.Tank[i].H0;
-
-/*** Updated 10/25/00 ***/
       m->hydraulics.NodeDemand[m->network.Tank[i].Node] = 0.0;
-
       m->hydraulics.OldStat[m->network.Nlinks+i] = TEMPCLOSED;
    }
 
    /* Initialize emitter flows */
    memset(m->hydraulics.EmitterFlows,0,(m->network.Nnodes+1)*sizeof(double));
-   for (i=1; i <= m->network.Njuncs; i++)
-      if (m->network.Node[i].Ke > 0.0) m->hydraulics.EmitterFlows[i] = 1.0;
-
+  for (i=1; i <= m->network.Njuncs; i++) {
+     if (m->network.Node[i].Ke > 0.0) {
+        m->hydraulics.EmitterFlows[i] = 1.0;
+     }
+  }
    /* Initialize links */
    for (i=1; i <= m->network.Nlinks; i++)
    {
@@ -1976,8 +1974,10 @@ double newflows(OW_Project *m)
    }
 
    /* Return ratio of total flow corrections to total flow */
-   if (qsum > m->Hacc) return(dqsum/qsum);
-   else return(dqsum);
+   if (qsum > m->Hacc)
+     return(dqsum/qsum);
+   else
+     return(dqsum);
 
 }                        /* End of newflows */
 

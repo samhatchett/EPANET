@@ -556,14 +556,14 @@ typedef struct {
       Ncurves,               /* Number of data curves        */
       Ncoords;               /* Number of Coords             */
   
-  Spattern *Pattern;              /* Time patterns                */
-  Scurve   *Curve;                /* Curve data                   */
-  Scoord   *Coord;                /* Coordinate data              */
   Snode    *Node;                 /* Node data                    */
   Slink    *Link;                 /* Link data                    */
   Stank    *Tank;                 /* Tank data                    */
   Spump    *Pump;                 /* Pump data                    */
   Svalve   *Valve;                /* Valve data                   */
+  Spattern *Pattern;              /* Time patterns                */
+  Scurve   *Curve;                /* Curve data                   */
+  Scoord   *Coord;                /* Coordinate data              */
   Scontrol *Control;              /* Control data                 */
   ENHashTable  *NodeHashTable, *LinkHashTable;            /* Hash tables for ID labels    */
   Padjlist *Adjlist;              /* Node adjacency lists         */
