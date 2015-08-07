@@ -8,77 +8,53 @@
 
 int   main(int argc, char *argv[])
 {
-  char valveName[32];
-  OW_Project *m;
-  long t1;
   
-  OW_open("/Users/sam/Desktop/gcww_v5.inp", &m, "report.rpt", "bin.out");
-  
-  
-  int nLinks;
-  OW_getcount(m, EN_LINKCOUNT, &nLinks);
-  
-  for (int i = 1; i <= nLinks; ++i) {
-    
-    EN_LinkType type;
-    OW_getlinktype(m, i, &type);
-    
-    if (type == EN_TCV) {
-      
-      OW_getlinkid(m, i, valveName);
-      
-      double val;
-      OW_getlinkvalue(m, i, EN_INITSETTING, &val);
-      
-      
-      
-      if (val >= 10000) {
-        // tcv is assumed closed.
-        fprintf(stdout, "%s      CLOSED\n", valveName);
-      }
-      
-    }
-    
-  }
-  
-  
-  
-  /*
-  
+  int err;
+
   OW_Project *model;
-  OW_newNetwork(&model);
+  err = OW_newNetwork(&model);
   
   
-  OW_startEditingNetwork(model);
+  err = OW_startEditingNetwork(model);
   
-  OW_addNode(model, EN_JUNCTION, "demand_junction");
-  OW_setnodevalue(model, 1, EN_ELEVATION, 90.0);
-  OW_setnodevalue(model, 1, EN_BASEDEMAND, 10);
+  err = OW_addNode(model, EN_JUNCTION, "demand_junction");
+  err = OW_setnodevalue(model, 1, EN_ELEVATION, 90.0);
+  err = OW_setnodevalue(model, 1, EN_BASEDEMAND, 10);
   
-  OW_addNode(model, EN_RESERVOIR, "reservoir");
-  OW_setnodevalue(model, 2, EN_HEAD, 100.0);
+  err = OW_addNode(model, EN_RESERVOIR, "reservoir");
+  err = OW_setnodevalue(model, 2, EN_ELEVATION, 100.0);
+  
+  err = OW_addLink(model, EN_PIPE, "connecting_pipe", "demand_junction", "reservoir");
+  err = OW_setlinkvalue(model, 1, EN_SETTING, 0);
+  err = OW_setlinkvalue(model, 1, EN_DIAMETER, 10);
+  err = OW_setlinkvalue(model, 1, EN_LENGTH, 100);
   
   
+  err = OW_stopEditingNetwork(model);
   
-  OW_addLink(model, EN_PIPE, "connecting_pipe", "reservoir", "demand_junction");
-  OW_setlinkvalue(model, 1, EN_DIAMETER, 10);
-  OW_setlinkvalue(model, 1, EN_LENGTH, 100);
-  
-  
-  OW_stopEditingNetwork(model);
-  
-  OW_openH(model);
-  OW_initH(model, EN_NOSAVE);
+  err = OW_openH(model);
+  err = OW_initH(model, EN_NOSAVE);
   
   long t;
-  OW_runH(model, &t);
+  err = OW_runH(model, &t);
   
   double flow;
   
-  OW_getlinkvalue(model, 1, EN_FLOW, &flow);
+  err = OW_getlinkvalue(model, 1, EN_FLOW, &flow);
   
-  fprintf(stdout, "%f", flow);
+  fprintf(stdout, "flow: %f\n\n", flow);
   
-  */
+  
+  
+  err = OW_setnodevalue(model, 1, EN_BASEDEMAND, 20);
+  
+  err = OW_runH(model, &t);
+  err = OW_getlinkvalue(model, 1, EN_FLOW, &flow);
+  
+  fprintf(stdout, "flow2: %f", flow);
+  
+  
+  OW_close(model);
+  
   
 }
