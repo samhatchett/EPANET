@@ -1926,8 +1926,9 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     source = m->network.Node[index].S;
     if (source == NULL) {
       source = (struct Ssource *)malloc(sizeof(struct Ssource));
-      if (source == NULL)
-        return (101);
+      if (source == NULL) {
+        return (OW_ERR_INSUFFICIENT_MEMORY);
+      }
       source->Type = CONCEN;
       source->C0 = 0.0;
       source->Pat = 0;
@@ -2203,7 +2204,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
   n = m->network.Npats + 1;
   tmpPat = (Spattern *)calloc(n + 1, sizeof(Spattern));
   if (tmpPat == NULL)
-    return (101);
+    return (OW_ERR_INSUFFICIENT_MEMORY);
 
   /* Copy contents of old pattern array to new one */
 
@@ -2235,7 +2236,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
       if (tmpPat[i].F)
         free(tmpPat[i].F);
     free(tmpPat);
-    return (101);
+    return (OW_ERR_INSUFFICIENT_MEMORY);
   }
 
   // Replace old pattern array with new one
@@ -2266,7 +2267,7 @@ int DLLEXPORT OW_setpattern(OW_Project *m, int index, EN_API_FLOAT_TYPE *f, int 
   m->network.Pattern[index].Length = n;
   m->network.Pattern[index].F = (double *)realloc(m->network.Pattern[index].F, n * sizeof(double));
   if (m->network.Pattern[index].F == NULL)
-    return (101);
+    return (OW_ERR_INSUFFICIENT_MEMORY);
 
   /* Load multipliers into pattern */
   for (j = 0; j < n; j++) {
@@ -2873,7 +2874,7 @@ int allocdata(OW_Project *m)
       m->network.Coord[n].X = (double *)calloc(1, sizeof(double));
       m->network.Coord[n].Y = (double *)calloc(1, sizeof(double));
       if (m->network.Coord[n].X == NULL || m->network.Coord[n].Y == NULL) {
-        return (101);
+        return (OW_ERR_INSUFFICIENT_MEMORY);
       }
       m->network.Coord[n].X[0] = 0;
       m->network.Coord[n].Y[0] = 0;
@@ -3150,7 +3151,7 @@ void geterrmsg(int errcode, char *msgOut)
                            case 6:     strcpy(Msg,WARN6);   break;
                      */
   /* System Errors */
-  case 101:
+  case OW_ERR_INSUFFICIENT_MEMORY:
     strcpy(msgOut, ERR101);
     break;
   case 102:

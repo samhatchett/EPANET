@@ -220,11 +220,14 @@ int   runhyd(OW_Project *m, long *t)
 /*** Updated 3/1/01 ***/
       /* If system unbalanced and no extra trials */
       /* allowed, then activate the Haltflag.     */
-      if (relerr > m->Hacc && m->ExtraIter == -1)
+     if (relerr > m->Hacc && m->ExtraIter == -1) {
         m->Haltflag = 1;
+     }
 
       /* Report any warning conditions */
-      if (!errcode) errcode = writehydwarn(m,iter,relerr);
+     if (!errcode) {
+       errcode = writehydwarn(m,iter,relerr);
+     }
    }
    return(errcode);
 }                               /* end of runhyd */
@@ -1336,9 +1339,10 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
    }
 
    /* Iterations ended. Report any errors. */
-   if (errcode < 0) errcode = 101;      /* Memory allocation error */
-   else if (errcode > 0)
-   {
+  if (errcode < 0) {
+    errcode = OW_ERR_INSUFFICIENT_MEMORY;      /* Memory allocation error */
+  }
+   else if (errcode > 0) {
       writehyderr(m,m->hydraulics.solver.Order[errcode]);      /* Ill-conditioned eqns. error */
       errcode = 110;
    }
