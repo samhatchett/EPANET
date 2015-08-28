@@ -584,6 +584,9 @@ int DLLEXPORT OW_solveQ(OW_Project *m)
 
 int DLLEXPORT OW_openQ(OW_Project *m)
 {
+  if (m == NULL) {
+    return EN_OK;
+  }
   int errcode = 0;
 
   /* Check that hydraulics results exist */
@@ -673,6 +676,9 @@ int DLLEXPORT OW_stepQ(OW_Project *m, long *tleft)
 
 int DLLEXPORT OW_closeQ(OW_Project *m)
 {
+  if (m == NULL) {
+    return EN_OK;
+  }
   if (!m->Openflag)
     return (102);
   closequal(m);
