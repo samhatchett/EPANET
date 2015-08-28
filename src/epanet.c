@@ -595,8 +595,9 @@ int DLLEXPORT OW_openQ(OW_Project *m)
   if (!m->Openflag) {
     return (102);
   }
-  // !LT! todo - check for SaveHflag / set sequential/step mode
-  // if (!SaveHflag) return(104);
+  if (!m->SaveHflag && !m->OpenHflag) {
+    return(104); // not saveH means results are not saved, not openH means no current results.
+  }
 
   /* Open WQ solver */
   ERRCODE(openqual(m));
@@ -613,7 +614,7 @@ int DLLEXPORT OW_initQ(OW_Project *m, int saveflag)
 {
   int errcode = 0;
   if (!m->OpenQflag)
-    return (105);
+    return (OW_ERR_WQ_NOT_INITIALIZED);
   initqual(m);
   m->SaveQflag = FALSE;
   m->Saveflag = FALSE;
