@@ -1711,7 +1711,7 @@ int DLLEXPORT OW_getversion(int *v)
  */
 int DLLEXPORT OW_setControlEnabled(OW_Project *m, int controlIndex, int enable)
 {
-  if (enable != EN_DISABLE || enable != EN_ENABLE) {
+  if (enable != EN_DISABLE && enable != EN_ENABLE) {
     return OW_ERR_ILLEGAL_NUMERIC_VALUE;
   }
 
