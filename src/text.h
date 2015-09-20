@@ -492,6 +492,7 @@ AUTHOR:     L. Rossman
 #define ERR241 "Input Error 241: %s %s refers to undefined control."
 #define ERR250 "Input Error 250: function call contains invalid format."
 #define ERR251 "Input Error 251: function call contains invalid parameter code."
+#define ERR253 "Input Error 253: function call contains invalid demand index."
 
 #define ERR301 "File Error 301: identical file names."
 #define ERR302 "File Error 302: cannot open input file."

@@ -3231,6 +3231,9 @@ void geterrmsg(int errcode, char *msgOut)
   case 251:
     sprintf(msgOut, ERR251);
     break;
+  case 253:
+    sprintf(msgOut, ERR253);
+    break;
 
   /* File Errors */
   case 301:

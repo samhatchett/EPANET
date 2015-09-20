@@ -100,20 +100,15 @@ int  juncdata(OW_Project *m)
    Node[m->network.Njuncs].Rpt = 0;
 
 /* Create a new demand record */
-/*** Updated 6/24/02 ***/
-   if (n >= 3)
-   {
-      demand = (struct Sdemand *) malloc(sizeof(struct Sdemand));
-      if (demand == NULL) return(101);
-      demand->Base = y;
-      demand->Pat = p;
-      demand->next = Node[m->network.Njuncs].D;
-      Node[m->network.Njuncs].D = demand;
-      m->hydraulics.NodeDemand[m->network.Njuncs] = y;
-   }
-   else m->hydraulics.NodeDemand[m->network.Njuncs] = MISSING;
-/*** end of update ***/
-   return(0);
+   demand = (struct Sdemand *) malloc(sizeof(struct Sdemand));
+   if (demand == NULL) return(101);
+   demand->Base = y;
+   demand->Pat = p;
+   demand->next = Node[m->network.Njuncs].D;
+   Node[m->network.Njuncs].D = demand;
+   m->hydraulics.NodeDemand[m->network.Njuncs] = y;
+
+  return(0);
 }                        /* end of juncdata */
 
 
@@ -752,19 +747,14 @@ int  demanddata(OW_Project *m)
 /* Replace any demand entered in [JUNCTIONS] section */
 /* (Such demand was temporarily stored in D[]) */
 
-/*** Updated 6/24/02 ***/
    demand = Node[j].D;
-   if (demand && NodeDemand[j] != MISSING)
-   {
+   if (NodeDemand[j] != MISSING) {
       demand->Base = y;
       demand->Pat  = p;
       NodeDemand[j] = MISSING;
    }
-/*** End of update ***/
-
-/* Otherwise add a new demand to this junction */
-   else
-   {
+   else {
+      /* Add a new demand to this junction */
       demand = (struct Sdemand *) malloc(sizeof(struct Sdemand));
       if (demand == NULL) return(101);
       demand->Base = y;
