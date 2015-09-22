@@ -353,8 +353,26 @@ extern "C" {
   int  DLLEXPORT OW_freeModel(OW_Project *modelObj);
   
   // Project Management
+  /*----------------------------------------------------------------
+   **  Input:   f1 = pointer to name of input file
+   **           f2 = pointer to name of report file
+   **           f3 = pointer to name of binary output file
+   **  Output:  none
+   **  Returns: error code
+   **  Purpose: opens EPANET input file & reads in network data
+   **----------------------------------------------------------------
+   */
+  /**
+   @fn OW_open(char *inpFile, OW_Project **modelObj, char *rptFile, char *binOutFile)
+   @brief Open an epanet input file and create a model object.
+   
+   @param inpFile The path to the *.inp formatted text file
+   @param modelObj Output: model object pointer
+   @param rptFile The path to a report file (will be created, optional) 
+   @param binOutFile The path to the binary output file (will be created, optional)
+   */
   int  DLLEXPORT OW_open(char *inpFile, OW_Project **modelObj, char *rptFile, char *binOutFile);
-  int  DLLEXPORT OW_saveinpfile(OW_Project *modelObj, char *filename);
+  int  DLLEXPORT OW_saveinpfile(OW_Project *modelObj, const char *filename);
   int  DLLEXPORT OW_close(OW_Project *modelObj);
   
   // Hydraulic solver
