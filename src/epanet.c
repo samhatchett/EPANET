@@ -1989,11 +1989,6 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     }
     break;
 
-    /*** New parameters added for retrieval begins here   ***/ //(2.00.12 -
-  // LR)
-  /*** (Thanks to Nicolas Basile of Ecole Polytechnique ***/
-  /***  de Montreal for suggesting some of these.)      ***/
-
   case EN_TANKDIAM:
     if (value <= 0.0)
       return (202);
@@ -2078,8 +2073,6 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
       m->Reactflag = 1;
     }
     break;
-
-    /***  New parameter additions ends here. ***/ //(2.00.12 - LR)
 
   default:
     return (251);
