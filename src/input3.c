@@ -174,13 +174,18 @@ int  tankdata(OW_Project *m)
    }
    else {
       /* Check for valid input data */
-      if (!getfloat(Tok[2],&initlevel)) return(202);
-      if (!getfloat(Tok[3],&minlevel))  return(202);
-      if (!getfloat(Tok[4],&maxlevel))  return(202);
-      if (!getfloat(Tok[5],&diam))      return(202);
-      if (diam < 0.0)                   return(202);
-      if (n >= 7
-      && !getfloat(Tok[6],&minvol))     return(202);
+      if (!getfloat(Tok[2],&initlevel))
+        return(202);
+      if (!getfloat(Tok[3],&minlevel))
+        return(202);
+      if (!getfloat(Tok[4],&maxlevel))
+        return(202);
+      if (!getfloat(Tok[5],&diam))
+        return(202);
+      if (diam < 0.0)
+        return(202);
+      if (n >= 7 && !getfloat(Tok[6],&minvol))
+        return(202);
 
       /* If volume curve supplied check it exists */
       if (n == 8)

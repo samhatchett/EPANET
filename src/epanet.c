@@ -245,7 +245,7 @@ int DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char 
   return (errcode);
 }
 
-int DLLEXPORT OW_saveinpfile(OW_Project *m, char *filename)
+int DLLEXPORT OW_saveinpfile(OW_Project *m, const char *filename)
 {
   if (!m->Openflag)
     return (102);
@@ -1858,23 +1858,27 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
 
   int isTank = 0;
   int tankIndex = 0;
+  Stank *tank;
   if (index > m->network.Njuncs) {
     isTank = 1;
     tankIndex = index - m->network.Njuncs;
+    tank = &(m->network.Tank[tankIndex]);
   }
 
+  Snode *node = &(m->network.Node[index]);
+  
   switch (code) {
   case EN_ELEVATION:
     if (!isTank) {
-      m->network.Node[index].El = value / m->Ucf[ELEV];
+      node->El = value / m->Ucf[ELEV];
     }
     else {
-      value = (value / m->Ucf[ELEV]) - m->network.Node[index].El;
+      value = (value / m->Ucf[ELEV]) - node->El;
       j = index - m->network.Njuncs;
-      m->network.Tank[tankIndex].H0 += value;
-      m->network.Tank[tankIndex].Hmin += value;
-      m->network.Tank[tankIndex].Hmax += value;
-      m->network.Node[index].El += value;
+      tank->H0 += value;
+      tank->Hmin += value;
+      tank->Hmax += value;
+      node->El += value;
       m->hydraulics.NodeHead[index] += value;
     }
     break;
@@ -1911,17 +1915,18 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
       return (203);
     if (value < 0.0)
       return (202);
-    if (value > 0.0)
+    if (value > 0.0) {
       value = pow((m->Ucf[FLOW] / value), m->Qexp) / m->Ucf[PRESSURE];
-    m->network.Node[index].Ke = value;
+    }
+    node->Ke = value;
     break;
 
   case EN_INITQUAL:
     if (value < 0.0)
       return (202);
-    m->network.Node[index].C0 = value / m->Ucf[QUALITY];
+    node->C0 = value / m->Ucf[QUALITY];
     if (isTank) {
-      m->network.Tank[tankIndex].C = m->network.Node[index].C0;
+      tank->C = node->C0;
     }
     break;
 
@@ -2014,14 +2019,21 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     break;
 
   case EN_MINLEVEL:
-    if (value < 0.0)
+    if (value < 0.0) {
       return (202);
+      }
     if (isTank && m->network.Tank[tankIndex].A > 0.0) {
-      if (m->network.Tank[tankIndex].Vcurve > 0)
-        return (202);
-
-      m->network.Tank[tankIndex].Hmin = (value / m->Ucf[ELEV]) + m->network.Node[index].El;
-      m->network.Tank[tankIndex].Vmin = tankvolume(m, tankIndex, m->network.Tank[tankIndex].Hmin);
+      double newLevel = value / m->Ucf[ELEV];
+      if (tank->Vcurve > 0) {
+        int iCurve = tank->Vcurve;
+        Scurve *curve = &(m->network.Curve[iCurve]);
+        int n = curve->Npts - 1;
+        if (newLevel < curve->X[0] || newLevel > curve->X[n] || newLevel + node->El > tank->Hmax) {
+          return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+        }
+      }
+      tank->Hmin = newLevel + node->El;
+      tank->Vmin = tankvolume(m, tankIndex, tank->Hmin);
     }
     break;
 
@@ -2029,11 +2041,17 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     if (value < 0.0)
       return (202);
     if (isTank && m->network.Tank[tankIndex].A > 0.0) {
-      if (m->network.Tank[tankIndex].Vcurve > 0)
-        return (202);
-
-      m->network.Tank[tankIndex].Hmax = value / m->Ucf[ELEV] + m->network.Node[index].El;
-      m->network.Tank[tankIndex].Vmax = tankvolume(m, tankIndex, m->network.Tank[tankIndex].Hmax);
+      double newLevel = value / m->Ucf[ELEV];
+      if (m->network.Tank[tankIndex].Vcurve > 0) {
+        int iCurve = tank->Vcurve;
+        Scurve *curve = &(m->network.Curve[iCurve]);
+        int n = curve->Npts - 1;
+        if (newLevel < curve->X[0] || newLevel > curve->X[n] || newLevel + node->El < tank->Hmin) {
+          return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+        }
+      }
+      tank->Hmax = newLevel + node->El;
+      tank->Vmax = tankvolume(m, tankIndex, tank->Hmax);
     }
     break;
 
