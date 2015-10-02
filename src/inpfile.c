@@ -136,7 +136,7 @@ int  saveinpfile(OW_Project *m, char *fname)
 
    fprintf(f,"\n\n[JUNCTIONS]");
    for (i=1; i <= m->network.Njuncs; i++)
-      fprintf(f,"\n %-31s %12.4f", m->network.Node[i].ID, m->network.Node[i].El * m->Ucf[ELEV]);
+      fprintf(f,"\n %-31s %12.4f ;%s", m->network.Node[i].ID, m->network.Node[i].El * m->Ucf[ELEV], m->network.Node[i].Comment);
 
 /* Write [RESERVOIRS] section */
 
@@ -151,7 +151,8 @@ int  saveinpfile(OW_Project *m, char *fname)
             sprintf(s1," %-31s",m->network.Pattern[j].ID);
          else
             strcpy(s1,"");
-         fprintf(f, "\n%s %s", s,s1);
+        
+         fprintf(f, "\n%s %s ;%s", s,s1, m->network.Node[n].Comment);
       }
    }
 
@@ -174,8 +175,9 @@ int  saveinpfile(OW_Project *m, char *fname)
          if ((j = m->network.Tank[i].Vcurve) > 0)
             sprintf(s1,"%-31s",m->network.Curve[j].ID);
          else
-            strcpy(s1,"");
-         fprintf(f, "\n%s %s", s,s1);
+           strcpy(s1,"");
+        
+         fprintf(f, "\n%s %s ;%s", s,s1, m->network.Node[n].Comment);
       }
    }
 
@@ -212,7 +214,7 @@ int  saveinpfile(OW_Project *m, char *fname)
          else
            strcpy(s2,"");
         
-         fprintf(f,"\n%s %s %s",s,s1,s2);
+         fprintf(f,"\n%s %s %s ;%s",s,s1,s2, m->network.Link[i].Comment);
       }
    }
 
@@ -257,8 +259,8 @@ int  saveinpfile(OW_Project *m, char *fname)
          sprintf(s1, "  SPEED %.4f", m->network.Link[n].Kc);
       else strcpy(s1,"");
       strcat(s,s1);
-
-      fprintf(f,"\n%s",s);
+     
+      fprintf(f,"\n%s ;%s",s, m->network.Link[n].Comment);
    }
 
 /* Write [VALVES] section */
@@ -289,8 +291,8 @@ int  saveinpfile(OW_Project *m, char *fname)
       if (m->network.Link[n].Type == GPV && (j = ROUND(m->network.Link[n].Kc)) > 0)
          sprintf(s1,"%-31s %12.4f", m->network.Curve[j].ID, km);
       else sprintf(s1,"%12.4f %12.4f",kc,km);
-
-      fprintf(f, "\n%s %s", s,s1);
+     
+      fprintf(f, "\n%s %s ;%s", s,s1, m->network.Link[n].Comment);
    }
 
 /* Write [DEMANDS] section */

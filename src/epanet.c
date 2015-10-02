@@ -1849,6 +1849,54 @@ int DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
   return EN_OK;
 }
 
+
+
+int  DLLEXPORT OW_getnodecomment(OW_Project *m, int nIndex, char *comment)
+{
+  if (!m->Openflag)
+    return (102);
+  if (nIndex <= 0 || nIndex > m->network.Nnodes)
+    return (203);
+  
+  strncpy(comment, m->network.Node[nIndex].Comment, MAXMSG);
+  return EN_OK;
+}
+
+int  DLLEXPORT OW_setnodecomment(OW_Project *m, int nIndex, const char *comment)
+{
+  if (!m->Openflag)
+    return (102);
+  if (nIndex <= 0 || nIndex > m->network.Nnodes)
+    return (203);
+  
+  strncpy(m->network.Node[nIndex].Comment, comment, MAXMSG);
+  return EN_OK;
+}
+
+
+int  DLLEXPORT OW_getlinkcomment(OW_Project *m, int linkIndex, char *comment)
+{
+  if (!m->Openflag)
+    return (102);
+  if (linkIndex <= 0 || linkIndex > m->network.Nlinks)
+    return (203);
+  
+  strncpy(comment, m->network.Link[linkIndex].Comment, MAXMSG);
+  return EN_OK;
+}
+
+int  DLLEXPORT OW_setlinkcomment(OW_Project *m, int linkIndex, const char *comment)
+{
+  if (!m->Openflag)
+    return (102);
+  if (linkIndex <= 0 || linkIndex > m->network.Nlinks)
+    return (203);
+  
+  strncpy(m->network.Link[linkIndex].Comment, comment, MAXMSG);
+  return EN_OK;
+}
+
+
 int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
 {
   int j;

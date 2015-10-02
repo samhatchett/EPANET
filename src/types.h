@@ -47,7 +47,7 @@ typedef  int          INT4;                                                    /
 #define   MAXTITLE  3        /* Max. # title lines                     */
 #define   MAXID     31       /* Max. # characters in ID name           */      //(2.00.11 - LR)
 #define   MAXMSG    79       /* Max. # characters in message text      */
-#define   MAXLINE   255      /* Max. # characters read from input line */
+#define   MAXLINE   5120      /* Max. # characters read from input line */
 #define   MAXFNAME  259      /* Max. # characters in file name         */
 #define   MAXTOKS   40       /* Max. items per line of input           */
 #define   TZERO     1.E-4    /* Zero time tolerance                    */
@@ -352,6 +352,7 @@ typedef struct Ssource *Psource; /* Pointer to WQ source object */
 typedef struct            /* NODE OBJECT */
 {
    char    ID[MAXID+1];    /* Node ID          */
+   char    Comment[MAXMSG+1]; /**< comment line */
    double  El;             /* Elevation        */
    Pdemand D;              /* Demand pointer   */
    Psource S;              /* Source pointer   */
@@ -363,6 +364,7 @@ typedef struct            /* NODE OBJECT */
 typedef struct            /* LINK OBJECT */
 {
    char    ID[MAXID+1];    /* Link ID           */
+   char    Comment[MAXMSG+1]; /**< comment line */
    int     N1;             /* Start node index  */
    int     N2;             /* End node index    */
    double  Diam;           /* Diameter          */

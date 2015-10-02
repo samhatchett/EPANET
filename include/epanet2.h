@@ -445,6 +445,8 @@ extern "C" {
   int  DLLEXPORT OW_getnodetype(OW_Project *modelObj, int index, EN_NodeType *code);
   int  DLLEXPORT OW_getnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT OW_setnodevalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_getnodecomment(OW_Project *modelObj, int nIndex, char *comment);
+  int  DLLEXPORT OW_setnodecomment(OW_Project *modelObj, int nIndex, const char *comment);
   int  DLLEXPORT OW_getcoord(OW_Project *modelObj, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y);
   
   // Demands
@@ -460,6 +462,8 @@ extern "C" {
   int  DLLEXPORT OW_getlinknodes(OW_Project *modelObj, int index, int *node1, int *node2);
   int  DLLEXPORT OW_getlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE *value);
   int  DLLEXPORT OW_setlinkvalue(OW_Project *modelObj, int index, int code, EN_API_FLOAT_TYPE v);
+  int  DLLEXPORT OW_getlinkcomment(OW_Project *modelObj, int linkIndex, char *comment);
+  int  DLLEXPORT OW_setlinkcomment(OW_Project *modelObj, int linkIndex, const char *comment);
   
   // Curves
   int  DLLEXPORT OW_getcurve(OW_Project *modelObj, int curveIndex, char* id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues);
