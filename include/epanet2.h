@@ -100,6 +100,7 @@
 #define EN_QTIME        12
 #define EN_HALTFLAG     13
 #define EN_NEXTEVENT    14
+#define EN_NEXTEVENTINDEX 15
 
 #define EN_ITERATIONS     0
 #define EN_RELATIVEERROR  1

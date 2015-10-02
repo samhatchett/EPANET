@@ -795,7 +795,7 @@ long  timestep(OW_Project *m)
 }
 
 
-void  tanktimestep(OW_Project *m, long *tstep)
+int   tanktimestep(OW_Project *m, long *tstep)
 /*
 **-----------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -805,7 +805,7 @@ void  tanktimestep(OW_Project *m, long *tstep)
 **-----------------------------------------------------------------
 */
 {
-   int    i,n;   
+   int    i,n,tankIndex = 0;
    double  h,q,v;
    long   t;
 
@@ -829,9 +829,12 @@ void  tanktimestep(OW_Project *m, long *tstep)
       t = (long)ROUND(v/q);                     /* Time to fill/drain  */
      if (t > 0 && t < *tstep) {
        *tstep = t;
-//       printf("Tank index %d (%s) with flow rate %f is restricting timestep to %ld seconds\n", i, m->network.Node[n].ID, q, t);
+       tankIndex = n;
+//       printf("Tank index %d (%s) with flow rate %f is restricting timestep to %ld seconds\n", n, m->network.Node[n].ID, q, t);
      }
    }
+  
+  return tankIndex;
 }
 
 

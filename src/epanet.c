@@ -978,7 +978,7 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
   *value = 0;
   if (!m->Openflag)
     return (102);
-  if (code < EN_DURATION || code > EN_NEXTEVENT)
+  if (code < EN_DURATION || code > EN_NEXTEVENTINDEX)
     return (251);
   switch (code) {
   case EN_DURATION:
@@ -1018,6 +1018,11 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
     *value = m->Hstep; // find the lesser of the hydraulic time step length, or
     // the time to next fill/empty
     tanktimestep(m, value);
+    break;
+  case EN_NEXTEVENTINDEX:
+    *value = m->Hstep;
+    int i = tanktimestep(m, value);
+    *value = i;
     break;
   case EN_RULESTEP:
     *value = m->Rulestep;
