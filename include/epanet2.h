@@ -95,14 +95,18 @@
 #define EN_RULESTEP     7
 #define EN_STATISTIC    8
 #define EN_PERIODS      9
-#define EN_STARTTIME    10  /* Added TNT 10/2/2009 */
+#define EN_STARTTIME    10
 #define EN_HTIME        11
 #define EN_QTIME        12
 #define EN_HALTFLAG     13
-#define EN_NEXTTANKEVENT  14
-#define EN_NEXTCONTROLEVENT 15
-#define EN_TANKEVENTINDEX 16
-#define EN_CONTROLEVENTINDEX 17
+
+typedef enum {
+  EN_STEP_REPORT       = 0,
+  EN_STEP_HYD          = 1,
+  EN_STEP_WQ           = 2,
+  EN_STEP_TANKEVENT    = 3,
+  EN_STEP_CONTROLEVENT = 4
+} EN_TimestepEvent;
 
 #define EN_ITERATIONS     0
 #define EN_RELATIVEERROR  1
@@ -389,6 +393,7 @@ extern "C" {
   int  DLLEXPORT OW_savehydfile(OW_Project *modelObj, char *filename);
   int  DLLEXPORT OW_usehydfile(OW_Project *modelObj, char *filename);
   int  DLLEXPORT OW_getstatistic(OW_Project *modelObj, int code, EN_API_FLOAT_TYPE* value);
+  int  DLLEXPORT OW_timeToNextEvent(OW_Project *modelObj, EN_TimestepEvent *eventType, long *duration, int *elementIndex);
   
   // Water Quality solver
   int  DLLEXPORT OW_solveQ(OW_Project *modelObj);

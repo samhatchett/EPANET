@@ -980,7 +980,7 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
   *value = 0;
   if (!m->Openflag)
     return (102);
-  if (code < EN_DURATION || code > EN_CONTROLEVENTINDEX)
+  if (code < EN_DURATION || code > EN_STARTTIME)
     return (251);
   switch (code) {
   case EN_DURATION:
@@ -1016,28 +1016,6 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
   case EN_HTIME:
     *value = m->Htime;
     break;
-  case EN_NEXTTANKEVENT:
-    // find the lesser of the hydraulic time step length, or
-    // the time to next fill/empty
-    *value = m->Hstep;
-    tanktimestep(m, value);
-    break;
-  case EN_NEXTCONTROLEVENT:
-    // find the lesser of the hydraulic time step length, or
-    // the time to next control action
-    *value = m->Hstep;
-    controltimestep(m, value);
-    break;
-  case EN_TANKEVENTINDEX:
-    *value = m->Hstep;
-    i = tanktimestep(m, value);
-    *value = i;
-    break;
-  case EN_CONTROLEVENTINDEX:
-    *value = m->Hstep;
-    i = controltimestep(m, value);
-    *value = i;
-    break;
   case EN_RULESTEP:
     *value = m->Rulestep;
     break;
@@ -1047,6 +1025,40 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
   }
   return EN_OK;
 }
+
+/// get the time to next event, and give a reason for the time step truncation
+int  DLLEXPORT OW_timeToNextEvent(OW_Project *m, EN_TimestepEvent *eventType, long *duration, int *elementIndex)
+{
+  long hydStep, tankStep, controlStep;
+  
+  hydStep = m->Hstep;
+  tankStep = hydStep;
+  controlStep = hydStep;
+  
+  int iTank = tanktimestep(m, &tankStep);
+  int iControl = controltimestep(m, &controlStep);
+  
+  // return the lesser of the three step lengths
+  if (controlStep < tankStep) {
+    *eventType = EN_STEP_CONTROLEVENT;
+    *duration = controlStep;
+    *elementIndex = iControl;
+  }
+  else if (tankStep < hydStep) {
+    *eventType = EN_STEP_TANKEVENT;
+    *duration = tankStep;
+    *elementIndex = iTank;
+  }
+  else {
+    *eventType = EN_STEP_HYD;
+    *duration = hydStep;
+    *elementIndex = 0;
+  }
+  
+  return EN_OK;
+}
+
+
 
 int DLLEXPORT OW_getflowunits(OW_Project *m, int *code)
 {
