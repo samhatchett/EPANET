@@ -165,7 +165,7 @@ void    demands(OW_Project *m);                    /* Computes current demands  
 int     controls(OW_Project *m);                   /* Controls link settings     */
 long    timestep(OW_Project *m);                   /* Computes new time step     */
 int     tanktimestep(OW_Project *m, long *);             /* Time till tanks fill/drain */
-void    controltimestep(OW_Project *m, long *);          /* Time till control action   */
+int     controltimestep(OW_Project *m, long *);          /* Time till control action   */
 void    ruletimestep(OW_Project *m, long *);             /* Time till rule action      */
 void    addenergy(OW_Project *m, long);                  /* Accumulates energy usage   */
 void    getenergy(OW_Project *m, int, double *, double *); /* Computes link energy use   */

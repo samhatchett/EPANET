@@ -99,8 +99,10 @@
 #define EN_HTIME        11
 #define EN_QTIME        12
 #define EN_HALTFLAG     13
-#define EN_NEXTEVENT    14
-#define EN_NEXTEVENTINDEX 15
+#define EN_NEXTTANKEVENT  14
+#define EN_NEXTCONTROLEVENT 15
+#define EN_TANKEVENTINDEX 16
+#define EN_CONTROLEVENTINDEX 17
 
 #define EN_ITERATIONS     0
 #define EN_RELATIVEERROR  1

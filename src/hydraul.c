@@ -830,7 +830,6 @@ int   tanktimestep(OW_Project *m, long *tstep)
      if (t > 0 && t < *tstep) {
        *tstep = t;
        tankIndex = n;
-//       printf("Tank index %d (%s) with flow rate %f is restricting timestep to %ld seconds\n", n, m->network.Node[n].ID, q, t);
      }
    }
   
@@ -838,7 +837,7 @@ int   tanktimestep(OW_Project *m, long *tstep)
 }
 
 
-void  controltimestep(OW_Project *m, long *tstep)
+int   controltimestep(OW_Project *m, long *tstep)
 /*
 **------------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -848,7 +847,7 @@ void  controltimestep(OW_Project *m, long *tstep)
 **------------------------------------------------------------------
 */
 {
-   int   i,j,k,n;
+   int   i,j,k,n,controlIndex = 0;
    double h,q,v;
    long  t,t1,t2;
 
@@ -903,10 +902,14 @@ void  controltimestep(OW_Project *m, long *tstep)
          if (
               (m->network.Link[k].Type > PIPE && m->hydraulics.LinkSetting[k] != control->Setting) ||
               (m->hydraulics.LinkStatus[k] != control->Status)
-            )
+             ) {
             *tstep = t;
+            controlIndex = i;
+         }
       }
    }
+  
+  return controlIndex;
 }                        /* End of timestep */
 
 
