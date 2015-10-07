@@ -617,6 +617,9 @@ struct OW_Project {
   *RptFile,              /* Report file pointer          */
   *HydFile,              /* Hydraulics file pointer      */
   *TmpOutFile;           /* Temporary file handle        */
+  void (*reportCallback)(void *userData, struct OW_Project*, char*);
+  void *reportCallbackUserData;
+  
   long     HydOffset,             /* Hydraulics file byte offset  */
   OutOffset1,            /* 1st output file byte offset  */
   OutOffset2;            /* 2nd output file byte offset  */

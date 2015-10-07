@@ -751,20 +751,33 @@ void  writeline(OW_Project *m, char *s)
 **--------------------------------------------------------------
 */
 {
-   if (m->RptFile == NULL) return;
-   if (m->Rptflag)
-   {
-      if (LineNum == (long)m->PageSize)
-      {
-         PageNum++;
-         if (fprintf(m->RptFile,FMT82,PageNum,m->Title[0]) == EOF)
-            Fprinterr = TRUE;
-         LineNum = 3;
-      }
-   }
-   if (fprintf(m->RptFile,"\n  %s",s) == EOF) Fprinterr = TRUE;
-   LineNum++;
+  if (m->reportCallback == NULL) {
+    writeReportFileLine(m, s);
+  }
+  else {
+    m->reportCallback(m->reportCallbackUserData, m, s);
+  }
 }                        /* End of writeline */
+
+
+void writeReportFileLine(OW_Project *m, char *s)
+{
+  
+  
+  if (m->RptFile == NULL) return;
+  if (m->Rptflag)
+  {
+    if (LineNum == (long)m->PageSize)
+    {
+      PageNum++;
+      if (fprintf(m->RptFile,FMT82,PageNum,m->Title[0]) == EOF)
+        Fprinterr = TRUE;
+      LineNum = 3;
+    }
+  }
+  if (fprintf(m->RptFile,"\n  %s",s) == EOF) Fprinterr = TRUE;
+  LineNum++;
+}
 
 
 void  writerelerr(OW_Project *m, int iter, double relerr)

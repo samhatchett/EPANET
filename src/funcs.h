@@ -127,6 +127,7 @@ void    writeenergy(OW_Project *m);                /* Writes energy usage       
 int     writeresults(OW_Project *m);               /* Writes node/link results   */
 void    writeheader(OW_Project *m, int,int);             /* Writes heading on report   */
 void    writeline(OW_Project *m, char *);                /* Writes line to report file */
+void    writeReportFileLine(OW_Project *m, char *s);
 void    writerelerr(OW_Project *m, int, double);          /* Writes convergence error   */
 void    writestatchange(OW_Project *m, int,char,char);   /* Writes link status change  */
 void    writecontrolaction(OW_Project *m, int, int);     /* Writes control action taken*/

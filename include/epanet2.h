@@ -407,6 +407,8 @@ extern "C" {
   int  DLLEXPORT OW_getqualinfo(OW_Project *modelObj, int *qualcode, char *chemname, char *chemunits, int *tracenode);
   
   // Reporting
+  int  DLLEXPORT OW_setReportCallback(OW_Project *m, void (*callback)(void *userData, OW_Project*,char*)); /**< set a callback function for logging. by default OW_writeline */
+  int  DLLEXPORT OW_setReportCallbackUserData(OW_Project *m, void *userData);
   int  DLLEXPORT OW_writeline(OW_Project *modelObj, char *line);
   int  DLLEXPORT OW_report(OW_Project *modelObj);
   int  DLLEXPORT OW_resetreport(OW_Project *modelObj);

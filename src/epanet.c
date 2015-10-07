@@ -159,6 +159,7 @@ int DLLEXPORT OW_newModel(OW_Project **modelOut)
   m->SaveHflag = FALSE;
   m->SaveQflag = FALSE;
   m->Warnflag = FALSE;
+  m->reportCallback = NULL;
 
   /*** Updated 9/7/00 ***/
   m->Messageflag = TRUE;
@@ -685,6 +686,19 @@ int DLLEXPORT OW_closeQ(OW_Project *m)
   closequal(m);
   m->OpenQflag = FALSE;
   return EN_OK;
+}
+
+
+int  DLLEXPORT OW_setReportCallback(OW_Project *m, void (*callback)(void*,OW_Project*,char*))
+{
+  m->reportCallback = callback;
+//  m->reportCallbackUserData = userData;
+  return EN_OK;
+}
+
+int DLLEXPORT OW_setReportCallbackUserData(OW_Project *m, void *userData)
+{
+  m->reportCallbackUserData = userData;
 }
 
 int DLLEXPORT OW_writeline(OW_Project *m, char *line)
