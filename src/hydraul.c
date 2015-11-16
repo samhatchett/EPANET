@@ -45,6 +45,15 @@ AUTHOR:     L. Rossman
      writehydwarn() -- see REPORT.C
 *******************************************************************
 */
+
+//#define __APPLE_GCD__
+#ifdef __APPLE_GCD__
+  #include <dispatch/dispatch.h>
+  #define LOOP_CONTINUE return;
+#else
+  #define LOOP_CONTINUE continue;
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -2043,42 +2052,67 @@ void  linkcoeffs(OW_Project *m)
 **--------------------------------------------------------------
 */
 {
-   int   k,n1,n2;
-
    /* Examine each link of network */
-   for (k=1; k <= m->network.Nlinks; k++)
+#ifdef __APPLE_GCD__
+  dispatch_apply(m->network.Nlinks, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i)
+#else
+  for (int i = 0; i < m->network.Nlinks; i++) 
+#endif
    {
-      n1 = m->network.Link[k].N1;           /* Start node of link */
-      n2 = m->network.Link[k].N2;           /* End node of link   */
+     int k = (int)i + 1;
+     switch (m->network.Link[k].Type) {
+       case CV:
+       case PIPE:  pipecoeff(m,k); break;
+       case PUMP:  pumpcoeff(m,k); break;
+       case PBV:   pbvcoeff(m,k);  break;
+       case TCV:   tcvcoeff(m,k);  break;
+       case GPV:   gpvcoeff(m,k);  break;
+       case FCV:
+       case PRV:
+       case PSV:   /* If valve status fixed then treat as pipe */
+         /* otherwise ignore the valve for now. */
+         if (m->hydraulics.LinkSetting[k] == MISSING) {
+           valvecoeff(m,k);  //pipecoeff(k);      //(2.00.11 - LR)
+         }
+         else
+           LOOP_CONTINUE;
+         break;
+       default:
+         LOOP_CONTINUE;
+     }
+   }
+#ifdef __APPLE_GCD__
+    );
+#endif
+   for (int i = 0; i < m->network.Nlinks; i++)
+   {
+     int k = i + 1;
+     
+     /* maintain the control structure from above to selectively continue */
+     switch (m->network.Link[k].Type) {
+       case CV:
+       case PIPE:  break;
+       case PUMP:  break;
+       case PBV:   break;
+       case TCV:   break;
+       case GPV:   break;
+       case FCV:
+       case PRV:
+       case PSV:   /* If valve status fixed then treat as pipe */
+         /* otherwise ignore the valve for now. */
+         if (m->hydraulics.LinkSetting[k] != MISSING) {
+           continue;
+         }
+         break;
+       default:    continue;
+     }
 
+     
+      int n1 = m->network.Link[k].N1;           /* Start node of link */
+      int n2 = m->network.Link[k].N2;           /* End node of link   */
+    
       int row1 = m->hydraulics.solver.Row[n1];
       int row2 = m->hydraulics.solver.Row[n2];
-     
-     
-      /* Compute P[k] = 1 / (dh/dQ) and Y[k] = h * P[k]   */
-      /* for each link k (where h = link head loss).      */
-      /* FCVs, PRVs, and PSVs with non-fixed status       */
-      /* are analyzed later.                              */
-
-      switch (m->network.Link[k].Type)
-      {
-         case CV:
-         case PIPE:  pipecoeff(m,k); break;
-         case PUMP:  pumpcoeff(m,k); break;
-         case PBV:   pbvcoeff(m,k);  break;
-         case TCV:   tcvcoeff(m,k);  break;
-         case GPV:   gpvcoeff(m,k);  break;
-         case FCV:   
-         case PRV:
-         case PSV:   /* If valve status fixed then treat as pipe */
-                     /* otherwise ignore the valve for now. */
-                     if (m->hydraulics.LinkSetting[k] == MISSING) {
-                       valvecoeff(m,k);  //pipecoeff(k);      //(2.00.11 - LR)
-                     }
-                     else continue;
-                     break;
-         default:    continue;                  
-      }                                         
 
       /* Update net nodal inflows (X), solution matrix (A) and RHS array (F) */
       /* (Use covention that flow out of node is (-), flow into node is (+)) */
@@ -2279,16 +2313,14 @@ void  pipecoeff(OW_Project *m, int k)
    r1 = f*r+ml;
  
    /* Use large P coefficient for small flow resistance product */
-   if (r1*q < m->RQtol)
-   {
+   if (r1*q < m->RQtol) {
       m->hydraulics.solver.P[k] = 1.0 / m->RQtol;
       m->hydraulics.solver.Y[k] = m->hydraulics.LinkFlows[k] / m->Hexp;
       return;
    }
 
    /* Compute P and Y coefficients */
-   if (m->Formflag == DW)                  /* D-W eqn. */
-   {
+   if (m->Formflag == DW) {                /* D-W eqn. */
       hpipe = r1*SQR(q);                /* Total head loss */
       p = 2.0*r1*q;                     /* |dh/dQ| */
      /* + dfdq*r*q*q;*/                 /* Ignore df/dQ term */
@@ -2296,12 +2328,10 @@ void  pipecoeff(OW_Project *m, int k)
       m->hydraulics.solver.P[k] = p;
       m->hydraulics.solver.Y[k] = SGN(m->hydraulics.LinkFlows[k])*hpipe*p;
    }
-   else                                 /* H-W or C-M eqn.   */
-   {
+   else {                                /* H-W or C-M eqn.   */
       hpipe = r*pow(q, m->Hexp);            /* Friction head loss  */
       p = m->Hexp * hpipe;                   /* Q*dh(friction)/dQ   */
-      if (ml > 0.0)
-      {
+      if (ml > 0.0) {
          hml = ml*q*q;                  /* Minor head loss   */
          p += 2.0*hml;                  /* Q*dh(Total)/dQ    */
       }
@@ -2487,8 +2517,9 @@ void  gpvcoeff(OW_Project *m, int k)
 
 /*** Updated 9/7/00 ***/
    /* Treat as a pipe if valve closed */
-   if (m->hydraulics.LinkStatus[k] == CLOSED) valvecoeff(m,k); //pipecoeff(k);                          //(2.00.11 - LR)
-
+  if (m->hydraulics.LinkStatus[k] == CLOSED) {
+     valvecoeff(m,k); //pipecoeff(k);                          //(2.00.11 - LR)
+  }
    /* Otherwise utilize headloss curve   */
    /* whose index is stored in K */
    else
@@ -2527,11 +2558,12 @@ void  pbvcoeff(OW_Project *m, int k)
    else
    {
       /* Treat as a pipe if minor loss > valve setting */
-      if (m->network.Link[k].Km*SQR(m->hydraulics.LinkFlows[k]) > m->hydraulics.LinkSetting[k]) valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
+     if (m->network.Link[k].Km*SQR(m->hydraulics.LinkFlows[k]) > m->hydraulics.LinkSetting[k]) {
+        valvecoeff(m,k);  //pipecoeff(k);         //(2.00.11 - LR)
+     }
 
       /* Otherwise force headloss across valve to be equal to setting */
-      else
-      {
+      else {
          m->hydraulics.solver.P[k] = CBIG;
          m->hydraulics.solver.Y[k] = m->hydraulics.LinkSetting[k]*CBIG;
       }
