@@ -250,18 +250,30 @@ int  nexthyd(OW_Project *m, long *tstep)
 /*** Updated 3/1/01 ***/
    /* Save current results to hydraulics file and */
    /* force end of simulation if Haltflag is active */
-   if (m->Saveflag) errcode = savehyd(m,&(m->Htime));
-   if (m->Haltflag) m->Htime = m->Dur;
-
+  if (m->Saveflag) {
+     errcode = savehyd(m,&(m->Htime));
+  }
+  if (m->Haltflag) {
+     m->Htime = m->Dur;
+  }
+  
    /* Compute next time step & update tank levels */
    *tstep = 0;
    hydstep = 0;
-   if (m->Htime < m->Dur) hydstep = timestep(m);
-   if (m->Saveflag) errcode = savehydstep(m,&hydstep);
+  if (m->Htime < m->Dur) {
+    hydstep = timestep(m);
+  }
+  if (m->Saveflag) {
+    errcode = savehydstep(m,&hydstep);
+  }
 
    /* Compute pumping energy */
-   if (m->Dur == 0) addenergy(m,0);
-   else if (m->Htime < m->Dur) addenergy(m,hydstep);
+  if (m->Dur == 0) {
+    addenergy(m,0);
+  }
+  else if (m->Htime < m->Dur) {
+    addenergy(m,hydstep);
+  }
 
    /* Update current time. */
    if (m->Htime < m->Dur)  /* More time remains */
@@ -772,7 +784,9 @@ long  timestep(OW_Project *m)
    /* Revise time step based on time until next demand period */
    n = ((m->Htime + m->Pstart) / m->Pstep) + 1;   /* Next pattern period   */
    t = n * m->Pstep - m->Htime;              /* Time till next period */
-   if (t > 0 && t < tstep) tstep = t;
+  if (t > 0 && t < tstep) {
+     tstep = t;
+  }
 
    /* Revise time step based on time until next reporting period */
    t = m->Rtime - m->Htime;
@@ -787,10 +801,13 @@ long  timestep(OW_Project *m)
    controltimestep(m, &tstep);
 
    /* Evaluate rule-based controls (which will also update tank levels) */
-   if (m->network.Nrules > 0)
+  if (m->network.Nrules > 0) {
      ruletimestep(m, &tstep);
-   else
+  }
+   else {
      tanklevels(m, tstep);
+   }
+  
    return(tstep);
 }
 
