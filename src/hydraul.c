@@ -2056,7 +2056,7 @@ void  linkcoeffs(OW_Project *m)
 #ifdef __APPLE_GCD__
   dispatch_apply(m->network.Nlinks, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i)
 #else
-  for (int i = 0; i < m->network.Nlinks; i++) 
+  for (int i = 0; i < m->network.Nlinks; i++)
 #endif
    {
      int k = (int)i + 1;
