@@ -2302,7 +2302,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
 
   if (!m->Openflag)
     return (102);
-  if (OW_getpatternindex(m, id, &i) == 0)
+  if (OW_getpatternindex(m, id, &i) == EN_OK) /* found */
     return (215);
 
   /* Check that id name is not too long */

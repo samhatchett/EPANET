@@ -136,7 +136,7 @@ int  saveinpfile(OW_Project *m, char *fname)
 
    fprintf(f,"\n\n[JUNCTIONS]");
    for (i=1; i <= m->network.Njuncs; i++)
-      fprintf(f,"\n %-31s %12.4f ;%s", m->network.Node[i].ID, m->network.Node[i].El * m->Ucf[ELEV], m->network.Node[i].Comment);
+      fprintf(f,"\n %-31s %12.6E ;%s", m->network.Node[i].ID, m->network.Node[i].El * m->Ucf[ELEV], m->network.Node[i].Comment);
 
 /* Write [RESERVOIRS] section */
 
@@ -146,7 +146,7 @@ int  saveinpfile(OW_Project *m, char *fname)
       if (m->network.Tank[i].A == 0.0)
       {
          n = m->network.Tank[i].Node;
-         sprintf(s," %-31s %12.4f",m->network.Node[n].ID, m->network.Node[n].El * m->Ucf[ELEV]);
+         sprintf(s," %-31s %12.6E",m->network.Node[n].ID, m->network.Node[n].El * m->Ucf[ELEV]);
          if ((j = m->network.Tank[i].Pat) > 0)
             sprintf(s1," %-31s",m->network.Pattern[j].ID);
          else
@@ -164,7 +164,7 @@ int  saveinpfile(OW_Project *m, char *fname)
       if (m->network.Tank[i].A > 0.0)
       {
          n = m->network.Tank[i].Node;
-         sprintf(s," %-31s %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f",
+         sprintf(s," %-31s %12.6E %12.6E %12.6E %12.6E %12.6E %12.6E",
             m->network.Node[n].ID,
             m->network.Node[n].El * m->Ucf[ELEV],
             (m->network.Tank[i].H0 - m->network.Node[n].El) * m->Ucf[ELEV],
@@ -195,7 +195,7 @@ int  saveinpfile(OW_Project *m, char *fname)
            kc = kc * m->Ucf[ELEV]*1000.0;
         
          km = m->network.Link[i].Km*SQR(d)*SQR(d)/0.02517;
-         sprintf(s," %-31s %-31s %-31s %12.4f %12.4f",
+         sprintf(s," %-31s %-31s %-31s %12.6E %12.6E",
             m->network.Link[i].ID,
             m->network.Node[m->network.Link[i].N1].ID,
             m->network.Node[m->network.Link[i].N2].ID,
@@ -203,9 +203,9 @@ int  saveinpfile(OW_Project *m, char *fname)
             d * m->Ucf[DIAM]);
         
          if (m->Formflag == DW)
-           sprintf(s1, "%12.4f %12.4f", kc, km);
+           sprintf(s1, "%12.6E %12.6E", kc, km);
          else
-           sprintf(s1, "%12.4f %12.4f", kc, km);
+           sprintf(s1, "%12.6E %12.6E", kc, km);
         
          if (m->network.Link[i].Type == CV)
            sprintf(s2,"CV");
@@ -232,7 +232,7 @@ int  saveinpfile(OW_Project *m, char *fname)
 
    /* Pump has constant power */
       if (pump->Ptype == CONST_HP)
-         sprintf(s1, "  POWER %.4f", m->network.Link[n].Km);
+         sprintf(s1, "  POWER %.6E", m->network.Link[n].Km);
 
    /* Pump has a head curve */
       else if ((j = pump->Hcurve) > 0)
@@ -241,7 +241,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    /* Old format used for pump curve */
       else
       {
-         fprintf(f, "\n%s %12.4f %12.4f %12.4f          0.0 %12.4f",s,
+         fprintf(f, "\n%s %12.6E %12.6E %12.6E          0.0 %12.6E",s,
                  -pump->H0 * m->Ucf[HEAD],
                  (-pump->H0 - pump->R * pow(pump->Q0,pump->N)) * m->Ucf[HEAD],
                  pump->Q0 * m->Ucf[FLOW],
@@ -256,7 +256,7 @@ int  saveinpfile(OW_Project *m, char *fname)
       strcat(s,s1);
 
       if (m->network.Link[n].Kc != 1.0)
-         sprintf(s1, "  SPEED %.4f", m->network.Link[n].Kc);
+         sprintf(s1, "  SPEED %.6E", m->network.Link[n].Kc);
       else strcpy(s1,"");
       strcat(s,s1);
      
@@ -281,7 +281,7 @@ int  saveinpfile(OW_Project *m, char *fname)
       }
       km = m->network.Link[n].Km*SQR(d)*SQR(d)/0.02517;
 
-      sprintf(s," %-31s %-31s %-31s %12.4f %5s",
+      sprintf(s," %-31s %-31s %-31s %12.6E %5s",
          m->network.Link[n].ID,
          m->network.Node[m->network.Link[n].N1].ID,
          m->network.Node[m->network.Link[n].N2].ID,
@@ -289,8 +289,8 @@ int  saveinpfile(OW_Project *m, char *fname)
          LinkTxt[m->network.Link[n].Type]);
 
       if (m->network.Link[n].Type == GPV && (j = ROUND(m->network.Link[n].Kc)) > 0)
-         sprintf(s1,"%-31s %12.4f", m->network.Curve[j].ID, km);
-      else sprintf(s1,"%12.4f %12.4f",kc,km);
+         sprintf(s1,"%-31s %12.6E", m->network.Curve[j].ID, km);
+      else sprintf(s1,"%12.6E %12.6E",kc,km);
      
       fprintf(f, "\n%s %s ;%s", s,s1, m->network.Link[n].Comment);
    }
@@ -303,7 +303,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    {
       for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next)
       {
-         sprintf(s," %-31s %14.6f", m->network.Node[i].ID, ucf*demand->Base);
+         sprintf(s," %-31s %14.6E", m->network.Node[i].ID, ucf*demand->Base);
          if ((j = demand->Pat) > 0) sprintf(s1,"   %s", m->network.Pattern[j].ID);
          else strcpy(s1,"");
          fprintf(f,"\n%s %s",s,s1);
@@ -317,7 +317,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    {
       if (m->network.Node[i].Ke == 0.0) continue;
       ke = m->Ucf[FLOW]/pow(m->Ucf[PRESSURE] * m->network.Node[i].Ke, (1.0 / m->Qexp));
-      fprintf(f,"\n %-31s %14.6f",m->network.Node[i].ID,ke);
+      fprintf(f,"\n %-31s %14.6E",m->network.Node[i].ID,ke);
    }
 
 /* Write [STATUS] section */
@@ -339,7 +339,7 @@ int  saveinpfile(OW_Project *m, char *fname)
                  m->network.Pump[n].Ptype != CONST_HP &&
                  m->network.Link[i].Kc != 1.0
                )
-               fprintf(f, "\n %-31s %-.4f", m->network.Link[i].ID, m->network.Link[i].Kc);
+               fprintf(f, "\n %-31s %-.6E", m->network.Link[i].ID, m->network.Link[i].Kc);
          }
       }
 
@@ -362,7 +362,7 @@ int  saveinpfile(OW_Project *m, char *fname)
       for (j=0; j < m->network.Pattern[i].Length; j++)
       {
         if (j % 6 == 0) fprintf(f,"\n %-31s", m->network.Pattern[i].ID);
-        fprintf(f," %12.4f", m->network.Pattern[i].F[j]);
+        fprintf(f," %12.6E", m->network.Pattern[i].F[j]);
       }
    }
 
@@ -372,7 +372,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    for (i=1; i <= m->network.Ncurves; i++)
    {
       for (j=0; j < m->network.Curve[i].Npts; j++)
-         fprintf(f,"\n %-31s %12.4f %12.4f",
+         fprintf(f,"\n %-31s %12.6E %12.6E",
             m->network.Curve[i].ID, m->network.Curve[i].X[j], m->network.Curve[i].Y[j]);
    }
 
@@ -397,7 +397,7 @@ int  saveinpfile(OW_Project *m, char *fname)
             case PBV: kc *= m->Ucf[PRESSURE]; break;
             case FCV: kc *= m->Ucf[FLOW];     break;
          }
-         sprintf(s, " LINK %s %.4f", m->network.Link[j].ID, kc);
+         sprintf(s, " LINK %s %.6E", m->network.Link[j].ID, kc);
       }
       
       switch (m->network.Control[i].Type)
@@ -409,13 +409,13 @@ int  saveinpfile(OW_Project *m, char *fname)
             kc = m->network.Control[i].Grade - m->network.Node[n].El;
             if (n > m->network.Njuncs) kc *= m->Ucf[HEAD];
             else            kc *= m->Ucf[PRESSURE];
-            fprintf(f, "\n%s IF NODE %s %s %.4f", s,
+            fprintf(f, "\n%s IF NODE %s %s %.6E", s,
                m->network.Node[n].ID, ControlTxt[m->network.Control[i].Type], kc);
             break;
 
       /* Print timer control */
          case TIMER:
-            fprintf(f, "\n%s AT %s %.4f HOURS",
+            fprintf(f, "\n%s AT %s %.6E HOURS",
                s, ControlTxt[TIMER], m->network.Control[i].Time/3600.);
             break;
                          
@@ -434,7 +434,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    for (i=1; i <= m->network.Nnodes; i++)
    {
       if (m->network.Node[i].C0 == 0.0) continue;
-      fprintf(f, "\n %-31s %14.6f", m->network.Node[i].ID, m->network.Node[i].C0 * m->Ucf[QUALITY]);
+      fprintf(f, "\n %-31s %14.6E", m->network.Node[i].ID, m->network.Node[i].C0 * m->Ucf[QUALITY]);
    }
       
 /* Write [SOURCES] section */
@@ -444,7 +444,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    {
       source = m->network.Node[i].S;
       if (source == NULL) continue;
-      sprintf(s," %-31s %-8s %14.6f",
+      sprintf(s," %-31s %-8s %14.6E",
          m->network.Node[i].ID,
          SourceTxt[source->Type],
          source->C0);
@@ -460,7 +460,7 @@ int  saveinpfile(OW_Project *m, char *fname)
    for (i=1; i <= m->network.Ntanks; i++)
    {
       if (m->network.Tank[i].A == 0.0) continue;
-      fprintf(f, "\n %-31s %-8s %12.4f",
+      fprintf(f, "\n %-31s %-8s %12.6E",
               m->network.Node[m->network.Tank[i].Node].ID,
               MixTxt[m->network.Tank[i].MixModel],
               (m->network.Tank[i].V1max / m->network.Tank[i].Vmax));
@@ -472,25 +472,25 @@ int  saveinpfile(OW_Project *m, char *fname)
    fprintf(f, "\n ORDER  BULK            %-.2f", m->BulkOrder);
    fprintf(f, "\n ORDER  WALL            %-.0f", m->WallOrder);
    fprintf(f, "\n ORDER  TANK            %-.2f", m->TankOrder);
-   fprintf(f, "\n GLOBAL BULK            %-.6f", m->Kbulk*SECperDAY);
-   fprintf(f, "\n GLOBAL WALL            %-.6f", m->Kwall*SECperDAY);
+   fprintf(f, "\n GLOBAL BULK            %-.6E", m->Kbulk*SECperDAY);
+   fprintf(f, "\n GLOBAL WALL            %-.6E", m->Kwall*SECperDAY);
    if (m->Climit > 0.0)
-   fprintf(f, "\n LIMITING POTENTIAL     %-.6f", m->Climit);
+   fprintf(f, "\n LIMITING POTENTIAL     %-.6E", m->Climit);
    if (m->Rfactor != MISSING && m->Rfactor != 0.0)
-   fprintf(f, "\n ROUGHNESS CORRELATION  %-.6f", m->Rfactor);
+   fprintf(f, "\n ROUGHNESS CORRELATION  %-.6E", m->Rfactor);
    for (i=1; i <= m->network.Nlinks; i++)
    {
       if (m->network.Link[i].Type > PIPE) continue;
       if (m->network.Link[i].Kb != m->Kbulk)
-         fprintf(f, "\n BULK   %-31s %-.6f", m->network.Link[i].ID, m->network.Link[i].Kb*SECperDAY);
+         fprintf(f, "\n BULK   %-31s %-.6E", m->network.Link[i].ID, m->network.Link[i].Kb*SECperDAY);
       if (m->network.Link[i].Kw != m->Kwall)
-         fprintf(f, "\n WALL   %-31s %-.6f", m->network.Link[i].ID, m->network.Link[i].Kw*SECperDAY);
+         fprintf(f, "\n WALL   %-31s %-.6E", m->network.Link[i].ID, m->network.Link[i].Kw*SECperDAY);
    }
    for (i=1; i <= m->network.Ntanks; i++)
    {
       if (m->network.Tank[i].A == 0.0) continue;
       if (m->network.Tank[i].Kb != m->Kbulk)
-         fprintf(f, "\n TANK   %-31s %-.6f",m->network.Node[m->network.Tank[i].Node].ID,
+         fprintf(f, "\n TANK   %-31s %-.6E",m->network.Node[m->network.Tank[i].Node].ID,
             m->network.Tank[i].Kb*SECperDAY);
    }
 
@@ -498,15 +498,15 @@ int  saveinpfile(OW_Project *m, char *fname)
 
    fprintf(f, "\n\n[ENERGY]");
    if (m->Ecost != 0.0)
-   fprintf(f, "\n GLOBAL PRICE        %-.4f", m->Ecost);
+   fprintf(f, "\n GLOBAL PRICE        %-.4E", m->Ecost);
    if (m->Epat != 0)
    fprintf(f, "\n GLOBAL PATTERN      %s",  m->network.Pattern[m->Epat].ID);
-   fprintf(f, "\n GLOBAL EFFIC        %-.4f", m->Epump);
-   fprintf(f, "\n DEMAND CHARGE       %-.4f", m->Dcost);
+   fprintf(f, "\n GLOBAL EFFIC        %-.4E", m->Epump);
+   fprintf(f, "\n DEMAND CHARGE       %-.4E", m->Dcost);
    for (i=1; i <= m->network.Npumps; i++)
    {
       if (m->network.Pump[i].Ecost > 0.0)
-         fprintf(f, "\n PUMP %-31s PRICE   %-.4f",
+         fprintf(f, "\n PUMP %-31s PRICE   %-.4E",
             m->network.Link[m->network.Pump[i].Link].ID, m->network.Pump[i].Ecost);
       if (m->network.Pump[i].Epat > 0.0)
          fprintf(f, "\n PUMP %-31s PATTERN %s",
@@ -556,17 +556,17 @@ int  saveinpfile(OW_Project *m, char *fname)
    fprintf(f, "\n QUALITY             AGE");
    if (m->Qualflag == NONE)
    fprintf(f, "\n QUALITY             NONE");
-   fprintf(f, "\n DEMAND MULTIPLIER   %-.4f", m->Dmult);
-   fprintf(f, "\n EMITTER EXPONENT    %-.4f", 1.0 / m->Qexp);
-   fprintf(f, "\n VISCOSITY           %-.6f", m->Viscos/VISCOS);
-   fprintf(f, "\n DIFFUSIVITY         %-.6f", m->Diffus/DIFFUS);
-   fprintf(f, "\n SPECIFIC GRAVITY    %-.6f", m->SpGrav);
+   fprintf(f, "\n DEMAND MULTIPLIER   %-.4E", m->Dmult);
+   fprintf(f, "\n EMITTER EXPONENT    %-.4E", 1.0 / m->Qexp);
+   fprintf(f, "\n VISCOSITY           %-.6E", m->Viscos/VISCOS);
+   fprintf(f, "\n DIFFUSIVITY         %-.6E", m->Diffus/DIFFUS);
+   fprintf(f, "\n SPECIFIC GRAVITY    %-.6E", m->SpGrav);
    fprintf(f, "\n TRIALS              %-d",   m->MaxIter);
-   fprintf(f, "\n ACCURACY            %-.8f", m->Hacc);
-   fprintf(f, "\n TOLERANCE           %-.8f", m->Ctol * m->Ucf[QUALITY]);
+   fprintf(f, "\n ACCURACY            %-.8E", m->Hacc);
+   fprintf(f, "\n TOLERANCE           %-.8E", m->Ctol * m->Ucf[QUALITY]);
    fprintf(f, "\n CHECKFREQ           %-d", m->CheckFreq);
    fprintf(f, "\n MAXCHECK            %-d", m->MaxCheck);
-   fprintf(f, "\n DAMPLIMIT           %-.8f", m->DampLimit);
+   fprintf(f, "\n DAMPLIMIT           %-.8E", m->DampLimit);
 
 /* Write [REPORT] section */
 
@@ -622,9 +622,9 @@ int  saveinpfile(OW_Project *m, char *fname)
       {
          fprintf(f, "\n %-20sPRECISION %d", Field[i].Name, Field[i].Precision);
          if (Field[i].RptLim[LOW] < BIG)
-            fprintf(f, "\n %-20sBELOW %.6f", Field[i].Name, Field[i].RptLim[LOW]);
+            fprintf(f, "\n %-20sBELOW %.6E", Field[i].Name, Field[i].RptLim[LOW]);
          if (Field[i].RptLim[HI] > -BIG)
-            fprintf(f, "\n %-20sABOVE %.6f", Field[i].Name, Field[i].RptLim[HI]);
+            fprintf(f, "\n %-20sABOVE %.6E", Field[i].Name, Field[i].RptLim[HI]);
       }
       else fprintf(f, "\n %-20sNO", Field[i].Name);
    }
