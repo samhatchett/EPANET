@@ -1558,7 +1558,8 @@ int DLLEXPORT OW_getlinknodes(OW_Project *m, int index, int *node1, int *node2)
 int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
 {
   double a, h, q, v = 0.0;
-
+  int returnValue = EN_OK;
+  
   /* Check for valid arguments */
   *value = 0.0;
   if (!m->Openflag)
@@ -1705,12 +1706,25 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   case EN_LINKQUAL:
     v = avgqual(m, index) * m->Ucf[LINKQUAL];
     break;
+      
+  case EN_HEADCURVE:
+    if (m->network.Link[index].Type == PUMP) {
+      int p = m->network.Link[index].pumpLinkIdx;
+      v = m->network.Pump[p].Hcurve;
+      if (v == 0) {
+        returnValue = OW_ERR_NO_HEAD_CURVE;
+      }
+    }
+    else {
+      v = 0;
+      returnValue = OW_ERR_ILLEGAL_VAL_LINK;
+    }
 
   default:
     return (251);
   }
   *value = (EN_API_FLOAT_TYPE)v;
-  return EN_OK;
+  return returnValue;
 }
 
 int DLLEXPORT OW_getcurve(OW_Project *m, int curveIndex, char *id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues)
