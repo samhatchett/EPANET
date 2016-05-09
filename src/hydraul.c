@@ -1879,18 +1879,24 @@ int  pswitch(OW_Project *m)
    /* Check each control statement */
    for (i=1; i <= m->network.Ncontrols; i++)
    {
+     Scontrol control = m->network.Control[i]; // immutable as-copy
+     
+     if ( !control.isEnabled) {
+       continue; // skip disabled controls
+     }
+     
       reset = 0;
-      if ( (k = m->network.Control[i].Link) <= 0) continue;
+      if ( (k = control.Link) <= 0) continue;
 
       /* Determine if control based on a junction, not a tank */
-      if ( (n = m->network.Control[i].Node) > 0 && n <= m->network.Njuncs)
+      if ( (n = control.Node) > 0 && n <= m->network.Njuncs)
       {
          /* Determine if control conditions are satisfied */
-         if (m->network.Control[i].Type == LOWLEVEL
-             && m->hydraulics.NodeHead[n] <= m->network.Control[i].Grade + m->Htol )
+         if (control.Type == LOWLEVEL
+             && m->hydraulics.NodeHead[n] <= control.Grade + m->Htol )
              reset = 1;
-         if (m->network.Control[i].Type == HILEVEL
-             && m->hydraulics.NodeHead[n] >= m->network.Control[i].Grade - m->Htol )
+         if (control.Type == HILEVEL
+             && m->hydraulics.NodeHead[n] >= control.Grade - m->Htol )
              reset = 1;
       }
 
@@ -1901,25 +1907,25 @@ int  pswitch(OW_Project *m)
          s = m->hydraulics.LinkStatus[k];
          if (m->network.Link[k].Type == PIPE)
          {
-            if (s != m->network.Control[i].Status) change = 1;
+            if (s != control.Status) change = 1;
          }
          if (m->network.Link[k].Type == PUMP)
          {
-            if (m->hydraulics.LinkSetting[k] != m->network.Control[i].Setting) change = 1;
+            if (m->hydraulics.LinkSetting[k] != control.Setting) change = 1;
          }
          if (m->network.Link[k].Type >= PRV)
          {
-            if (m->hydraulics.LinkSetting[k] != m->network.Control[i].Setting) change = 1;
+            if (m->hydraulics.LinkSetting[k] != control.Setting) change = 1;
             else if (m->hydraulics.LinkSetting[k] == MISSING &&
-                     s != m->network.Control[i].Status) change = 1;
+                     s != control.Status) change = 1;
          }
 
          /* If a change occurs, update status & setting */
          if (change)
          {
-            m->hydraulics.LinkStatus[k] = m->network.Control[i].Status;
+            m->hydraulics.LinkStatus[k] = control.Status;
            if (m->network.Link[k].Type > PIPE) {
-             m->hydraulics.LinkSetting[k] = m->network.Control[i].Setting;
+             m->hydraulics.LinkSetting[k] = control.Setting;
            }
            if (m->Statflag == FULL) {
              writestatchange(m,k,s,m->hydraulics.LinkStatus[k]);
