@@ -15,35 +15,35 @@
 
 
 /* ---------Input Section Names ---------- */
-#define   s_TITLE       "[TITL"
-#define   s_JUNCTIONS   "[JUNC"
-#define   s_RESERVOIRS  "[RESE"
-#define   s_TANKS       "[TANK"
-#define   s_PIPES       "[PIPE"
-#define   s_PUMPS       "[PUMP"
-#define   s_VALVES      "[VALV"
-#define   s_CONTROLS    "[CONT"
-#define   s_RULES       "[RULE"
-#define   s_DEMANDS     "[DEMA"
-#define   s_SOURCES     "[SOUR"
-#define   s_EMITTERS    "[EMIT"
-#define   s_PATTERNS    "[PATT"
-#define   s_CURVES      "[CURV"
-#define   s_QUALITY     "[QUAL"
-#define   s_STATUS      "[STAT"
-#define   s_ROUGHNESS   "[ROUG"
-#define   s_ENERGY      "[ENER"
-#define   s_REACTIONS   "[REAC"
-#define   s_MIXING      "[MIXI"
-#define   s_REPORT      "[REPO"
-#define   s_TIMES       "[TIME"
-#define   s_OPTIONS     "[OPTI"
-#define   s_COORDS      "[COOR"
-#define   s_VERTICES    "[VERT"
-#define   s_LABELS      "[LABE"
-#define   s_BACKDROP    "[BACK"
-#define   s_TAGS        "[TAGS"
-#define   s_END         "[END"
+#define   s_TITLE       "[TITLE]"
+#define   s_JUNCTIONS   "[JUNCTIONS]"
+#define   s_RESERVOIRS  "[RESERVOIRS]"
+#define   s_TANKS       "[TANKS]"
+#define   s_PIPES       "[PIPES]"
+#define   s_PUMPS       "[PUMPS]"
+#define   s_VALVES      "[VALVES]"
+#define   s_CONTROLS    "[CONTROLS]"
+#define   s_RULES       "[RULES]"
+#define   s_DEMANDS     "[DEMANDS]"
+#define   s_SOURCES     "[SOURCES]"
+#define   s_EMITTERS    "[EMITTERS]"
+#define   s_PATTERNS    "[PATTERNS]"
+#define   s_CURVES      "[CURVES]"
+#define   s_QUALITY     "[QUALITY]"
+#define   s_STATUS      "[STATUS]"
+#define   s_ROUGHNESS   "[ROUGHNESS]"
+#define   s_ENERGY      "[ENERGY]"
+#define   s_REACTIONS   "[REACTIONS]"
+#define   s_MIXING      "[MIXING]"
+#define   s_REPORT      "[REPORT]"
+#define   s_TIMES       "[TIMES]"
+#define   s_OPTIONS     "[OPTIONS]"
+#define   s_COORDS      "[COORDS]"
+#define   s_VERTICES    "[VERTICES]"
+#define   s_LABELS      "[LABELS]"
+#define   s_BACKDROP    "[BACKDROP]"
+#define   s_TAGS        "[TAGS]"
+#define   s_END         "[END]"
 
 
 
@@ -434,4 +434,13 @@ int _getPatterns(OW_Project *modelObj, FILE *file)
 }
 
 
+
+
+
+#pragma mark - SAVE FILE
+
+
+int OW_saveInpFile(OW_Project *modelObj, const char *filename) {
+  
+}
 
