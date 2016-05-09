@@ -699,6 +699,7 @@ int  DLLEXPORT OW_setReportCallback(OW_Project *m, void (*callback)(void*,OW_Pro
 int DLLEXPORT OW_setReportCallbackUserData(OW_Project *m, void *userData)
 {
   m->reportCallbackUserData = userData;
+  return EN_OK;
 }
 
 int DLLEXPORT OW_writeline(OW_Project *m, char *line)
