@@ -1720,8 +1720,22 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
       v = 0;
       returnValue = OW_ERR_ILLEGAL_VAL_LINK;
     }
-
-  default:
+      break;
+      
+    case EN_EFFICIENCYCURVE:
+      if (m->network.Link[index].Type == PUMP) {
+        int p = m->network.Link[index].pumpLinkIdx;
+        v = m->network.Pump[p].Ecurve;
+        if (v == 0) {
+          returnValue = OW_ERR_NO_EFF_CURVE;
+        }
+      }
+      else {
+        v = 0;
+        returnValue = OW_ERR_ILLEGAL_VAL_LINK;
+      }
+      
+    default:
     return (251);
   }
   *value = (EN_API_FLOAT_TYPE)v;

@@ -85,6 +85,7 @@
 #define EN_ENERGY       13
 #define EN_LINKQUAL     14     /* TNT */
 #define EN_HEADCURVE    15
+#define EN_EFFICIENCYCURVE 16
 
 #define EN_DURATION     0    /* Time parameters */
 #define EN_HYDSTEP      1
@@ -242,6 +243,7 @@ typedef enum {
 #define OW_ERR_UNDEF_CONTROL 241
 #define OW_ERR_FN_INVALID_FORMAT 250
 #define OW_ERR_FN_INVALID_CODE 251
+#define OW_ERR_NO_EFF_CURVE 268
 
 #define OW_ERR_FILE_IDENTICAL 301
 #define OW_ERR_FILE_CANT_OPEN_INP 302
