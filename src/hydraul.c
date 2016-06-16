@@ -1129,7 +1129,7 @@ void  getenergy(OW_Project *m, int k, double *kw, double *eff)
          e = interp(m->network.Curve[i].Npts,
                     m->network.Curve[i].X,
                     m->network.Curve[i].Y,
-                    q * m->Ucf[FLOW]);
+                    q * m->Ucf[FLOW] / m->hydraulics.LinkSetting[k]);
       }
       e = MIN(e, 100.0);
       e = MAX(e, 1.0);
