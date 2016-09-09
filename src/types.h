@@ -46,7 +46,7 @@ typedef  int          INT4;                                                    /
 #define   EOFMARK            0x1A  /* Use 0x04 for UNIX systems */
 #define   MAXTITLE  3        /* Max. # title lines                     */
 #define   MAXID     31       /* Max. # characters in ID name           */      //(2.00.11 - LR)
-#define   MAXMSG    79       /* Max. # characters in message text      */
+#define   MAXMSG    256       /* Max. # characters in message text      */
 #define   MAXLINE   5120      /* Max. # characters read from input line */
 #define   MAXFNAME  259      /* Max. # characters in file name         */
 #define   MAXTOKS   40       /* Max. items per line of input           */

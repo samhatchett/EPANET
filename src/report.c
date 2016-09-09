@@ -990,7 +990,7 @@ int  writehydwarn(OW_Project *m, int iter, double relerr)
       }                                                                        //(2.00.11 - LR)
       if (s == XHEAD || s == XFLOW)                                            //(2.00.11 - LR)
       {                                    
-         sprintf(m->Msg,WARN04,Link[j].ID,StatTxt[s],                             //(2.00.11 - LR)
+         snprintf(m->Msg,MAXMSG,WARN04,Link[j].ID,StatTxt[s],                             //(2.00.11 - LR)
                  clocktime(m->Atime,m->Htime));
          if (m->Messageflag) writeline(m,m->Msg);
          flag = 4;
