@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 2.6)
 
 project (EPANET)
 
-add_definitions(-std=c99)
+add_definitions(-std=c99 -DEN_API_FLOAT_TYPE=double)
 SET(CMAKE_C_FLAGS "-std=c99")
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)

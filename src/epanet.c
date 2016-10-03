@@ -1366,6 +1366,9 @@ int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
 
   case EN_PRESSURE:
     v = (m->hydraulics.NodeHead[index] - m->network.Node[index].El) * m->Ucf[PRESSURE];
+      if (m->Unitsflag == SI) {
+        v *= 9.804139432;
+      }
     break;
 
   case EN_QUALITY:
