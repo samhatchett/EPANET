@@ -74,7 +74,7 @@ int     getcurves(OW_Project *m);                  /* Gets curve data from list 
 int     getcoords(OW_Project *m);                  /* Gets coordinate data from list  */
 int     findmatch(char *,char *[]);       /* Finds keyword in line      */
 int     match(char *, char *);            /* Checks for word match      */
-int     gettokens(char *s, char** Tok, int maxToks);                /* Tokenizes input line       */
+int     gettokens(char *s, char** Tok, int maxToks, char *comment);                /* Tokenizes input line       */
 int     getfloat(char *, double *);       /* Converts string to double   */
 double  hour(char *, char *);             /* Converts time to hours     */
 int     setreport(OW_Project *m, char *);                /* Processes reporting command*/

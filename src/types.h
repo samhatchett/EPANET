@@ -590,8 +590,6 @@ struct OW_Project {
   */
   
   
-  
-  
   OW_Network network;
   
   
@@ -606,10 +604,6 @@ struct OW_Project {
   STmplist *Curvelist;            /* Temporary list of curves     */
   STmplist *Coordlist;            /* Temporary list of coordinates*/
 
-  
-  
-  
-  
   
   
   FILE			*InFile,               /* Input file pointer           */
@@ -762,6 +756,7 @@ struct OW_Project {
   int    Ntokens,           /* Number of tokens in input line    */
          Ntitle;            /* Number of title lines             */
   char   *Tok[MAXTOKS];     /* Array of token strings            */
+  char   Comment[MAXMSG+1];
   
   /* Used in INPUT3.C: */
   STmplist  *PrevPat;       /* Pointer to pattern list element   */

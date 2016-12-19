@@ -122,7 +122,7 @@ int _match(char *str, char *substr);
 int _scanFileToSection(FILE *handle, section_t section, netsize_t netsize);
 
 int _getPatterns(OW_Project *modelObj, FILE *file);
-int  _gettokens(char *s, char** Tok, int maxToks);
+int  _gettokens(char *s, char** Tok, int maxToks, char *comment);
 
 lineToken_t _newTokensFromLine(FILE *file);
 int _freeTokens(lineToken_t line);
@@ -374,7 +374,7 @@ int _scanFileToSection(FILE *handle, section_t section, netsize_t netsize)
 
 
 
-int  _gettokens(char *s, char** Tok, int maxToks)
+int  _gettokens(char *s, char** Tok, int maxToks, char *comment)
 /*
  **--------------------------------------------------------------
  **  Input:   *s = string to be tokenized

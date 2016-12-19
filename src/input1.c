@@ -79,7 +79,7 @@ int  getdata(OW_Project *m)
    int errcode = 0;
    setdefaults(m);                /* Assign default data values     */
    initreport(m);                 /* Initialize reporting options   */
-   rewind(m->InFile);               /* Rewind input file              */
+   rewind(m->InFile);             /* Rewind input file              */
    ERRCODE(readdata(m));          /* Read in network data           */
    if (!errcode) adjustdata(m);   /* Adjust data for default values */
    if (!errcode) initunits(m);    /* Initialize units on input data */

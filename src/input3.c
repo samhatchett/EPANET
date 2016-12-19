@@ -98,6 +98,8 @@ int  juncdata(OW_Project *m)
    Node[m->network.Njuncs].S   = NULL;
    Node[m->network.Njuncs].Ke  = 0.0;
    Node[m->network.Njuncs].Rpt = 0;
+  strcpy(Node[m->network.Njuncs].Comment, m->Comment);
+  
 
 /* Create a new demand record */
    demand = (struct Sdemand *) malloc(sizeof(struct Sdemand));
@@ -202,6 +204,7 @@ int  tankdata(OW_Project *m)
    Node[i].C0            = 0.0;              /* Init. quality.       */
    Node[i].S             = NULL;             /* WQ source data       */     
    Node[i].Ke            = 0.0;              /* Emitter coeff.       */
+   strcpy(Node[i].Comment, m->Comment);
    Tank[iTank].Node     = i;                /* Node index.          */
    Tank[iTank].H0       = initlevel;        /* Init. level.         */
    Tank[iTank].Hmin     = minlevel;         /* Min. level.          */
@@ -321,6 +324,7 @@ int  pipedata(OW_Project *m)
    Link[Nlinks].Type  = type;                /* Link type        */
    Link[Nlinks].Stat  = status;              /* Link status      */
    Link[Nlinks].Rpt   = 0;                   /* Report flag      */
+   strcpy(Link[Nlinks].Comment, m->Comment);
    return(0);
 }                        /* end of pipedata */
 
@@ -387,6 +391,7 @@ int  pumpdata(OW_Project *mod)
    Link[Nlinks].Type  = PUMP;             /* Link type.         */
    Link[Nlinks].Stat  = OPEN;             /* Link status.       */
    Link[Nlinks].Rpt   = 0;                /* Report flag.       */
+   strcpy(Link[Nlinks].Comment, mod->Comment);
    Pump[Npumps].Link = Nlinks;            /* Link index.        */
    Pump[Npumps].Ptype = NOCURVE;          /* Type of pump curve */
    Pump[Npumps].Hcurve = 0;               /* Pump curve index   */
@@ -548,6 +553,7 @@ int  valvedata(OW_Project *m)
    Link->Type   = type;               /* Valve type.       */
    Link->Stat   = status;             /* Valve status.     */
    Link->Rpt    = 0;                  /* Report flag.      */
+   strcpy(Link->Comment, m->Comment);
    Valve[Nvalves].Link = Nlinks;             /* Link index.       */
    return(0);
 }                        /* end of valvedata */

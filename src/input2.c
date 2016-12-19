@@ -191,7 +191,8 @@ int  readdata(OW_Project *m)
 
       /* Make copy of line and scan for tokens */
          strcpy(wline,line);
-         m->Ntokens = gettokens(wline, m->Tok, MAXTOKS);
+        m->Comment[0] = '\0';
+         m->Ntokens = gettokens(wline, m->Tok, MAXTOKS, m->Comment);
 
        /* Skip blank lines and comments */
          if (m->Ntokens == 0) continue;
@@ -895,7 +896,7 @@ int  match(char *str, char *substr)
 /*** Updated 10/25/00 ***/
 /* The gettokens function has been totally re-written. */
 
-int  gettokens(char *s, char** Tok, int maxToks)
+int  gettokens(char *s, char** Tok, int maxToks, char *comment)
 /*
 **--------------------------------------------------------------
 **  Input:   *s = string to be tokenized
@@ -909,16 +910,28 @@ int  gettokens(char *s, char** Tok, int maxToks)
 **--------------------------------------------------------------
 */
 {
-   int  len, m, n;
-   char *c;
-
+   int  m, n;
+   size_t len;
+   char *c, *c2;
+  
 /* Begin with no tokens */
    for (n=0; n<maxToks; n++) Tok[n] = NULL;
    n = 0;
 
 /* Truncate s at start of comment */
    c = strchr(s,';');
-   if (c) *c = '\0';
+  if (c) {
+    c2 = c+1;
+    if (c2) {
+      // there is a comment here, after the semi-colon.
+      len = strlen(c2);
+      if (len > 0) {
+        len = strcspn(c2, "\n\r");
+        strncpy(comment, c2, MIN(MAXMSG,len));
+      }
+    }
+    *c = '\0';
+  }
    len = (int)strlen(s);
 
 /* Scan s for tokens until nothing left */
@@ -1031,7 +1044,7 @@ int  setreport(OW_Project *m, char *s)
 **-----------------------------------------------------------
 */
 {
-   m->Ntokens = gettokens(s, m->Tok, MAXTOKS);
+   m->Ntokens = gettokens(s, m->Tok, MAXTOKS, m->Comment);
    return(reportdata(m));
 }
 

@@ -877,6 +877,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = "EN_API_FLOAT_TYPE=double";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -961,6 +962,7 @@
 				223D15371CAF547D00FB5FD6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2255753E17551217009946B1 /* Build configuration list for PBXNativeTarget "epanet-static" */ = {
 			isa = XCConfigurationList;

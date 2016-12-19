@@ -164,9 +164,15 @@ void  initqual(OW_Project *m)
    int i;
 
    /* Initialize quality, tank volumes, & source mass flows */
-   for (i=1; i <= m->network.Nnodes; i++) m->NodeQual[i] = m->network.Node[i].C0;
-   for (i=1; i <= m->network.Ntanks; i++) m->network.Tank[i].C = m->network.Node[m->network.Tank[i].Node].C0;
-   for (i=1; i <= m->network.Ntanks; i++) m->network.Tank[i].V = m->network.Tank[i].V0;
+   for (i=1; i <= m->network.Nnodes; i++)
+     m->NodeQual[i] = m->network.Node[i].C0;
+  
+   for (i=1; i <= m->network.Ntanks; i++)
+     m->network.Tank[i].C = m->network.Node[m->network.Tank[i].Node].C0;
+  
+   for (i=1; i <= m->network.Ntanks; i++)
+     m->network.Tank[i].V = m->network.Tank[i].V0;
+  
    for (i=1; i <= m->network.Nnodes; i++) {
      if (m->network.Node[i].S != NULL) {
        m->network.Node[i].S->Smass = 0.0;
@@ -599,8 +605,10 @@ void  initsegs(OW_Project *m)
 
       /* Find quality of downstream node */
       j = DOWN_NODE(m,k);
-      if (j <= m->network.Njuncs) c = m->NodeQual[j];
-      else             c = m->network.Tank[j - m->network.Njuncs].C;
+      if (j <= m->network.Njuncs)
+        c = m->NodeQual[j];
+      else
+        c = m->network.Tank[j - m->network.Njuncs].C;
 
       /* Fill link with single segment with this quality */
       addseg(m,k,LINKVOL(m,k),c);

@@ -1930,7 +1930,7 @@ int  DLLEXPORT OW_getnodecomment(OW_Project *m, int nIndex, char *comment)
   if (nIndex <= 0 || nIndex > m->network.Nnodes)
     return (203);
   
-  strncpy(comment, m->network.Node[nIndex].Comment, MAXMSG);
+  strlcpy(comment, m->network.Node[nIndex].Comment, MAXMSG);
   return EN_OK;
 }
 
