@@ -481,7 +481,9 @@ int DLLEXPORT OW_closeH(OW_Project *m)
 {
   if (!m->Openflag)
     return (102);
-  closehyd(m);
+  if (m->OpenHflag) {
+    closehyd(m);
+  }
   m->OpenHflag = FALSE;
   return EN_OK;
 }
