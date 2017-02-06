@@ -1932,7 +1932,8 @@ int  DLLEXPORT OW_getnodecomment(OW_Project *m, int nIndex, char *comment)
   if (nIndex <= 0 || nIndex > m->network.Nnodes)
     return (203);
   
-  strlcpy(comment, m->network.Node[nIndex].Comment, MAXMSG);
+  strncpy(comment, m->network.Node[nIndex].Comment, MAXMSG);
+  comment[MAXMSG-1] = '\0';
   return EN_OK;
 }
 
@@ -1944,6 +1945,7 @@ int  DLLEXPORT OW_setnodecomment(OW_Project *m, int nIndex, const char *comment)
     return (203);
   
   strncpy(m->network.Node[nIndex].Comment, comment, MAXMSG);
+  m->network.Node[nIndex].Comment[MAXMSG-1] = '\0';
   return EN_OK;
 }
 
