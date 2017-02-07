@@ -1910,7 +1910,7 @@ int DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN
  */
 int DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
 {
-  if (enable != EN_DISABLE || enable != EN_ENABLE) {
+  if (enable != EN_DISABLE && enable != EN_ENABLE) {
     return OW_ERR_ILLEGAL_NUMERIC_VALUE;
   }
 
