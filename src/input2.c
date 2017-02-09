@@ -927,7 +927,9 @@ int  gettokens(char *s, char** Tok, int maxToks, char *comment)
       len = strlen(c2);
       if (len > 0) {
         len = strcspn(c2, "\n\r");
-        strncpy(comment, c2, MIN(MAXMSG,len));
+        len = MIN(len, MAXMSG);
+        strncpy(comment, c2, len);
+        comment[MIN(len,MAXMSG)] = '\0';
       }
     }
     *c = '\0';
