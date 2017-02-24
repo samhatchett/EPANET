@@ -570,12 +570,12 @@ typedef struct {
   ENHashTable  *NodeHashTable, *LinkHashTable;            /* Hash tables for ID labels    */
   Padjlist *Adjlist;              /* Node adjacency lists         */
   
-} OW_Network;
+} EN_Network;
 
 
 /***** MODEL STRUCT ******/
 
-struct OW_Project {
+struct EN_Project {
   
 /* heirarchy:
  
@@ -590,7 +590,7 @@ struct OW_Project {
   */
   
   
-  OW_Network network;
+  EN_Network network;
   
   
   double *PipeRateCoeff,        /* Pipe reaction rate           */
@@ -611,7 +611,7 @@ struct OW_Project {
   *RptFile,              /* Report file pointer          */
   *HydFile,              /* Hydraulics file pointer      */
   *TmpOutFile;           /* Temporary file handle        */
-  void (*reportCallback)(void *userData, struct OW_Project*, char*);
+  void (*reportCallback)(void *userData, struct EN_Project*, char*);
   void *reportCallbackUserData;
   
   long     HydOffset,             /* Hydraulics file byte offset  */

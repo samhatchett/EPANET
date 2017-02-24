@@ -12,13 +12,13 @@ namespace epanet {
   public:
     ModelFile(); ///! empty constructor
     ModelFile(std::istream& input); ///! instantiate with text file
-    ModelFile(OW_Project *model); ///! instantiate with model project
+    ModelFile(EN_Project *model); ///! instantiate with model project
     
     void to_stream(std::ostream& stream); ///! export model as text file, also can use << operator
-    OW_Project* to_model(); ///! retrieve model representation of file
+    EN_Project* to_model(); ///! retrieve model representation of file
     
   private:
-    OW_Project *_model;
+    EN_Project *_model;
     void _newModelFromStream(std::istream &stream);
   };
   std::ostream& operator<<(std::ostream& out, const ModelFile& modelFile); // stream out of model file

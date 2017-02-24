@@ -48,7 +48,7 @@ Linsolve() solves the linearized system of hydraulic equations.
 
 
 
-int  createsparse(OW_Project *m)
+int  createsparse(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -100,7 +100,7 @@ int  createsparse(OW_Project *m)
 }                        /* End of createsparse */
 
 
-int  allocsparse(OW_Project *m)
+int  allocsparse(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                              
@@ -122,7 +122,7 @@ int  allocsparse(OW_Project *m)
 }
 
 
-void  freesparse(OW_Project *m)
+void  freesparse(EN_Project *m)
 /*
 **----------------------------------------------------------------
 ** Input:   None                                                
@@ -142,7 +142,7 @@ void  freesparse(OW_Project *m)
 }                        /* End of freesparse */
 
 
-int  buildlists(OW_Project *m, int paraflag)
+int  buildlists(EN_Project *m, int paraflag)
 /*
 **--------------------------------------------------------------
 ** Input:   paraflag = TRUE if list marks parallel links      
@@ -185,7 +185,7 @@ int  buildlists(OW_Project *m, int paraflag)
 }                        /* End of buildlists */
 
 
-int  paralink(OW_Project *m, int i, int j, int k)
+int  paralink(EN_Project *m, int i, int j, int k)
 /*
 **--------------------------------------------------------------
 ** Input:   i = index of start node of link                    
@@ -211,7 +211,7 @@ int  paralink(OW_Project *m, int i, int j, int k)
 }                        /* End of paralink */
 
 
-void  xparalinks(OW_Project *m)
+void  xparalinks(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -256,7 +256,7 @@ void  xparalinks(OW_Project *m)
 }                        /* End of xparalinks */
 
 
-void  freelists(OW_Project *m)
+void  freelists(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -279,7 +279,7 @@ void  freelists(OW_Project *m)
 }                        /* End of freelists */
 
 
-void  countdegree(OW_Project *m)
+void  countdegree(EN_Project *m)
 /*
 **----------------------------------------------------------------
 ** Input:   none                                                
@@ -301,7 +301,7 @@ void  countdegree(OW_Project *m)
 }
 
 
-int   reordernodes(OW_Project *m)
+int   reordernodes(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -334,7 +334,7 @@ int   reordernodes(OW_Project *m)
 }                        /* End of reordernodes */
 
 
-int  mindegree(OW_Project *mod, int k, int n)
+int  mindegree(EN_Project *mod, int k, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   k = first node in list of active nodes              
@@ -361,7 +361,7 @@ int  mindegree(OW_Project *mod, int k, int n)
 }                        /* End of mindegree */
 
 
-int  growlist(OW_Project *m, int knode)
+int  growlist(EN_Project *m, int knode)
 /*
 **--------------------------------------------------------------
 ** Input:   knode = node index                                  
@@ -390,7 +390,7 @@ int  growlist(OW_Project *m, int knode)
 }                        /* End of growlist */
 
 
-int  newlink(OW_Project *m, Padjlist alink)
+int  newlink(EN_Project *m, Padjlist alink)
 /*
 **--------------------------------------------------------------
 ** Input:   alink = element of node's adjacency list            
@@ -435,7 +435,7 @@ int  newlink(OW_Project *m, Padjlist alink)
 }                        /* End of newlink */
 
 
-int  linked(OW_Project *m, int i, int j)
+int  linked(EN_Project *m, int i, int j)
 /*
 **--------------------------------------------------------------
 ** Input:   i = node index                                      
@@ -452,7 +452,7 @@ int  linked(OW_Project *m, int i, int j)
 }                        /* End of linked */
 
 
-int  addlink(OW_Project *m, int i, int j, int n)
+int  addlink(EN_Project *m, int i, int j, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   i = node index                                      
@@ -474,7 +474,7 @@ int  addlink(OW_Project *m, int i, int j, int n)
 }                        /* End of addlink */
 
 
-int  storesparse(OW_Project *mod, int n)
+int  storesparse(EN_Project *mod, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   n = number of rows in solution matrix               
@@ -522,7 +522,7 @@ int  storesparse(OW_Project *mod, int n)
 }                        /* End of storesparse */
 
 
-int  ordersparse(OW_Project *m, int n)
+int  ordersparse(EN_Project *m, int n)
 /*
 **--------------------------------------------------------------
 ** Input:   n = number of rows in solution matrix               
@@ -599,7 +599,7 @@ void  transpose(int n, int *il, int *jl, int *xl, int *ilt, int *jlt,
 }                        /* End of transpose */
 
 
-int  linsolve(OW_Project *m, int n, double *Aii, double *Aij, double *B)
+int  linsolve(EN_Project *m, int n, double *Aii, double *Aij, double *B)
 /*
 **--------------------------------------------------------------
 ** Input:   n    = number of equations                          

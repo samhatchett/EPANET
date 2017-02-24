@@ -147,10 +147,10 @@ execute function x and set the error code equal to its return value.
 //   open water analytics expanded methods below                   //
 // ================================================================//
 
-int DLLEXPORT OW_newModel(OW_Project **modelOut)
+int DLLEXPORT EN_newModel(EN_Project **modelOut)
 {
   *modelOut = 0;
-  OW_Project *m = calloc(1, sizeof(OW_Project));
+  EN_Project *m = calloc(1, sizeof(EN_Project));
 
   /* Set system flags */
   m->Openflag = FALSE;
@@ -177,16 +177,16 @@ int DLLEXPORT OW_newModel(OW_Project **modelOut)
   return 0;
 }
 
-int DLLEXPORT OW_freeModel(OW_Project *modelObj)
+int DLLEXPORT EN_freeModel(EN_Project *modelObj)
 {
   free(modelObj);
   return EN_OK;
 }
 
-int DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char *binOutFile)
+int DLLEXPORT EN_open(char *inpFile, EN_Project **modelOut, char *rptFile, char *binOutFile)
 {
-  OW_Project *m;
-  OW_newModel(&m);
+  EN_Project *m;
+  EN_newModel(&m);
 
   int errcode = 0;
 
@@ -246,14 +246,14 @@ int DLLEXPORT OW_open(char *inpFile, OW_Project **modelOut, char *rptFile, char 
   return (errcode);
 }
 
-int DLLEXPORT OW_saveinpfile(OW_Project *m, const char *filename)
+int DLLEXPORT EN_saveinpfile(EN_Project *m, const char *filename)
 {
   if (!m->Openflag)
     return (102);
   return (saveinpfile(m, filename));
 }
 
-int DLLEXPORT OW_close(OW_Project *m)
+int DLLEXPORT EN_close(EN_Project *m)
 {
   if (!m) {
     return 0;
@@ -309,21 +309,21 @@ int DLLEXPORT OW_close(OW_Project *m)
 
   free(en_defaultModel);
 
-  OW_freeModel(m);
+  EN_freeModel(m);
 
   return EN_OK;
 }
 
-int DLLEXPORT OW_solveH(OW_Project *m)
+int DLLEXPORT EN_solveH(EN_Project *m)
 {
   int errcode;
   long t, tstep;
 
   /* Open hydraulics solver */
-  errcode = OW_openH(m);
+  errcode = EN_openH(m);
   if (!errcode) {
     /* Initialize hydraulics */
-    errcode = OW_initH(m, EN_SAVE);
+    errcode = EN_initH(m, EN_SAVE);
     writecon(FMT14);
 
     /* Analyze each hydraulic period */
@@ -340,8 +340,8 @@ int DLLEXPORT OW_solveH(OW_Project *m)
 
         /* Solve for hydraulics & advance to next time period */
         tstep = 0;
-        ERRCODE(OW_runH(m, &t));
-        ERRCODE(OW_nextH(m, &tstep));
+        ERRCODE(EN_runH(m, &t));
+        ERRCODE(EN_nextH(m, &tstep));
 
         /*** Updated 6/24/02 ***/
         writecon("\b\b\b\b\b\b\b\b\b\b");
@@ -353,12 +353,12 @@ int DLLEXPORT OW_solveH(OW_Project *m)
   /*** Updated 6/24/02 ***/
   writecon("\b\b\b\b\b\b\b\b                     ");
 
-  OW_closeH(m);
+  EN_closeH(m);
   errcode = MAX(errcode, m->Warnflag);
   return (errcode);
 }
 
-int DLLEXPORT OW_saveH(OW_Project *m)
+int DLLEXPORT EN_saveH(EN_Project *m)
 {
   char tmpflag;
   int errcode;
@@ -374,7 +374,7 @@ int DLLEXPORT OW_saveH(OW_Project *m)
   /* Call WQ solver to simply transfer results */
   /* from Hydraulics file to Output file at    */
   /* fixed length reporting time intervals.    */
-  errcode = OW_solveQ(m);
+  errcode = EN_solveQ(m);
 
   /* Restore WQ analysis option */
   m->Qualflag = tmpflag;
@@ -384,7 +384,7 @@ int DLLEXPORT OW_saveH(OW_Project *m)
   return (errcode);
 }
 
-int DLLEXPORT OW_openH(OW_Project *m)
+int DLLEXPORT EN_openH(EN_Project *m)
 {
   int errcode = 0;
 
@@ -411,7 +411,7 @@ int DLLEXPORT OW_openH(OW_Project *m)
   return (errcode);
 }
 
-int DLLEXPORT OW_initH(OW_Project *m, int flag)
+int DLLEXPORT EN_initH(EN_Project *m, int flag)
 {
   int errcode = 0;
   int sflag, fflag;
@@ -447,7 +447,7 @@ int DLLEXPORT OW_initH(OW_Project *m, int flag)
   return (errcode);
 }
 
-int DLLEXPORT OW_runH(OW_Project *m, long *t)
+int DLLEXPORT EN_runH(EN_Project *m, long *t)
 {
   int errcode;
   *t = 0;
@@ -461,7 +461,7 @@ int DLLEXPORT OW_runH(OW_Project *m, long *t)
   return (errcode);
 }
 
-int DLLEXPORT OW_nextH(OW_Project *m, long *tstep)
+int DLLEXPORT EN_nextH(EN_Project *m, long *tstep)
 {
   int errcode;
   *tstep = 0;
@@ -477,7 +477,7 @@ int DLLEXPORT OW_nextH(OW_Project *m, long *tstep)
   return (errcode);
 }
 
-int DLLEXPORT OW_closeH(OW_Project *m)
+int DLLEXPORT EN_closeH(EN_Project *m)
 {
   if (!m->Openflag)
     return (102);
@@ -488,7 +488,7 @@ int DLLEXPORT OW_closeH(OW_Project *m)
   return EN_OK;
 }
 
-int DLLEXPORT OW_savehydfile(OW_Project *m, char *filename)
+int DLLEXPORT EN_savehydfile(EN_Project *m, char *filename)
 {
   FILE *f;
   int c;
@@ -510,7 +510,7 @@ int DLLEXPORT OW_savehydfile(OW_Project *m, char *filename)
   return EN_OK;
 }
 
-int DLLEXPORT OW_usehydfile(OW_Project *m, char *filename)
+int DLLEXPORT EN_usehydfile(EN_Project *m, char *filename)
 {
   int errcode;
 
@@ -535,16 +535,16 @@ int DLLEXPORT OW_usehydfile(OW_Project *m, char *filename)
   return (errcode);
 }
 
-int DLLEXPORT OW_solveQ(OW_Project *m)
+int DLLEXPORT EN_solveQ(EN_Project *m)
 {
   int errcode;
   long t, tstep;
 
   /* Open WQ solver */
-  errcode = OW_openQ(m);
+  errcode = EN_openQ(m);
   if (!errcode) {
     /* Initialize WQ */
-    errcode = OW_initQ(m, EN_SAVE);
+    errcode = EN_initQ(m, EN_SAVE);
     if (m->Qualflag)
       writecon(FMT15);
     else {
@@ -568,8 +568,8 @@ int DLLEXPORT OW_solveQ(OW_Project *m)
 
         /* Retrieve current network solution & update WQ to next time period */
         tstep = 0;
-        ERRCODE(OW_runQ(m, &t));
-        ERRCODE(OW_nextQ(m, &tstep));
+        ERRCODE(EN_runQ(m, &t));
+        ERRCODE(EN_nextQ(m, &tstep));
 
         /*** Updated 6/24/02 ***/
         writecon("\b\b\b\b\b\b\b\b\b\b");
@@ -581,11 +581,11 @@ int DLLEXPORT OW_solveQ(OW_Project *m)
 
   /*** Updated 6/24/02 ***/
   writecon("\b\b\b\b\b\b\b\b                     ");
-  OW_closeQ(m);
+  EN_closeQ(m);
   return (errcode);
 }
 
-int DLLEXPORT OW_openQ(OW_Project *m)
+int DLLEXPORT EN_openQ(EN_Project *m)
 {
   if (m == NULL) {
     return EN_OK;
@@ -613,11 +613,11 @@ int DLLEXPORT OW_openQ(OW_Project *m)
   return (errcode);
 }
 
-int DLLEXPORT OW_initQ(OW_Project *m, int saveflag)
+int DLLEXPORT EN_initQ(EN_Project *m, int saveflag)
 {
   int errcode = 0;
   if (!m->OpenQflag)
-    return (OW_ERR_WQ_NOT_INITIALIZED);
+    return (EN_ERR_WQ_NOT_INITIALIZED);
   initqual(m);
   m->SaveQflag = FALSE;
   m->Saveflag = FALSE;
@@ -630,7 +630,7 @@ int DLLEXPORT OW_initQ(OW_Project *m, int saveflag)
   return (errcode);
 }
 
-int DLLEXPORT OW_runQ(OW_Project *m, long *t)
+int DLLEXPORT EN_runQ(EN_Project *m, long *t)
 {
   int errcode;
   *t = 0;
@@ -644,7 +644,7 @@ int DLLEXPORT OW_runQ(OW_Project *m, long *t)
   return (errcode);
 }
 
-int DLLEXPORT OW_nextQ(OW_Project *m, long *tstep)
+int DLLEXPORT EN_nextQ(EN_Project *m, long *tstep)
 {
   int errcode;
   *tstep = 0;
@@ -661,7 +661,7 @@ int DLLEXPORT OW_nextQ(OW_Project *m, long *tstep)
   return (errcode);
 }
 
-int DLLEXPORT OW_stepQ(OW_Project *m, long *tleft)
+int DLLEXPORT EN_stepQ(EN_Project *m, long *tleft)
 {
   int errcode;
   *tleft = 0;
@@ -678,7 +678,7 @@ int DLLEXPORT OW_stepQ(OW_Project *m, long *tleft)
   return (errcode);
 }
 
-int DLLEXPORT OW_closeQ(OW_Project *m)
+int DLLEXPORT EN_closeQ(EN_Project *m)
 {
   if (m == NULL) {
     return EN_OK;
@@ -691,20 +691,20 @@ int DLLEXPORT OW_closeQ(OW_Project *m)
 }
 
 
-int  DLLEXPORT OW_setReportCallback(OW_Project *m, void (*callback)(void*,OW_Project*,char*))
+int  DLLEXPORT EN_setReportCallback(EN_Project *m, void (*callback)(void*,EN_Project*,char*))
 {
   m->reportCallback = callback;
 //  m->reportCallbackUserData = userData;
   return EN_OK;
 }
 
-int DLLEXPORT OW_setReportCallbackUserData(OW_Project *m, void *userData)
+int DLLEXPORT EN_setReportCallbackUserData(EN_Project *m, void *userData)
 {
   m->reportCallbackUserData = userData;
   return EN_OK;
 }
 
-int DLLEXPORT OW_writeline(OW_Project *m, char *line)
+int DLLEXPORT EN_writeline(EN_Project *m, char *line)
 {
   if (!m->Openflag)
     return (102);
@@ -712,7 +712,7 @@ int DLLEXPORT OW_writeline(OW_Project *m, char *line)
   return EN_OK;
 }
 
-int DLLEXPORT OW_report(OW_Project *m)
+int DLLEXPORT EN_report(EN_Project *m)
 {
   int errcode;
 
@@ -727,7 +727,7 @@ int DLLEXPORT OW_report(OW_Project *m)
   return (errcode);
 }
 
-int DLLEXPORT OW_resetreport(OW_Project *m)
+int DLLEXPORT EN_resetreport(EN_Project *m)
 {
   int i;
   if (!m->Openflag)
@@ -740,7 +740,7 @@ int DLLEXPORT OW_resetreport(OW_Project *m)
   return EN_OK;
 }
 
-int DLLEXPORT OW_setreport(OW_Project *m, char *s)
+int DLLEXPORT EN_setreport(EN_Project *m, char *s)
 {
   char s1[MAXLINE + 1];
   if (!m->Openflag)
@@ -761,7 +761,7 @@ int DLLEXPORT OW_setreport(OW_Project *m, char *s)
  @return EN_DISABLE if the control is disabled or could not be found, EN_ENABLE
  if the control is enabled.
  */
-int DLLEXPORT OW_controlEnabled(OW_Project *m, int controlIndex)
+int DLLEXPORT EN_controlEnabled(EN_Project *m, int controlIndex)
 {
   if (controlIndex < 1 || controlIndex > m->network.Ncontrols) {
     return EN_DISABLE; // of course it's not enabled. it's not even a control.
@@ -777,7 +777,7 @@ int DLLEXPORT OW_controlEnabled(OW_Project *m, int controlIndex)
  @return EN_DISABLE if the rule is disabled or could not be found, EN_ENABLE if
  the rule is enabled.
  */
-int DLLEXPORT OW_ruleEnabled(OW_Project *m, int ruleIndex)
+int DLLEXPORT EN_ruleEnabled(EN_Project *m, int ruleIndex)
 {
   if (ruleIndex < 1 || ruleIndex > m->network.Nrules) {
     return EN_DISABLE; // of course it's not enabled. it's not even a control.
@@ -786,7 +786,7 @@ int DLLEXPORT OW_ruleEnabled(OW_Project *m, int ruleIndex)
   return m->Rule[ruleIndex].isEnabled;
 }
 
-int DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
+int DLLEXPORT EN_getcontrol(EN_Project *m, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level)
 {
   double s, lvl;
 
@@ -835,14 +835,14 @@ int DLLEXPORT OW_getcontrol(OW_Project *m, int controlIndex, int *controlType, i
   return EN_OK;
 }
 
-int DLLEXPORT OW_getRuleName(OW_Project *m, int ruleIndex, char *id)
+int DLLEXPORT EN_getRuleName(EN_Project *m, int ruleIndex, char *id)
 {
   strcpy(id, "");
   if (!m->Openflag) {
-    return (OW_ERR_NO_DATA);
+    return (EN_ERR_NO_DATA);
   }
   if (ruleIndex < 1 || ruleIndex > m->network.Nrules) {
-    return (OW_ERR_UNDEF_TIME_PAT);
+    return (EN_ERR_UNDEF_TIME_PAT);
   }
   strcpy(id, m->Rule[ruleIndex].label);
   return EN_OK;
@@ -850,7 +850,7 @@ int DLLEXPORT OW_getRuleName(OW_Project *m, int ruleIndex, char *id)
 
 /**
  @brief Get a list of links affected by this rule. Array is allocated by this
- library. Be sure to free it using OW_freeRuleAffectedLinks
+ library. Be sure to free it using EN_freeRuleAffectedLinks
  @param m The model object pointer
  @param ruleIndex The index of the rule in question
  @param[out] nLinks The number of links affected
@@ -858,13 +858,13 @@ int DLLEXPORT OW_getRuleName(OW_Project *m, int ruleIndex, char *id)
  = nLinks
  @return EN_OK if ok, other code as appropriate.
  */
-int DLLEXPORT OW_getRuleAffectedLinks(OW_Project *m, int ruleIndex, int *nLinks, int *linkIndexes)
+int DLLEXPORT EN_getRuleAffectedLinks(EN_Project *m, int ruleIndex, int *nLinks, int *linkIndexes)
 {
   if (!m->Openflag) {
-    return OW_ERR_NO_DATA;
+    return EN_ERR_NO_DATA;
   }
   if (ruleIndex < 1 || ruleIndex > m->network.Nrules) {
-    return (OW_ERR_UNDEF_TIME_PAT);
+    return (EN_ERR_UNDEF_TIME_PAT);
   }
 
   *nLinks = 0;
@@ -914,16 +914,16 @@ int DLLEXPORT OW_getRuleAffectedLinks(OW_Project *m, int ruleIndex, int *nLinks,
  @param linkIndexes The array of link indexes.
  @return EN_OK if ok, other code as appropriate.
  */
-int DLLEXPORT OW_freeRuleAffectedLinks(int *linkIndexes)
+int DLLEXPORT EN_freeRuleAffectedLinks(int *linkIndexes)
 {
   if (linkIndexes == NULL) {
-    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+    return EN_ERR_ILLEGAL_NUMERIC_VALUE;
   }
   free(linkIndexes);
   return EN_OK;
 }
 
-int DLLEXPORT OW_getcount(OW_Project *m, int code, int *count)
+int DLLEXPORT EN_getcount(EN_Project *m, int code, int *count)
 {
   *count = 0;
   if (!m->Openflag)
@@ -957,7 +957,7 @@ int DLLEXPORT OW_getcount(OW_Project *m, int code, int *count)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getoption(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getoption(EN_Project *m, int code, EN_API_FLOAT_TYPE *value)
 {
   double v = 0.0;
   *value = 0.0;
@@ -990,7 +990,7 @@ int DLLEXPORT OW_getoption(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
   return EN_OK;
 }
 
-int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
+int DLLEXPORT EN_gettimeparam(EN_Project *m, int code, long *value)
 {
   int i;
   
@@ -1044,7 +1044,7 @@ int DLLEXPORT OW_gettimeparam(OW_Project *m, int code, long *value)
 }
 
 /// get the time to next event, and give a reason for the time step truncation
-int  DLLEXPORT OW_timeToNextEvent(OW_Project *m, EN_TimestepEvent *eventType, long *duration, int *elementIndex)
+int  DLLEXPORT EN_timeToNextEvent(EN_Project *m, EN_TimestepEvent *eventType, long *duration, int *elementIndex)
 {
   long hydStep, tankStep, controlStep;
   
@@ -1077,7 +1077,7 @@ int  DLLEXPORT OW_timeToNextEvent(OW_Project *m, EN_TimestepEvent *eventType, lo
 
 
 
-int DLLEXPORT OW_getflowunits(OW_Project *m, int *code)
+int DLLEXPORT EN_getflowunits(EN_Project *m, int *code)
 {
   *code = -1;
   if (!m->Openflag)
@@ -1086,7 +1086,7 @@ int DLLEXPORT OW_getflowunits(OW_Project *m, int *code)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getpatternindex(OW_Project *m, char *id, int *index)
+int DLLEXPORT EN_getpatternindex(EN_Project *m, char *id, int *index)
 {
   int i;
   *index = 0;
@@ -1102,7 +1102,7 @@ int DLLEXPORT OW_getpatternindex(OW_Project *m, char *id, int *index)
   return (205);
 }
 
-int DLLEXPORT OW_getpatternid(OW_Project *m, int index, char *id)
+int DLLEXPORT EN_getpatternid(EN_Project *m, int index, char *id)
 {
   strcpy(id, "");
   if (!m->Openflag)
@@ -1113,7 +1113,7 @@ int DLLEXPORT OW_getpatternid(OW_Project *m, int index, char *id)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getpatternlen(OW_Project *m, int index, int *len)
+int DLLEXPORT EN_getpatternlen(EN_Project *m, int index, int *len)
 {
   if (!m->Openflag)
     return (102);
@@ -1123,7 +1123,7 @@ int DLLEXPORT OW_getpatternlen(OW_Project *m, int index, int *len)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getpatternvalue(OW_Project *m, int index, int period, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getpatternvalue(EN_Project *m, int index, int period, EN_API_FLOAT_TYPE *value)
 {
   *value = 0.0;
   if (!m->Openflag)
@@ -1136,7 +1136,7 @@ int DLLEXPORT OW_getpatternvalue(OW_Project *m, int index, int period, EN_API_FL
   return EN_OK;
 }
 
-int DLLEXPORT OW_getaveragepatternvalue(OW_Project *m, int index, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getaveragepatternvalue(EN_Project *m, int index, EN_API_FLOAT_TYPE *value)
 {
   *value = 0.0;
   if (!m->Openflag)
@@ -1152,7 +1152,7 @@ int DLLEXPORT OW_getaveragepatternvalue(OW_Project *m, int index, EN_API_FLOAT_T
   return EN_OK;
 }
 
-int DLLEXPORT OW_getqualtype(OW_Project *m, int *qualcode, int *tracenode)
+int DLLEXPORT EN_getqualtype(EN_Project *m, int *qualcode, int *tracenode)
 {
   *tracenode = 0;
   if (!m->Openflag)
@@ -1163,7 +1163,7 @@ int DLLEXPORT OW_getqualtype(OW_Project *m, int *qualcode, int *tracenode)
   return EN_OK;
 }
 
-int DLLEXPORT OW_geterror(int errcode, char *errmsg, int n)
+int DLLEXPORT EN_geterror(int errcode, char *errmsg, int n)
 {
   switch (errcode) {
   case 1:
@@ -1194,7 +1194,7 @@ int DLLEXPORT OW_geterror(int errcode, char *errmsg, int n)
     return EN_OK;
 }
 
-int DLLEXPORT OW_getstatistic(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getstatistic(EN_Project *m, int code, EN_API_FLOAT_TYPE *value)
 {
   switch (code) {
   case EN_ITERATIONS:
@@ -1209,7 +1209,7 @@ int DLLEXPORT OW_getstatistic(OW_Project *m, int code, EN_API_FLOAT_TYPE *value)
   return 0;
 }
 
-int DLLEXPORT OW_getnodeindex(OW_Project *m, char *id, int *index)
+int DLLEXPORT EN_getnodeindex(EN_Project *m, char *id, int *index)
 {
   *index = 0;
   if (!m->Openflag) {
@@ -1224,7 +1224,7 @@ int DLLEXPORT OW_getnodeindex(OW_Project *m, char *id, int *index)
   }
 }
 
-int DLLEXPORT OW_getnodeid(OW_Project *m, int index, char *id)
+int DLLEXPORT EN_getnodeid(EN_Project *m, int index, char *id)
 {
   strcpy(id, "");
   if (!m->Openflag)
@@ -1235,7 +1235,7 @@ int DLLEXPORT OW_getnodeid(OW_Project *m, int index, char *id)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getnodetype(OW_Project *m, int index, EN_NodeType *code)
+int DLLEXPORT EN_getnodetype(EN_Project *m, int index, EN_NodeType *code)
 {
   *code = -1;
   if (!m->Openflag)
@@ -1253,7 +1253,7 @@ int DLLEXPORT OW_getnodetype(OW_Project *m, int index, EN_NodeType *code)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getnodevalue(EN_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
 {
   int tankIndex = 0;
   int isTank = 0;
@@ -1269,10 +1269,10 @@ int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   /* Check for valid arguments */
   *value = 0.0;
   if (!m->Openflag) {
-    return OW_ERR_NO_DATA;
+    return EN_ERR_NO_DATA;
   }
   if (index <= 0 || index > m->network.Nnodes) {
-    return OW_ERR_UNDEF_NODE;
+    return EN_ERR_UNDEF_NODE;
   }
 
   /* Retrieve called-for parameter */
@@ -1319,7 +1319,7 @@ int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   case EN_SOURCEPAT:
     source = m->network.Node[index].S;
     if (source == NULL)
-      return OW_ERR_UNDEF_SOURCE;
+      return EN_ERR_UNDEF_SOURCE;
     if (code == EN_SOURCEQUAL)
       v = source->C0;
     else if (code == EN_SOURCEMASS)
@@ -1332,7 +1332,7 @@ int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
 
   case EN_TANKLEVEL:
     if (!isTank)
-      return OW_ERR_FN_INVALID_CODE;
+      return EN_ERR_FN_INVALID_CODE;
     v = (m->network.Tank[tankIndex].H0 - m->network.Node[index].El) * m->Ucf[ELEV];
     break;
 
@@ -1449,14 +1449,14 @@ int DLLEXPORT OW_getnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   return EN_OK;
 }
 
-int DLLEXPORT OW_getcoord(OW_Project *m, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
+int DLLEXPORT EN_getcoord(EN_Project *m, int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
 {
   *x = m->network.Coord[index].X[0];
   *y = m->network.Coord[index].Y[0];
   return 0;
 }
 
-int DLLEXPORT OW_getnumdemands(OW_Project *m, int nodeIndex, int *numDemands)
+int DLLEXPORT EN_getnumdemands(EN_Project *m, int nodeIndex, int *numDemands)
 {
   Pdemand d;
   int n = 0;
@@ -1472,7 +1472,7 @@ int DLLEXPORT OW_getnumdemands(OW_Project *m, int nodeIndex, int *numDemands)
   return 0;
 }
 
-int DLLEXPORT OW_getbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand)
+int DLLEXPORT EN_getbasedemand(EN_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand)
 {
   Pdemand d;
   int n = 1;
@@ -1495,7 +1495,7 @@ int DLLEXPORT OW_getbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_A
   return 0;
 }
 
-int DLLEXPORT OW_getdemandpattern(OW_Project *m, int nodeIndex, int demandIdx, int *pattIdx)
+int DLLEXPORT EN_getdemandpattern(EN_Project *m, int nodeIndex, int demandIdx, int *pattIdx)
 {
   Pdemand d;
   int n = 1;
@@ -1514,7 +1514,7 @@ int DLLEXPORT OW_getdemandpattern(OW_Project *m, int nodeIndex, int demandIdx, i
   return 0;
 }
 
-int DLLEXPORT OW_getlinkindex(OW_Project *m, char *id, int *index)
+int DLLEXPORT EN_getlinkindex(EN_Project *m, char *id, int *index)
 {
   *index = 0;
   if (!m->Openflag)
@@ -1526,7 +1526,7 @@ int DLLEXPORT OW_getlinkindex(OW_Project *m, char *id, int *index)
     return EN_OK;
 }
 
-int DLLEXPORT OW_getlinkid(OW_Project *m, int index, char *id)
+int DLLEXPORT EN_getlinkid(EN_Project *m, int index, char *id)
 {
   strcpy(id, "");
   if (!m->Openflag)
@@ -1537,7 +1537,7 @@ int DLLEXPORT OW_getlinkid(OW_Project *m, int index, char *id)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getlinktype(OW_Project *m, int index, EN_LinkType *type)
+int DLLEXPORT EN_getlinktype(EN_Project *m, int index, EN_LinkType *type)
 {
   *type = -1;
   if (!m->Openflag)
@@ -1548,7 +1548,7 @@ int DLLEXPORT OW_getlinktype(OW_Project *m, int index, EN_LinkType *type)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getlinknodes(OW_Project *m, int index, int *node1, int *node2)
+int DLLEXPORT EN_getlinknodes(EN_Project *m, int index, int *node1, int *node2)
 {
   *node1 = 0;
   *node2 = 0;
@@ -1561,7 +1561,7 @@ int DLLEXPORT OW_getlinknodes(OW_Project *m, int index, int *node1, int *node2)
   return EN_OK;
 }
 
-int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
+int DLLEXPORT EN_getlinkvalue(EN_Project *m, int index, int code, EN_API_FLOAT_TYPE *value)
 {
   double a, h, q, v = 0.0;
   int returnValue = EN_OK;
@@ -1615,7 +1615,7 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
 
   case EN_INITSETTING:
     if (m->network.Link[index].Type == PIPE || m->network.Link[index].Type == CV)
-      return (OW_getlinkvalue(m, index, EN_ROUGHNESS, value));
+      return (EN_getlinkvalue(m, index, EN_ROUGHNESS, value));
     v = m->network.Link[index].Kc;
     switch (m->network.Link[index].Type) {
     case PRV:
@@ -1686,7 +1686,7 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
 
   case EN_SETTING:
     if (m->network.Link[index].Type == PIPE || m->network.Link[index].Type == CV) {
-      return (OW_getlinkvalue(m, index, EN_ROUGHNESS, value));
+      return (EN_getlinkvalue(m, index, EN_ROUGHNESS, value));
     }
     if (m->hydraulics.LinkSetting[index] == MISSING) {
       v = 0.0;
@@ -1718,12 +1718,12 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
       int p = m->network.Link[index].pumpLinkIdx;
       v = m->network.Pump[p].Hcurve;
       if (v == 0) {
-        returnValue = OW_ERR_NO_HEAD_CURVE;
+        returnValue = EN_ERR_NO_HEAD_CURVE;
       }
     }
     else {
       v = 0;
-      returnValue = OW_ERR_ILLEGAL_VAL_LINK;
+      returnValue = EN_ERR_ILLEGAL_VAL_LINK;
     }
       break;
       
@@ -1732,12 +1732,12 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
         int p = m->network.Link[index].pumpLinkIdx;
         v = m->network.Pump[p].Ecurve;
         if (v == 0) {
-          returnValue = OW_ERR_NO_EFF_CURVE;
+          returnValue = EN_ERR_NO_EFF_CURVE;
         }
       }
       else {
         v = 0;
-        returnValue = OW_ERR_ILLEGAL_VAL_LINK;
+        returnValue = EN_ERR_ILLEGAL_VAL_LINK;
       }
       
     default:
@@ -1747,7 +1747,7 @@ int DLLEXPORT OW_getlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   return returnValue;
 }
 
-int DLLEXPORT OW_getcurve(OW_Project *m, int curveIndex, char *id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues)
+int DLLEXPORT EN_getcurve(EN_Project *m, int curveIndex, char *id, int *nValues, EN_API_FLOAT_TYPE **xValues, EN_API_FLOAT_TYPE **yValues)
 {
   int err = 0;
 
@@ -1772,7 +1772,7 @@ int DLLEXPORT OW_getcurve(OW_Project *m, int curveIndex, char *id, int *nValues,
   return err;
 }
 
-int DLLEXPORT OW_getversion(int *v)
+int DLLEXPORT EN_getversion(int *v)
 {
   *v = CODEVERSION;
   return EN_OK;
@@ -1784,18 +1784,18 @@ int DLLEXPORT OW_getversion(int *v)
  @param controlIndex The index of the control in question
  @param enable Either EN_ENABLE or EN_DISABLE
  @return EN_OK if successful. Other error codes as appropriate for the failure
- condition: OW_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of
- the two acceptable values, or OW_ERR_UNDEF_CONTROL if the control could not be
+ condition: EN_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of
+ the two acceptable values, or EN_ERR_UNDEF_CONTROL if the control could not be
  found.
  */
-int DLLEXPORT OW_setControlEnabled(OW_Project *m, int controlIndex, int enable)
+int DLLEXPORT EN_setControlEnabled(EN_Project *m, int controlIndex, int enable)
 {
   if (enable != EN_DISABLE && enable != EN_ENABLE) {
-    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+    return EN_ERR_ILLEGAL_NUMERIC_VALUE;
   }
 
   if (controlIndex < 1 || controlIndex > m->network.Ncontrols) {
-    return OW_ERR_UNDEF_CONTROL; // return error. it's not even a control.
+    return EN_ERR_UNDEF_CONTROL; // return error. it's not even a control.
   }
 
   m->network.Control[controlIndex].isEnabled = enable;
@@ -1803,7 +1803,7 @@ int DLLEXPORT OW_setControlEnabled(OW_Project *m, int controlIndex, int enable)
   return EN_OK;
 }
 
-int DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level)
+int DLLEXPORT EN_setcontrol(EN_Project *m, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level)
 {
   char status = ACTIVE;
   long t = 0;
@@ -1811,11 +1811,11 @@ int DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN
 
   /* Check that input file opened */
   if (!m->Openflag)
-    return (OW_ERR_NO_DATA);
+    return (EN_ERR_NO_DATA);
 
   /* Check that control exists */
   if (cindex < 1 || cindex > m->network.Ncontrols)
-    return (OW_ERR_UNDEF_CONTROL);
+    return (EN_ERR_UNDEF_CONTROL);
 
   /* Check that controlled link exists */
   if (lindex == 0) {
@@ -1823,24 +1823,24 @@ int DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN
     return EN_OK;
   }
   if (lindex < 0 || lindex > m->network.Nlinks)
-    return (OW_ERR_UNDEF_LINK);
+    return (EN_ERR_UNDEF_LINK);
 
   /* Cannot control check valve. */
   if (m->network.Link[lindex].Type == CV)
-    return (OW_ERR_CONTROL_CV);
+    return (EN_ERR_CONTROL_CV);
 
   /* Check for valid parameters */
   if (ctype < 0 || ctype > EN_TIMEOFDAY)
-    return (OW_ERR_FN_INVALID_CODE);
+    return (EN_ERR_FN_INVALID_CODE);
 
   if (ctype == EN_LOWLEVEL || ctype == EN_HILEVEL) {
     if (nindex < 1 || nindex > m->network.Nnodes)
-      return (OW_ERR_UNDEF_NODE);
+      return (EN_ERR_UNDEF_NODE);
   }
   else
     nindex = 0;
   if (s < 0.0 || lvl < 0.0)
-    return (OW_ERR_ILLEGAL_NUMERIC_VALUE);
+    return (EN_ERR_ILLEGAL_NUMERIC_VALUE);
 
   /* Adjust units of control parameters */
   switch (m->network.Link[lindex].Type) {
@@ -1904,18 +1904,18 @@ int DLLEXPORT OW_setcontrol(OW_Project *m, int cindex, int ctype, int lindex, EN
  @param ruleIndex The index of the Rule in question
  @param enable Either EN_ENABLE or EN_DISABLE
  @return EN_OK if successful. Other error codes as appropriate for the failure
- condition: OW_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of
- the two acceptable values, or OW_ERR_UNDEF_CONTROL if the rule could not be
+ condition: EN_ERR_ILLEGAL_NUMERIC_VALUE if the enable parameter was not one of
+ the two acceptable values, or EN_ERR_UNDEF_CONTROL if the rule could not be
  found.
  */
-int DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
+int DLLEXPORT EN_setRuleEnabled(EN_Project *m, int ruleIndex, int enable)
 {
   if (enable != EN_DISABLE && enable != EN_ENABLE) {
-    return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+    return EN_ERR_ILLEGAL_NUMERIC_VALUE;
   }
 
   if (ruleIndex < 1 || ruleIndex > m->network.Nrules) {
-    return OW_ERR_UNDEF_CONTROL; // return error. it's not even a control.
+    return EN_ERR_UNDEF_CONTROL; // return error. it's not even a control.
   }
 
   m->Rule[ruleIndex].isEnabled = enable;
@@ -1925,7 +1925,7 @@ int DLLEXPORT OW_setRuleEnabled(OW_Project *m, int ruleIndex, int enable)
 
 
 
-int  DLLEXPORT OW_getnodecomment(OW_Project *m, int nIndex, char *comment)
+int  DLLEXPORT EN_getnodecomment(EN_Project *m, int nIndex, char *comment)
 {
   if (!m->Openflag)
     return (102);
@@ -1937,7 +1937,7 @@ int  DLLEXPORT OW_getnodecomment(OW_Project *m, int nIndex, char *comment)
   return EN_OK;
 }
 
-int  DLLEXPORT OW_setnodecomment(OW_Project *m, int nIndex, const char *comment)
+int  DLLEXPORT EN_setnodecomment(EN_Project *m, int nIndex, const char *comment)
 {
   if (!m->Openflag)
     return (102);
@@ -1950,7 +1950,7 @@ int  DLLEXPORT OW_setnodecomment(OW_Project *m, int nIndex, const char *comment)
 }
 
 
-int  DLLEXPORT OW_getlinkcomment(OW_Project *m, int linkIndex, char *comment)
+int  DLLEXPORT EN_getlinkcomment(EN_Project *m, int linkIndex, char *comment)
 {
   if (!m->Openflag)
     return (102);
@@ -1961,7 +1961,7 @@ int  DLLEXPORT OW_getlinkcomment(OW_Project *m, int linkIndex, char *comment)
   return EN_OK;
 }
 
-int  DLLEXPORT OW_setlinkcomment(OW_Project *m, int linkIndex, const char *comment)
+int  DLLEXPORT EN_setlinkcomment(EN_Project *m, int linkIndex, const char *comment)
 {
   if (!m->Openflag)
     return (102);
@@ -1973,7 +1973,7 @@ int  DLLEXPORT OW_setlinkcomment(OW_Project *m, int linkIndex, const char *comme
 }
 
 
-int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
+int DLLEXPORT EN_setnodevalue(EN_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
 {
   int j;
   Pdemand demand;
@@ -2068,7 +2068,7 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     if (source == NULL) {
       source = (struct Ssource *)malloc(sizeof(struct Ssource));
       if (source == NULL) {
-        return (OW_ERR_INSUFFICIENT_MEMORY);
+        return (EN_ERR_INSUFFICIENT_MEMORY);
       }
       source->Type = CONCEN;
       source->C0 = 0.0;
@@ -2153,7 +2153,7 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
         Scurve *curve = &(m->network.Curve[iCurve]);
         int n = curve->Npts - 1;
         if (newLevel < curve->X[0] || newLevel > curve->X[n] || newLevel + node->El > tank->Hmax) {
-          return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+          return EN_ERR_ILLEGAL_NUMERIC_VALUE;
         }
       }
       tank->Hmin = newLevel + node->El;
@@ -2171,7 +2171,7 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
         Scurve *curve = &(m->network.Curve[iCurve]);
         int n = curve->Npts - 1;
         if (newLevel < curve->X[0] || newLevel > curve->X[n] || newLevel + node->El < tank->Hmin) {
-          return OW_ERR_ILLEGAL_NUMERIC_VALUE;
+          return EN_ERR_ILLEGAL_NUMERIC_VALUE;
         }
       }
       tank->Hmax = newLevel + node->El;
@@ -2209,7 +2209,7 @@ int DLLEXPORT OW_setnodevalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   return EN_OK;
 }
 
-int DLLEXPORT OW_setlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
+int DLLEXPORT EN_setlinkvalue(EN_Project *m, int index, int code, EN_API_FLOAT_TYPE v)
 {
   char s;
   double r, value = v;
@@ -2279,7 +2279,7 @@ int DLLEXPORT OW_setlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
     if (value < 0.0)
       return (202);
     if (m->network.Link[index].Type == PIPE || m->network.Link[index].Type == CV)
-      return (OW_setlinkvalue(m, index, EN_ROUGHNESS, v));
+      return (EN_setlinkvalue(m, index, EN_ROUGHNESS, v));
     else {
       switch (m->network.Link[index].Type) {
       case PUMP:
@@ -2329,7 +2329,7 @@ int DLLEXPORT OW_setlinkvalue(OW_Project *m, int index, int code, EN_API_FLOAT_T
   return EN_OK;
 }
 
-int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
+int DLLEXPORT EN_addpattern(EN_Project *m, char *id)
 {
   int i, j, n, err = 0;
   Spattern *tmpPat;
@@ -2338,7 +2338,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
 
   if (!m->Openflag)
     return (102);
-  if (OW_getpatternindex(m, id, &i) == EN_OK) /* found */
+  if (EN_getpatternindex(m, id, &i) == EN_OK) /* found */
     return (215);
 
   /* Check that id name is not too long */
@@ -2351,7 +2351,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
   n = m->network.Npats + 1;
   tmpPat = (Spattern *)calloc(n + 1, sizeof(Spattern));
   if (tmpPat == NULL)
-    return (OW_ERR_INSUFFICIENT_MEMORY);
+    return (EN_ERR_INSUFFICIENT_MEMORY);
 
   /* Copy contents of old pattern array to new one */
 
@@ -2383,7 +2383,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
       if (tmpPat[i].F)
         free(tmpPat[i].F);
     free(tmpPat);
-    return (OW_ERR_INSUFFICIENT_MEMORY);
+    return (EN_ERR_INSUFFICIENT_MEMORY);
   }
 
   // Replace old pattern array with new one
@@ -2398,7 +2398,7 @@ int DLLEXPORT OW_addpattern(OW_Project *m, char *id)
   return 0;
 }
 
-int DLLEXPORT OW_setpattern(OW_Project *m, int index, EN_API_FLOAT_TYPE *f, int n)
+int DLLEXPORT EN_setpattern(EN_Project *m, int index, EN_API_FLOAT_TYPE *f, int n)
 {
   int j;
 
@@ -2414,7 +2414,7 @@ int DLLEXPORT OW_setpattern(OW_Project *m, int index, EN_API_FLOAT_TYPE *f, int 
   m->network.Pattern[index].Length = n;
   m->network.Pattern[index].F = (double *)realloc(m->network.Pattern[index].F, n * sizeof(double));
   if (m->network.Pattern[index].F == NULL)
-    return (OW_ERR_INSUFFICIENT_MEMORY);
+    return (EN_ERR_INSUFFICIENT_MEMORY);
 
   /* Load multipliers into pattern */
   for (j = 0; j < n; j++) {
@@ -2423,7 +2423,7 @@ int DLLEXPORT OW_setpattern(OW_Project *m, int index, EN_API_FLOAT_TYPE *f, int 
   return EN_OK;
 }
 
-int DLLEXPORT OW_setpatternvalue(OW_Project *m, int index, int period, EN_API_FLOAT_TYPE value)
+int DLLEXPORT EN_setpatternvalue(EN_Project *m, int index, int period, EN_API_FLOAT_TYPE value)
 {
   if (!m->Openflag)
     return (102);
@@ -2435,7 +2435,7 @@ int DLLEXPORT OW_setpatternvalue(OW_Project *m, int index, int period, EN_API_FL
   return EN_OK;
 }
 
-int DLLEXPORT OW_settimeparam(OW_Project *m, int code, long value)
+int DLLEXPORT EN_settimeparam(EN_Project *m, int code, long value)
 {
   if (!m->Openflag)
     return (102);
@@ -2535,7 +2535,7 @@ int DLLEXPORT OW_settimeparam(OW_Project *m, int code, long value)
   return EN_OK;
 }
 
-int DLLEXPORT OW_setoption(OW_Project *m, int code, EN_API_FLOAT_TYPE v)
+int DLLEXPORT EN_setoption(EN_Project *m, int code, EN_API_FLOAT_TYPE v)
 {
   int i, j;
   double Ke, n, ucf, value = v;
@@ -2563,7 +2563,7 @@ int DLLEXPORT OW_setoption(OW_Project *m, int code, EN_API_FLOAT_TYPE v)
     n = 1.0 / value;
     ucf = pow(m->Ucf[FLOW], n) / m->Ucf[PRESSURE];
     for (i = 1; i <= m->network.Njuncs; i++) {
-      j = OW_getnodevalue(m, i, EN_EMITTER, &v);
+      j = EN_getnodevalue(m, i, EN_EMITTER, &v);
       Ke = v;
       if (j == 0 && Ke > 0.0) {
         m->network.Node[i].Ke = ucf / pow(Ke, n);
@@ -2583,7 +2583,7 @@ int DLLEXPORT OW_setoption(OW_Project *m, int code, EN_API_FLOAT_TYPE v)
   return EN_OK;
 }
 
-int DLLEXPORT OW_setstatusreport(OW_Project *m, int code)
+int DLLEXPORT EN_setstatusreport(EN_Project *m, int code)
 {
   int errcode = 0;
   if (code >= 0 && code <= 2) {
@@ -2595,7 +2595,7 @@ int DLLEXPORT OW_setstatusreport(OW_Project *m, int code)
   return (errcode);
 }
 
-int DLLEXPORT OW_setqualtype(OW_Project *m, int qualcode, char *chemname, char *chemunits, char *tracenode)
+int DLLEXPORT EN_setqualtype(EN_Project *m, int qualcode, char *chemname, char *chemunits, char *tracenode)
 {
   /*** Updated 3/1/01 ***/
   double ccf = 1.0;
@@ -2644,9 +2644,9 @@ int DLLEXPORT OW_setqualtype(OW_Project *m, int qualcode, char *chemname, char *
   return EN_OK;
 }
 
-int DLLEXPORT OW_getqualinfo(OW_Project *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
+int DLLEXPORT EN_getqualinfo(EN_Project *m, int *qualcode, char *chemname, char *chemunits, int *tracenode)
 {
-  OW_getqualtype(m, qualcode, tracenode);
+  EN_getqualtype(m, qualcode, tracenode);
   if (m->Qualflag == TRACE) {
     strncpy(chemname, "", MAXID);
     strncpy(chemunits, "dimensionless", MAXID);
@@ -2658,7 +2658,7 @@ int DLLEXPORT OW_getqualinfo(OW_Project *m, int *qualcode, char *chemname, char 
   return 0;
 }
 
-int DLLEXPORT OW_setbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand)
+int DLLEXPORT EN_setbasedemand(EN_Project *m, int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand)
 {
   Pdemand d;
   int n = 1;
@@ -2685,7 +2685,7 @@ int DLLEXPORT OW_setbasedemand(OW_Project *m, int nodeIndex, int demandIdx, EN_A
 ----------------------------------------------------------------
 */
 
-int openfiles(OW_Project *m, char *f1, char *f2, char *f3)
+int openfiles(EN_Project *m, char *f1, char *f2, char *f3)
 /*----------------------------------------------------------------
 **  Input:   f1 = pointer to name of input file
 **           f2 = pointer to name of report file
@@ -2733,7 +2733,7 @@ int openfiles(OW_Project *m, char *f1, char *f2, char *f3)
   return EN_OK;
 } /* End of openfiles */
 
-int openhydfile(OW_Project *m)
+int openhydfile(EN_Project *m)
 /*----------------------------------------------------------------
 ** Input:   none
 ** Output:  none
@@ -2814,7 +2814,7 @@ int openhydfile(OW_Project *m)
   return (errcode);
 }
 
-int openoutfile(OW_Project *m)
+int openoutfile(EN_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -2885,7 +2885,7 @@ int openoutfile(OW_Project *m)
 ----------------------------------------------------------------
 */
 
-void initpointers(OW_Project *m)
+void initpointers(EN_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -2933,7 +2933,7 @@ void initpointers(OW_Project *m)
   initrules(m);
 }
 
-int allocdata(OW_Project *m)
+int allocdata(EN_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -3021,7 +3021,7 @@ int allocdata(OW_Project *m)
       m->network.Coord[n].X = (double *)calloc(1, sizeof(double));
       m->network.Coord[n].Y = (double *)calloc(1, sizeof(double));
       if (m->network.Coord[n].X == NULL || m->network.Coord[n].Y == NULL) {
-        return (OW_ERR_INSUFFICIENT_MEMORY);
+        return (EN_ERR_INSUFFICIENT_MEMORY);
       }
       m->network.Coord[n].X[0] = 0;
       m->network.Coord[n].Y[0] = 0;
@@ -3070,7 +3070,7 @@ void freeFloatlist(SFloatlist *f)
   }
 }
 
-void freedata(OW_Project *m)
+void freedata(EN_Project *m)
 /*----------------------------------------------------------------
 **  Input:   none
 **  Output:  none
@@ -3255,7 +3255,7 @@ double interp(int n, double x[], double y[], double xx)
   return (y[m]); /* xx off high end of curve */
 } /* End of interp */
 
-int findnode(OW_Project *m, char *id)
+int findnode(EN_Project *m, char *id)
 /*----------------------------------------------------------------
 **  Input:   id = node ID
 **  Output:  none
@@ -3267,7 +3267,7 @@ int findnode(OW_Project *m, char *id)
   return (ENHashTableFind(m->network.NodeHashTable, id));
 }
 
-int findlink(OW_Project *m, char *id)
+int findlink(EN_Project *m, char *id)
 /*----------------------------------------------------------------
 **  Input:   id = link ID
 **  Output:  none
@@ -3298,7 +3298,7 @@ void geterrmsg(int errcode, char *msgOut)
                            case 6:     strcpy(Msg,WARN6);   break;
                      */
   /* System Errors */
-  case OW_ERR_INSUFFICIENT_MEMORY:
+  case EN_ERR_INSUFFICIENT_MEMORY:
     strcpy(msgOut, ERR101);
     break;
   case 102:
@@ -3413,7 +3413,7 @@ void geterrmsg(int errcode, char *msgOut)
   return;
 }
 
-void errmsg(OW_Project *m, int errcode)
+void errmsg(EN_Project *m, int errcode)
 /*----------------------------------------------------------------
 **  Input:   errcode = error code
 **  Output:  none

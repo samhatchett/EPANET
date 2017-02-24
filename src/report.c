@@ -58,11 +58,11 @@ extern char *RptFormTxt[];
 
 
 typedef   REAL4 *Pfloat;
-void      writenodetable(OW_Project *m, Pfloat *);
-void      writelinktable(OW_Project *m, Pfloat *);
+void      writenodetable(EN_Project *m, Pfloat *);
+void      writelinktable(EN_Project *m, Pfloat *);
 
 
-int  writereport(OW_Project *m)
+int  writereport(EN_Project *m)
 /*
 **------------------------------------------------------
 **   Input:   none                                      
@@ -142,7 +142,7 @@ int  writereport(OW_Project *m)
 }                        /* End of writereport */
 
 
-void  writelogo(OW_Project *m)
+void  writelogo(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -165,7 +165,7 @@ void  writelogo(OW_Project *m)
 }                        /* End of writelogo */
 
 
-void  writesummary(OW_Project *m)
+void  writesummary(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -265,7 +265,7 @@ void  writesummary(OW_Project *m)
 }                        /* End of writesummary */
 
 
-void  writehydstat(OW_Project *m, int iter, double relerr)
+void  writehydstat(EN_Project *m, int iter, double relerr)
 /*
 **--------------------------------------------------------------
 **   Input:   iter   = # iterations to find hydraulic solution        
@@ -348,7 +348,7 @@ void  writehydstat(OW_Project *m, int iter, double relerr)
 }                        /* End of writehydstat */
 
 
-void  writeenergy(OW_Project *m)
+void  writeenergy(EN_Project *m)
 /*
 **-------------------------------------------------------------
 **   Input:   none                                               
@@ -393,7 +393,7 @@ void  writeenergy(OW_Project *m)
 }                       /* End of writeenergy */
 
 
-int  writeresults(OW_Project *mod)
+int  writeresults(EN_Project *mod)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -479,7 +479,7 @@ int  writeresults(OW_Project *mod)
 }                        /* End of writereport */
 
 
-void  writenodetable(OW_Project *m, Pfloat *x)
+void  writenodetable(EN_Project *m, Pfloat *x)
 /*
 **---------------------------------------------------------------
 **   Input:   x = pointer to node results for current time
@@ -547,7 +547,7 @@ void  writenodetable(OW_Project *m, Pfloat *x)
 }
 
 
-void  writelinktable(OW_Project *m, Pfloat *x)
+void  writelinktable(EN_Project *m, Pfloat *x)
 /*
 **---------------------------------------------------------------
 **   Input:   x = pointer to link results for current time
@@ -626,7 +626,7 @@ void  writelinktable(OW_Project *m, Pfloat *x)
 }
 
 
-void  writeheader(OW_Project *m, int type, int contin)
+void  writeheader(EN_Project *m, int type, int contin)
 /*
 **--------------------------------------------------------------
 **   Input:   type   = table type                                
@@ -742,7 +742,7 @@ void  writeheader(OW_Project *m, int type, int contin)
 }                        /* End of writeheader */
 
 
-void  writeline(OW_Project *m, char *s)
+void  writeline(EN_Project *m, char *s)
 /*
 **--------------------------------------------------------------
 **   Input:   *s = text string                                    
@@ -760,7 +760,7 @@ void  writeline(OW_Project *m, char *s)
 }                        /* End of writeline */
 
 
-void writeReportFileLine(OW_Project *m, char *s)
+void writeReportFileLine(EN_Project *m, char *s)
 {
   
   
@@ -780,7 +780,7 @@ void writeReportFileLine(OW_Project *m, char *s)
 }
 
 
-void  writerelerr(OW_Project *m, int iter, double relerr)
+void  writerelerr(EN_Project *m, int iter, double relerr)
 /*
 **-----------------------------------------------------------------
 **   Input:   iter   = current iteration of hydraulic solution    
@@ -803,7 +803,7 @@ void  writerelerr(OW_Project *m, int iter, double relerr)
 }                        /* End of writerelerr */
 
 
-void  writestatchange(OW_Project *m, int k, char s1, char s2)
+void  writestatchange(EN_Project *m, int k, char s1, char s2)
 /*
 **--------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -856,7 +856,7 @@ void  writestatchange(OW_Project *m, int k, char s1, char s2)
 }                        /* End of writestatchange */
 
 
-void writecontrolaction(OW_Project *m, int k, int i)
+void writecontrolaction(EN_Project *m, int k, int i)
 /*
 ----------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -891,7 +891,7 @@ void writecontrolaction(OW_Project *m, int k, int i)
 }
 
 
-void writeruleaction(OW_Project *m, int k, char *ruleID)
+void writeruleaction(EN_Project *m, int k, char *ruleID)
 /*
 **--------------------------------------------------------------
 **   Input:   k  = link index                                     
@@ -906,7 +906,7 @@ void writeruleaction(OW_Project *m, int k, char *ruleID)
 }
 
 
-int  writehydwarn(OW_Project *m, int iter, double relerr)
+int  writehydwarn(EN_Project *m, int iter, double relerr)
 /*
 **--------------------------------------------------------------
 **   Input:   iter = # iterations to find hydraulic solution      
@@ -1017,7 +1017,7 @@ int  writehydwarn(OW_Project *m, int iter, double relerr)
 }                        /* End of writehydwarn */
 
 
-void  writehyderr(OW_Project *m, int errnode)
+void  writehyderr(EN_Project *m, int errnode)
 /*
 **-----------------------------------------------------------
 **   Input:   none                                          
@@ -1034,7 +1034,7 @@ void  writehyderr(OW_Project *m, int errnode)
 }                        /* End of writehyderr */
 
 
-int  disconnected(OW_Project *m)
+int  disconnected(EN_Project *m)
 /*
 **-------------------------------------------------------------------
 **   Input:   None                                                  
@@ -1123,7 +1123,7 @@ int  disconnected(OW_Project *m)
 }                   /* End of disconnected() */
 
 
-void  marknodes(OW_Project *mod, int m, int *nodelist, char *marked)
+void  marknodes(EN_Project *mod, int m, int *nodelist, char *marked)
 /*
 **----------------------------------------------------------------
 **   Input:   m = number of source nodes
@@ -1173,7 +1173,7 @@ void  marknodes(OW_Project *mod, int m, int *nodelist, char *marked)
 }                   /* End of marknodes() */
 
 
-void getclosedlink(OW_Project *m, int i, char *marked)
+void getclosedlink(EN_Project *m, int i, char *marked)
 /*
 **----------------------------------------------------------------
 **   Input:   i = junction index                                    
@@ -1202,7 +1202,7 @@ void getclosedlink(OW_Project *m, int i, char *marked)
 }
       
 
-void  writelimits(OW_Project *m, int j1, int j2)
+void  writelimits(EN_Project *m, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **   Input:   j1 = index of first output variable                 
@@ -1235,7 +1235,7 @@ void  writelimits(OW_Project *m, int j1, int j2)
 }                        /* End of writelimits */
    
 
-int  checklimits(OW_Project *m, double *y, int j1, int j2)
+int  checklimits(EN_Project *m, double *y, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **   Input:   *y = array of output results                        
@@ -1256,7 +1256,7 @@ int  checklimits(OW_Project *m, double *y, int j1, int j2)
 }                        /* End of checklim */
 
 
-void writetime(OW_Project *m, char *fmt)
+void writetime(EN_Project *m, char *fmt)
 /*
 **----------------------------------------------------------------
 **   Input:   fmt = format string                             
@@ -1307,7 +1307,7 @@ char *fillstr(char *s, char ch, int n)
 }
 
 
-int  getnodetype(OW_Project *m, int i)
+int  getnodetype(EN_Project *m, int i)
 /*
 **---------------------------------------------------------
 **  Determines type of node with index i

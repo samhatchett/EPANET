@@ -73,8 +73,8 @@ int DLLEXPORT ENopen(char *f1, char *f2, char *f3)
  */
 {
   int err;
-  OW_Project *newModel;
-  err = OW_open(f1, &newModel, f2, f3);
+  EN_Project *newModel;
+  err = EN_open(f1, &newModel, f2, f3);
   en_defaultModel = newModel;
   return err;
 }
@@ -88,7 +88,7 @@ int DLLEXPORT ENsaveinpfile(char *filename)
  **----------------------------------------------------------------
  */
 {
-  return OW_saveinpfile(en_defaultModel, filename);
+  return EN_saveinpfile(en_defaultModel, filename);
 }
 
 int DLLEXPORT ENclose()
@@ -100,7 +100,7 @@ int DLLEXPORT ENclose()
  **----------------------------------------------------------------
  */
 {
-  return OW_close(en_defaultModel);
+  return EN_close(en_defaultModel);
 }
 
 /*
@@ -118,7 +118,7 @@ int DLLEXPORT ENsolveH()
  **----------------------------------------------------------------
  */
 {
-  return OW_solveH(en_defaultModel);
+  return EN_solveH(en_defaultModel);
 }
 
 int DLLEXPORT ENsaveH()
@@ -133,7 +133,7 @@ int DLLEXPORT ENsaveH()
  **----------------------------------------------------------------
  */
 {
-  return OW_saveH(en_defaultModel);
+  return EN_saveH(en_defaultModel);
 }
 
 int DLLEXPORT ENopenH()
@@ -145,7 +145,7 @@ int DLLEXPORT ENopenH()
  **----------------------------------------------------------------
  */
 {
-  return OW_openH(en_defaultModel);
+  return EN_openH(en_defaultModel);
 }
 
 /*** Updated 3/1/01 ***/
@@ -161,7 +161,7 @@ int DLLEXPORT ENinitH(int flag)
  **----------------------------------------------------------------
  */
 {
-  return OW_initH(en_defaultModel, flag);
+  return EN_initH(en_defaultModel, flag);
 }
 
 int DLLEXPORT ENrunH(long *t)
@@ -177,7 +177,7 @@ int DLLEXPORT ENrunH(long *t)
  **----------------------------------------------------------------
  */
 {
-  return OW_runH(en_defaultModel, t);
+  return EN_runH(en_defaultModel, t);
 }
 
 int DLLEXPORT ENnextH(long *tstep)
@@ -194,7 +194,7 @@ int DLLEXPORT ENnextH(long *tstep)
  **----------------------------------------------------------------
  */
 {
-  return OW_nextH(en_defaultModel, tstep);
+  return EN_nextH(en_defaultModel, tstep);
 }
 
 int DLLEXPORT ENcloseH()
@@ -206,7 +206,7 @@ int DLLEXPORT ENcloseH()
  **----------------------------------------------------------------
  */
 {
-  return OW_closeH(en_defaultModel);
+  return EN_closeH(en_defaultModel);
 }
 
 int DLLEXPORT ENsavehydfile(char *filename)
@@ -218,7 +218,7 @@ int DLLEXPORT ENsavehydfile(char *filename)
  **----------------------------------------------------------------
  */
 {
-  return OW_savehydfile(en_defaultModel, filename);
+  return EN_savehydfile(en_defaultModel, filename);
 }
 
 int DLLEXPORT ENusehydfile(char *filename)
@@ -230,7 +230,7 @@ int DLLEXPORT ENusehydfile(char *filename)
  **----------------------------------------------------------------
  */
 {
-  return OW_usehydfile(en_defaultModel, filename);
+  return EN_usehydfile(en_defaultModel, filename);
 }
 
 /*
@@ -248,7 +248,7 @@ int DLLEXPORT ENsolveQ()
  **----------------------------------------------------------------
  */
 {
-  return OW_solveQ(en_defaultModel);
+  return EN_solveQ(en_defaultModel);
 }
 
 int DLLEXPORT ENopenQ()
@@ -260,7 +260,7 @@ int DLLEXPORT ENopenQ()
  **----------------------------------------------------------------
  */
 {
-  return OW_openQ(en_defaultModel);
+  return EN_openQ(en_defaultModel);
 }
 
 int DLLEXPORT ENinitQ(int saveflag)
@@ -273,7 +273,7 @@ int DLLEXPORT ENinitQ(int saveflag)
  **----------------------------------------------------------------
  */
 {
-  return OW_initQ(en_defaultModel, saveflag);
+  return EN_initQ(en_defaultModel, saveflag);
 }
 
 int DLLEXPORT ENrunQ(long *t)
@@ -289,7 +289,7 @@ int DLLEXPORT ENrunQ(long *t)
  **----------------------------------------------------------------
  */
 {
-  return OW_runQ(en_defaultModel, t);
+  return EN_runQ(en_defaultModel, t);
 }
 
 int DLLEXPORT ENnextQ(long *tstep)
@@ -306,7 +306,7 @@ int DLLEXPORT ENnextQ(long *tstep)
  **----------------------------------------------------------------
  */
 {
-  return OW_nextQ(en_defaultModel, tstep);
+  return EN_nextQ(en_defaultModel, tstep);
 }
 
 int DLLEXPORT ENstepQ(long *tleft)
@@ -321,7 +321,7 @@ int DLLEXPORT ENstepQ(long *tleft)
  **----------------------------------------------------------------
  */
 {
-  return OW_stepQ(en_defaultModel, tleft);
+  return EN_stepQ(en_defaultModel, tleft);
 }
 
 int DLLEXPORT ENcloseQ()
@@ -333,7 +333,7 @@ int DLLEXPORT ENcloseQ()
  **----------------------------------------------------------------
  */
 {
-  return OW_closeQ(en_defaultModel);
+  return EN_closeQ(en_defaultModel);
 }
 
 /*
@@ -351,7 +351,7 @@ int DLLEXPORT ENwriteline(char *line)
  **----------------------------------------------------------------
  */
 {
-  return OW_writeline(en_defaultModel, line);
+  return EN_writeline(en_defaultModel, line);
 }
 
 int DLLEXPORT ENreport()
@@ -363,7 +363,7 @@ int DLLEXPORT ENreport()
  **----------------------------------------------------------------
  */
 {
-  return OW_report(en_defaultModel);
+  return EN_report(en_defaultModel);
 }
 
 int DLLEXPORT ENresetreport()
@@ -375,7 +375,7 @@ int DLLEXPORT ENresetreport()
  **----------------------------------------------------------------
  */
 {
-  return OW_resetreport(en_defaultModel);
+  return EN_resetreport(en_defaultModel);
 }
 
 int DLLEXPORT ENsetreport(char *s)
@@ -387,7 +387,7 @@ int DLLEXPORT ENsetreport(char *s)
  **----------------------------------------------------------------
  */
 {
-  return OW_setreport(en_defaultModel, s);
+  return EN_setreport(en_defaultModel, s);
 }
 
 /*
@@ -409,7 +409,7 @@ int DLLEXPORT ENgetversion(int *v)
  **----------------------------------------------------------------
  */
 {
-  return OW_getversion(v);
+  return EN_getversion(v);
 }
 
 int DLLEXPORT
@@ -430,7 +430,7 @@ ENgetcontrol(int cindex, int *ctype, int *lindex, EN_API_FLOAT_TYPE *setting,
  **----------------------------------------------------------------
  */
 {
-  return OW_getcontrol(en_defaultModel, cindex, ctype, lindex, setting, nindex,
+  return EN_getcontrol(en_defaultModel, cindex, ctype, lindex, setting, nindex,
                        level);
 }
 
@@ -444,7 +444,7 @@ int DLLEXPORT ENgetcount(int code, int *count)
  **----------------------------------------------------------------
  */
 {
-  return OW_getcount(en_defaultModel, code, count);
+  return EN_getcount(en_defaultModel, code, count);
 }
 
 int DLLEXPORT ENgetoption(int code, EN_API_FLOAT_TYPE *value)
@@ -456,7 +456,7 @@ int DLLEXPORT ENgetoption(int code, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_getoption(en_defaultModel, code, value);
+  return EN_getoption(en_defaultModel, code, value);
 }
 
 int DLLEXPORT ENgettimeparam(int code, long *value)
@@ -468,7 +468,7 @@ int DLLEXPORT ENgettimeparam(int code, long *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_gettimeparam(en_defaultModel, code, value);
+  return EN_gettimeparam(en_defaultModel, code, value);
 }
 
 int DLLEXPORT ENgetflowunits(int *code)
@@ -481,7 +481,7 @@ int DLLEXPORT ENgetflowunits(int *code)
  **----------------------------------------------------------------
  */
 {
-  return OW_getflowunits(en_defaultModel, code);
+  return EN_getflowunits(en_defaultModel, code);
 }
 
 int DLLEXPORT ENgetpatternindex(char *id, int *index)
@@ -493,7 +493,7 @@ int DLLEXPORT ENgetpatternindex(char *id, int *index)
  **----------------------------------------------------------------
  */
 {
-  return OW_getpatternindex(en_defaultModel, id, index);
+  return EN_getpatternindex(en_defaultModel, id, index);
 }
 
 int DLLEXPORT ENgetpatternid(int index, char *id)
@@ -507,7 +507,7 @@ int DLLEXPORT ENgetpatternid(int index, char *id)
  **----------------------------------------------------------------
  */
 {
-  return OW_getpatternid(en_defaultModel, index, id);
+  return EN_getpatternid(en_defaultModel, index, id);
 }
 
 int DLLEXPORT ENgetpatternlen(int index, int *len)
@@ -519,7 +519,7 @@ int DLLEXPORT ENgetpatternlen(int index, int *len)
  **----------------------------------------------------------------
  */
 {
-  return OW_getpatternlen(en_defaultModel, index, len);
+  return EN_getpatternlen(en_defaultModel, index, len);
 }
 
 int DLLEXPORT ENgetpatternvalue(int index, int period, EN_API_FLOAT_TYPE *value)
@@ -533,7 +533,7 @@ int DLLEXPORT ENgetpatternvalue(int index, int period, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_getpatternvalue(en_defaultModel, index, period, value);
+  return EN_getpatternvalue(en_defaultModel, index, period, value);
 }
 
 int DLLEXPORT ENgetqualtype(int *qualcode, int *tracenode)
@@ -547,12 +547,12 @@ int DLLEXPORT ENgetqualtype(int *qualcode, int *tracenode)
  **----------------------------------------------------------------
  */
 {
-  return OW_getqualtype(en_defaultModel, qualcode, tracenode);
+  return EN_getqualtype(en_defaultModel, qualcode, tracenode);
 }
 
 int DLLEXPORT
 ENgetqualinfo(int *qualcode, char *chemname, char *chemunits, int *tracenode) {
-  return OW_getqualinfo(en_defaultModel, qualcode, chemname, chemunits,
+  return EN_getqualinfo(en_defaultModel, qualcode, chemname, chemunits,
                         tracenode);
 }
 
@@ -566,7 +566,7 @@ int DLLEXPORT ENgeterror(int errcode, char *errmsg, int n)
  **----------------------------------------------------------------
  */
 {
-  return OW_geterror(errcode, errmsg, n);
+  return EN_geterror(errcode, errmsg, n);
 }
 
 int DLLEXPORT ENgetstatistic(int code, EN_API_FLOAT_TYPE *value)
@@ -578,7 +578,7 @@ int DLLEXPORT ENgetstatistic(int code, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_getstatistic(en_defaultModel, code, value);
+  return EN_getstatistic(en_defaultModel, code, value);
 }
 
 /*
@@ -596,7 +596,7 @@ int DLLEXPORT ENgetnodeindex(char *id, int *index)
  **----------------------------------------------------------------
  */
 {
-  return OW_getnodeindex(en_defaultModel, id, index);
+  return EN_getnodeindex(en_defaultModel, id, index);
 }
 
 int DLLEXPORT ENgetnodeid(int index, char *id)
@@ -610,7 +610,7 @@ int DLLEXPORT ENgetnodeid(int index, char *id)
  **----------------------------------------------------------------
  */
 {
-  return OW_getnodeid(en_defaultModel, index, id);
+  return EN_getnodeid(en_defaultModel, index, id);
 }
 
 int DLLEXPORT ENgetnodetype(int index, EN_NodeType *code)
@@ -622,7 +622,7 @@ int DLLEXPORT ENgetnodetype(int index, EN_NodeType *code)
  **----------------------------------------------------------------
  */
 {
-  return OW_getnodetype(en_defaultModel, index, code);
+  return EN_getnodetype(en_defaultModel, index, code);
 }
 
 int DLLEXPORT ENgetcoord(int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
@@ -635,7 +635,7 @@ int DLLEXPORT ENgetcoord(int index, EN_API_FLOAT_TYPE *x, EN_API_FLOAT_TYPE *y)
  **----------------------------------------------------------------
  */
 {
-  return OW_getcoord(en_defaultModel, index, x, y);
+  return EN_getcoord(en_defaultModel, index, x, y);
 }
 
 int DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value)
@@ -648,7 +648,7 @@ int DLLEXPORT ENgetnodevalue(int index, int code, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_getnodevalue(en_defaultModel, index, code, value);
+  return EN_getnodevalue(en_defaultModel, index, code, value);
 }
 
 /*
@@ -666,7 +666,7 @@ int DLLEXPORT ENgetlinkindex(char *id, int *index)
  **----------------------------------------------------------------
  */
 {
-  return OW_getlinkindex(en_defaultModel, id, index);
+  return EN_getlinkindex(en_defaultModel, id, index);
 }
 
 int DLLEXPORT ENgetlinkid(int index, char *id)
@@ -680,7 +680,7 @@ int DLLEXPORT ENgetlinkid(int index, char *id)
  **----------------------------------------------------------------
  */
 {
-  return OW_getlinkid(en_defaultModel, index, id);
+  return EN_getlinkid(en_defaultModel, index, id);
 }
 
 int DLLEXPORT ENgetlinktype(int index, int *code)
@@ -692,7 +692,7 @@ int DLLEXPORT ENgetlinktype(int index, int *code)
  **------------------------------------------------------------------
  */
 {
-  return OW_getlinktype(en_defaultModel, index, code);
+  return EN_getlinktype(en_defaultModel, index, code);
 }
 
 int DLLEXPORT ENgetlinknodes(int index, int *node1, int *node2)
@@ -705,7 +705,7 @@ int DLLEXPORT ENgetlinknodes(int index, int *node1, int *node2)
  **----------------------------------------------------------------
  */
 {
-  return OW_getlinknodes(en_defaultModel, index, node1, node2);
+  return EN_getlinknodes(en_defaultModel, index, node1, node2);
 }
 
 int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
@@ -718,7 +718,7 @@ int DLLEXPORT ENgetlinkvalue(int index, int code, EN_API_FLOAT_TYPE *value)
  **------------------------------------------------------------------
  */
 {
-  return OW_getlinkvalue(en_defaultModel, index, code, value);
+  return EN_getlinkvalue(en_defaultModel, index, code, value);
 }
 
 int DLLEXPORT
@@ -734,7 +734,7 @@ ENgetcurve(int curveIndex, char *id, int *nValues, EN_API_FLOAT_TYPE **xValues,
  **----------------------------------------------------------------
  */
 {
-  return OW_getcurve(en_defaultModel, curveIndex, id, nValues, xValues,
+  return EN_getcurve(en_defaultModel, curveIndex, id, nValues, xValues,
                      yValues);
 }
 
@@ -763,7 +763,7 @@ ENsetcontrol(int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting,
  **----------------------------------------------------------------
  */
 {
-  return OW_setcontrol(en_defaultModel, cindex, ctype, lindex, setting, nindex,
+  return EN_setcontrol(en_defaultModel, cindex, ctype, lindex, setting, nindex,
                        level);
 }
 
@@ -778,7 +778,7 @@ int DLLEXPORT ENsetnodevalue(int index, int code, EN_API_FLOAT_TYPE v)
  **----------------------------------------------------------------
  */
 {
-  return OW_setnodevalue(en_defaultModel, index, code, v);
+  return EN_setnodevalue(en_defaultModel, index, code, v);
 }
 
 int DLLEXPORT ENsetlinkvalue(int index, int code, EN_API_FLOAT_TYPE v)
@@ -792,7 +792,7 @@ int DLLEXPORT ENsetlinkvalue(int index, int code, EN_API_FLOAT_TYPE v)
  **----------------------------------------------------------------
  */
 {
-  return OW_setlinkvalue(en_defaultModel, index, code, v);
+  return EN_setlinkvalue(en_defaultModel, index, code, v);
 }
 
 int DLLEXPORT ENaddpattern(char *id)
@@ -805,7 +805,7 @@ int DLLEXPORT ENaddpattern(char *id)
  **----------------------------------------------------------------
  */
 {
-  return OW_addpattern(en_defaultModel, id);
+  return EN_addpattern(en_defaultModel, id);
 }
 
 int DLLEXPORT ENsetpattern(int index, EN_API_FLOAT_TYPE *f, int n)
@@ -819,7 +819,7 @@ int DLLEXPORT ENsetpattern(int index, EN_API_FLOAT_TYPE *f, int n)
  **----------------------------------------------------------------
  */
 {
-  return OW_setpattern(en_defaultModel, index, f, n);
+  return EN_setpattern(en_defaultModel, index, f, n);
 }
 
 int DLLEXPORT ENsetpatternvalue(int index, int period, EN_API_FLOAT_TYPE value)
@@ -833,7 +833,7 @@ int DLLEXPORT ENsetpatternvalue(int index, int period, EN_API_FLOAT_TYPE value)
  **----------------------------------------------------------------
  */
 {
-  return OW_setpatternvalue(en_defaultModel, index, period, value);
+  return EN_setpatternvalue(en_defaultModel, index, period, value);
 }
 
 int DLLEXPORT ENsettimeparam(int code, long value)
@@ -846,7 +846,7 @@ int DLLEXPORT ENsettimeparam(int code, long value)
  **----------------------------------------------------------------
  */
 {
-  return OW_settimeparam(en_defaultModel, code, value);
+  return EN_settimeparam(en_defaultModel, code, value);
 }
 
 int DLLEXPORT ENsetoption(int code, EN_API_FLOAT_TYPE v)
@@ -859,7 +859,7 @@ int DLLEXPORT ENsetoption(int code, EN_API_FLOAT_TYPE v)
  **----------------------------------------------------------------
  */
 {
-  return OW_setoption(en_defaultModel, code, v);
+  return EN_setoption(en_defaultModel, code, v);
 }
 
 int DLLEXPORT ENsetstatusreport(int code)
@@ -871,7 +871,7 @@ int DLLEXPORT ENsetstatusreport(int code)
  **----------------------------------------------------------------
  */
 {
-  return OW_setstatusreport(en_defaultModel, code);
+  return EN_setstatusreport(en_defaultModel, code);
 }
 
 int DLLEXPORT
@@ -891,26 +891,26 @@ ENsetqualtype(int qualcode, char *chemname, char *chemunits, char *tracenode)
  **----------------------------------------------------------------
  */
 {
-  return OW_setqualtype(en_defaultModel, qualcode, chemname, chemunits,
+  return EN_setqualtype(en_defaultModel, qualcode, chemname, chemunits,
                         tracenode);
 }
 
 int DLLEXPORT ENgetnumdemands(int nodeIndex, int *numDemands) {
-  return OW_getnumdemands(en_defaultModel, nodeIndex, numDemands);
+  return EN_getnumdemands(en_defaultModel, nodeIndex, numDemands);
 }
 
 int DLLEXPORT
 ENgetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE *baseDemand) {
-  return OW_getbasedemand(en_defaultModel, nodeIndex, demandIdx, baseDemand);
+  return EN_getbasedemand(en_defaultModel, nodeIndex, demandIdx, baseDemand);
 }
 
 int DLLEXPORT
 ENsetbasedemand(int nodeIndex, int demandIdx, EN_API_FLOAT_TYPE baseDemand) {
-  return OW_setbasedemand(en_defaultModel, nodeIndex, demandIdx, baseDemand);
+  return EN_setbasedemand(en_defaultModel, nodeIndex, demandIdx, baseDemand);
 }
 
 int DLLEXPORT ENgetdemandpattern(int nodeIndex, int demandIdx, int *pattIdx) {
-  return OW_getdemandpattern(en_defaultModel, nodeIndex, demandIdx, pattIdx);
+  return EN_getdemandpattern(en_defaultModel, nodeIndex, demandIdx, pattIdx);
 }
 
 int DLLEXPORT ENgetaveragepatternvalue(int index, EN_API_FLOAT_TYPE *value)
@@ -924,7 +924,7 @@ int DLLEXPORT ENgetaveragepatternvalue(int index, EN_API_FLOAT_TYPE *value)
  **----------------------------------------------------------------
  */
 {
-  return OW_getaveragepatternvalue(en_defaultModel, index, value);
+  return EN_getaveragepatternvalue(en_defaultModel, index, value);
 }
 
 //====================================================//

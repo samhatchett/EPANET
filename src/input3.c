@@ -48,7 +48,7 @@ extern char *Fldname[];
 //extern int       Ntokens;
 
 
-int  juncdata(OW_Project *m)
+int  juncdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -80,7 +80,7 @@ int  juncdata(OW_Project *m)
   
 /* Check for valid data */
    if (n < 2)
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
    if (!getfloat(m->Tok[1],&el))
      return(202);
    if (n >= 3  && !getfloat(m->Tok[2],&y))
@@ -114,7 +114,7 @@ int  juncdata(OW_Project *m)
 }                        /* end of juncdata */
 
 
-int  tankdata(OW_Project *m)
+int  tankdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -160,7 +160,7 @@ int  tankdata(OW_Project *m)
      return(215);    /* Add ID to database. */
 
 /* Check for valid data */
-   if (n < 2) return(OW_ERR_SYNTAX);                   /* Too few fields.   */
+   if (n < 2) return(EN_ERR_SYNTAX);                   /* Too few fields.   */
    if (!getfloat(Tok[1],&el)) return(202);   /* Read elevation    */
    if (n <= 3)                               /* Tank is reservoir.*/
    {
@@ -172,7 +172,7 @@ int  tankdata(OW_Project *m)
       }
    }
    else if (n < 6) {
-     return(OW_ERR_SYNTAX);              /* Too few fields for tank.*/
+     return(EN_ERR_SYNTAX);              /* Too few fields for tank.*/
    }
    else {
       /* Check for valid input data */
@@ -234,7 +234,7 @@ int  tankdata(OW_Project *m)
 }                        /* end of tankdata */
 
 
-int  pipedata(OW_Project *m)
+int  pipedata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                              
@@ -269,7 +269,7 @@ int  pipedata(OW_Project *m)
 
 /* Check for valid data */
    if (n < 6) {
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
    }
    if ((j1 = findnode(m,Tok[1])) == 0 || (j2 = findnode(m,Tok[2])) == 0) {
      return(203);
@@ -329,7 +329,7 @@ int  pipedata(OW_Project *m)
 }                        /* end of pipedata */
 
 
-int  pumpdata(OW_Project *mod)
+int  pumpdata(EN_Project *mod)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -366,7 +366,7 @@ int  pumpdata(OW_Project *mod)
    if (!addlinkID(mod, mod->network.Nlinks, Tok[0])) return(215);
 
 /* Check for valid data */
-   if (n < 4) return(OW_ERR_SYNTAX);
+   if (n < 4) return(EN_ERR_SYNTAX);
    if ((j1 = findnode(mod, Tok[1])) == 0 ||
        (j2 = findnode(mod, Tok[2])) == 0
       ) return(203);
@@ -445,14 +445,14 @@ int  pumpdata(OW_Project *mod)
          Link[Nlinks].Kc = y;
       }
       else
-        return(OW_ERR_SYNTAX);
+        return(EN_ERR_SYNTAX);
       m = m + 2;                          /* Skip to next keyword token */
    }
    return(0);
 }                        /* end of pumpdata */
 
 
-int  valvedata(OW_Project *m)
+int  valvedata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -486,7 +486,7 @@ int  valvedata(OW_Project *m)
 
 /* Check for valid data */
    if (n < 6)
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
    if ((j1 = findnode(m,Tok[1])) == 0 || (j2 = findnode(m,Tok[2])) == 0)
      return(203);
 
@@ -507,7 +507,7 @@ int  valvedata(OW_Project *m)
    else if (match(Tok[4],w_GPV))
      type = GPV;
    else
-     return(OW_ERR_SYNTAX);                      /* Illegal valve type.*/
+     return(EN_ERR_SYNTAX);                      /* Illegal valve type.*/
    if (!getfloat(Tok[3],&diam))
      return(202);
    if (diam <= 0.0)
@@ -559,7 +559,7 @@ int  valvedata(OW_Project *m)
 }                        /* end of valvedata */
 
 
-int  patterndata(OW_Project *m)
+int  patterndata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -579,7 +579,7 @@ int  patterndata(OW_Project *m)
    STmplist  *PrevPat = m->PrevPat;
   
    n = m->Ntokens - 1;
-   if (n < 1) return(OW_ERR_SYNTAX);            /* Too few values        */
+   if (n < 1) return(EN_ERR_SYNTAX);            /* Too few values        */
    if (                               /* Check for new pattern */
           PrevPat != NULL &&
           strcmp(Tok[0],PrevPat->ID) == 0
@@ -601,7 +601,7 @@ int  patterndata(OW_Project *m)
 }                        /* end of patterndata */
 
 
-int  curvedata(OW_Project *m)
+int  curvedata(EN_Project *m)
 /*
 **------------------------------------------------------
 **  Input:   none                                        
@@ -621,7 +621,7 @@ int  curvedata(OW_Project *m)
   STmplist  *PrevCurve = m->PrevCurve;
 
    /* Check for valid curve ID */
-   if (m->Ntokens < 3) return(OW_ERR_SYNTAX);
+   if (m->Ntokens < 3) return(EN_ERR_SYNTAX);
    if (
           PrevCurve != NULL &&
           strcmp(Tok[0],PrevCurve->ID) == 0
@@ -650,7 +650,7 @@ int  curvedata(OW_Project *m)
    return(0);
 }
 
-int  coordata(OW_Project *m)
+int  coordata(EN_Project *m)
 /*
  **--------------------------------------------------------------
  **  Input:   none
@@ -670,7 +670,7 @@ int  coordata(OW_Project *m)
   STmplist  *PrevCoord = m->PrevCoord;
   
 	/* Check for valid curve ID */
-	if (m->Ntokens < 3) return(OW_ERR_SYNTAX);
+	if (m->Ntokens < 3) return(EN_ERR_SYNTAX);
   
 	if (
       PrevCoord != NULL &&
@@ -707,7 +707,7 @@ int  coordata(OW_Project *m)
   
 }                        /* end of coordata */
 
-int  demanddata(OW_Project *m)
+int  demanddata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -734,7 +734,7 @@ int  demanddata(OW_Project *m)
 
 /* Extract data from tokens */
    n = m->Ntokens;
-   if (n < 2) return(OW_ERR_SYNTAX);
+   if (n < 2) return(EN_ERR_SYNTAX);
    if (!getfloat(Tok[1],&y)) return(202);
 
 /* If MULTIPLY command, save multiplier */
@@ -777,7 +777,7 @@ int  demanddata(OW_Project *m)
 }                        /* end of demanddata */
 
 
-int  controldata(OW_Project *m)
+int  controldata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -808,16 +808,16 @@ int  controldata(OW_Project *m)
 /* Check for sufficient number of input tokens */
    n = m->Ntokens;
    if (n < 6) {
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
    }
 /* Check that controlled link exists */
    k = findlink(m,Tok[1]);
    if (k == 0) {
-     return(OW_ERR_UNDEF_LINK);
+     return(EN_ERR_UNDEF_LINK);
    }
    type = Link[k].Type;
    if (type == CV) {
-     return(OW_ERR_CONTROL_CV);         /* Cannot control check valve. */
+     return(EN_ERR_CONTROL_CV);         /* Cannot control check valve. */
    }
 /*** Updated 9/7/00 ***/
 /* Parse control setting into a status level or numerical setting. */
@@ -858,11 +858,11 @@ int  controldata(OW_Project *m)
    else if (match(Tok[4],w_CLOCKTIME)) type = TIMEOFDAY;
    else
    {
-      if (n < 8) return(OW_ERR_SYNTAX);
+      if (n < 8) return(EN_ERR_SYNTAX);
       if ((i = findnode(m,Tok[5])) == 0) return(203);
       if      (match(Tok[6],w_BELOW)) type = LOWLEVEL;
       else if (match(Tok[6],w_ABOVE)) type = HILEVEL;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
 
 /* Parse control level or time */
@@ -872,7 +872,7 @@ int  controldata(OW_Project *m)
       case TIMEOFDAY:
          if (n == 6) time = hour(Tok[5],"");
          if (n == 7) time = hour(Tok[5],Tok[6]);
-         if (time < 0.0) return(OW_ERR_SYNTAX);
+         if (time < 0.0) return(EN_ERR_SYNTAX);
          break;
       case LOWLEVEL:
       case HILEVEL:   
@@ -898,7 +898,7 @@ int  controldata(OW_Project *m)
 }                        /* end of controldata */
 
 
-int  sourcedata(OW_Project *m)
+int  sourcedata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -923,7 +923,7 @@ int  sourcedata(OW_Project *m)
    char **Tok = m->Tok;
   
    n = m->Ntokens;
-   if (n < 2) return(OW_ERR_SYNTAX);
+   if (n < 2) return(EN_ERR_SYNTAX);
    if ((j = findnode(m,Tok[0])) == 0) return(203);
    /* NOTE: Under old format, SourceType not supplied so let  */
    /*       i = index of token that contains quality value.   */
@@ -952,7 +952,7 @@ int  sourcedata(OW_Project *m)
 }                        /* end of sourcedata */
 
 
-int  emitterdata(OW_Project *m)
+int  emitterdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -970,7 +970,7 @@ int  emitterdata(OW_Project *m)
    char **Tok = m->Tok;
    n = m->Ntokens;
   
-   if (n < 2) return(OW_ERR_SYNTAX);
+   if (n < 2) return(EN_ERR_SYNTAX);
    if ((j = findnode(m,Tok[0])) == 0) return(203);
    if (j > m->network.Njuncs) return(209);                 /* Not a junction.*/
    if (!getfloat(Tok[1],&k)) return(202);
@@ -980,7 +980,7 @@ int  emitterdata(OW_Project *m)
 }
 
 
-int  qualdata(OW_Project *m)
+int  qualdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1035,7 +1035,7 @@ int  qualdata(OW_Project *m)
 }                        /* end of qualdata */
 
 
-int  reactdata(OW_Project *m)
+int  reactdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1103,13 +1103,13 @@ int  reactdata(OW_Project *m)
       if (!getfloat(Tok[n-1],&y)) return(213);
       if      (match(Tok[1],w_BULK)) m->Kbulk = y;
       else if (match(Tok[1],w_WALL)) m->Kwall = y;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
       return(0);
    }
    if      (match(Tok[0],w_BULK)) item = 1;      /* Individual rates */
    else if (match(Tok[0],w_WALL)) item = 2;
    else if (match(Tok[0],w_TANK)) item = 3;
-   else return(OW_ERR_SYNTAX);
+   else return(EN_ERR_SYNTAX);
    strcpy(Tok[0],Tok[1]);                        /* Save id in Tok[0] */
    if (item == 3)                                /* Tank rates */
    {
@@ -1174,7 +1174,7 @@ int  reactdata(OW_Project *m)
 }                        /* end of reactdata */
 
 
-int  mixingdata(OW_Project *m)
+int  mixingdata(EN_Project *m)
 /*
 **-------------------------------------------------------------
 **  Input:   none                                               
@@ -1198,7 +1198,7 @@ int  mixingdata(OW_Project *m)
    n = m->Ntokens;
    if (n < 2) return(0);
    if ( (j = findnode(m,Tok[0])) <= Njuncs) return(0);
-   if ( (i = findmatch(Tok[1],MixTxt)) < 0) return(OW_ERR_SYNTAX);
+   if ( (i = findmatch(Tok[1],MixTxt)) < 0) return(EN_ERR_SYNTAX);
    v = 1.0;
    if ( (i == MIX2) &&
         (n == 3) &&
@@ -1213,7 +1213,7 @@ int  mixingdata(OW_Project *m)
 }
 
 
-int  statusdata(OW_Project *m)
+int  statusdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1239,7 +1239,7 @@ int  statusdata(OW_Project *m)
      return(210);
    n = m->Ntokens - 1;
    if (n < 1)
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
 
 /* Check for legal status setting */
   if (match(Tok[n],w_OPEN)) {
@@ -1253,7 +1253,7 @@ int  statusdata(OW_Project *m)
   }
   
   if (y < 0.0) {
-    return(OW_ERR_ILLEGAL_VAL_LINK);
+    return(EN_ERR_ILLEGAL_VAL_LINK);
   }
 
 /* Single link ID supplied */
@@ -1301,7 +1301,7 @@ int  statusdata(OW_Project *m)
 }              /* end of statusdata */
 
 
-int  energydata(OW_Project *m)
+int  energydata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1328,7 +1328,7 @@ int  energydata(OW_Project *m)
   
 /* Check for sufficient data */
    n = m->Ntokens;
-   if (n < 3) return(OW_ERR_SYNTAX);
+   if (n < 3) return(EN_ERR_SYNTAX);
 
 /* Check first keyword */
    if (match(Tok[0],w_DMNDCHARGE))               /* Demand charge */
@@ -1343,13 +1343,13 @@ int  energydata(OW_Project *m)
    }
    else if (match(Tok[0],w_PUMP))                /* Pump-specific parameter */
    {
-      if (n < 4) return(OW_ERR_SYNTAX);
+      if (n < 4) return(EN_ERR_SYNTAX);
       k = findlink(m,Tok[1]);                      /* Check that pump exists */
       if (k == 0) return(216);
       if (Link[k].Type != PUMP) return(216);
       j = Link[k].pumpLinkIdx;
    }
-   else return(OW_ERR_SYNTAX);
+   else return(EN_ERR_SYNTAX);
 
 /* Find type of energy parameter */      
    if (match(Tok[n-2],w_PRICE))                  /* Energy price */
@@ -1391,11 +1391,11 @@ int  energydata(OW_Project *m)
       }
       return(0);
    }
-   return(OW_ERR_SYNTAX);
+   return(EN_ERR_SYNTAX);
 }
 
 
-int  reportdata(OW_Project *m)
+int  reportdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1424,7 +1424,7 @@ int  reportdata(OW_Project *m)
   char **Tok = m->Tok;
 
    n = m->Ntokens - 1;
-   if (n < 1) return(OW_ERR_SYNTAX);
+   if (n < 1) return(EN_ERR_SYNTAX);
 
 /* Value for page size */
    if (match(Tok[0],w_PAGE))
@@ -1513,7 +1513,7 @@ int  reportdata(OW_Project *m)
    if (i >= 0)                                                                 //(2.00.11 - LR)
 /*****************************************************************/            //(2.00.11 - LR)
    {
-      if (i > FRICTION) return(OW_ERR_SYNTAX);
+      if (i > FRICTION) return(EN_ERR_SYNTAX);
       if (m->Ntokens == 1 || match(Tok[1],w_YES))
       {
          Field[i].Enabled = TRUE;
@@ -1524,12 +1524,12 @@ int  reportdata(OW_Project *m)
          Field[i].Enabled = FALSE;
          return(0);
       }
-      if (m->Ntokens < 3) return(OW_ERR_SYNTAX);
+      if (m->Ntokens < 3) return(EN_ERR_SYNTAX);
       if      (match(Tok[1],w_BELOW))  j = LOW;   /* Get relation operator */
       else if (match(Tok[1],w_ABOVE))  j = HI;    /* or precision keyword  */
       else if (match(Tok[1],w_PRECISION)) j = PREC;
-      else return(OW_ERR_SYNTAX);
-      if (!getfloat(Tok[2],&y)) return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
+      if (!getfloat(Tok[2],&y)) return(EN_ERR_SYNTAX);
       if (j == PREC)
       {
          Field[i].Enabled = TRUE;
@@ -1547,11 +1547,11 @@ int  reportdata(OW_Project *m)
    }
 
 /* If get to here then return error condition */
-   return(OW_ERR_SYNTAX);
+   return(EN_ERR_SYNTAX);
 }                        /* end of reportdata */
 
 
-int  timedata(OW_Project *m)
+int  timedata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1579,7 +1579,7 @@ int  timedata(OW_Project *m)
 
   
    n = m->Ntokens - 1;
-   if (n < 1) return(OW_ERR_SYNTAX);
+   if (n < 1) return(EN_ERR_SYNTAX);
 
 /* Check if setting time statistic flag */
    if (match(Tok[0],w_STATISTIC))
@@ -1590,7 +1590,7 @@ int  timedata(OW_Project *m)
       else if (match(Tok[n],w_MIN))   m->Tstatflag = MIN;
       else if (match(Tok[n],w_MAX))   m->Tstatflag = MAX;
       else if (match(Tok[n],w_RANGE)) m->Tstatflag = RANGE;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
       return(0);
    }
 
@@ -1620,21 +1620,21 @@ int  timedata(OW_Project *m)
    {
       if (match(Tok[1],w_TIME))       m->Pstep = t;     /* Pattern time step   */
       else if (match(Tok[1],w_START)) m->Pstart = t;    /* Pattern start time  */
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
    else if (match(Tok[0],w_REPORT))
    {
       if      (match(Tok[1],w_TIME))  m->Rstep = t;     /* Reporting time step  */
       else if (match(Tok[1],w_START)) m->Rstart = t;    /* Reporting start time */
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }                                                 /* Simulation start time*/
    else if (match(Tok[0],w_START))    m->Tstart = t % SECperDAY;
-   else return(OW_ERR_SYNTAX);
+   else return(EN_ERR_SYNTAX);
    return(0);
 }                        /* end of timedata */
 
 
-int  optiondata(OW_Project *m)
+int  optiondata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1652,7 +1652,7 @@ int  optiondata(OW_Project *m)
 }                        /* end of optiondata */
 
 
-int  optionchoice(OW_Project *m, int n)
+int  optionchoice(EN_Project *m, int n)
 /*
 **--------------------------------------------------------------
 **  Input:   n = index of last input token saved in Tok[]          
@@ -1676,7 +1676,7 @@ int  optionchoice(OW_Project *m, int n)
 
   /* Check if 1st token matches a parameter name and */
   /* process the input for the matched parameter     */
-   if (n < 0) return(OW_ERR_SYNTAX);
+   if (n < 0) return(EN_ERR_SYNTAX);
    if (match(Tok[0],w_UNITS))
    {
       if (n < 1) return(0);
@@ -1691,7 +1691,7 @@ int  optionchoice(OW_Project *m, int n)
       else if (match(Tok[1],w_CMD))  m->Flowflag = CMD;
       else if (match(Tok[1],w_MLD))  m->Flowflag = MLD;
       else if (match(Tok[1],w_SI))   m->Flowflag = LPS;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
    else if (match(Tok[0],w_PRESSURE))
    {
@@ -1699,7 +1699,7 @@ int  optionchoice(OW_Project *m, int n)
       else if (match(Tok[1],w_PSI))    m->Pressflag = PSI;
       else if (match(Tok[1],w_KPA))    m->Pressflag = KPA;
       else if (match(Tok[1],w_METERS)) m->Pressflag = METERS;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
    else if (match(Tok[0],w_HEADLOSS))
    {
@@ -1707,14 +1707,14 @@ int  optionchoice(OW_Project *m, int n)
       else if (match(Tok[1],w_HW)) m->Formflag = HW;
       else if (match(Tok[1],w_DW)) m->Formflag = DW;
       else if (match(Tok[1],w_CM)) m->Formflag = CM;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
    else if (match(Tok[0],w_HYDRAULIC))
    {
       if (n < 2) return(0);
       else if (match(Tok[1],w_USE))  m->Hydflag = USE;
       else if (match(Tok[1],w_SAVE)) m->Hydflag = SAVE;
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
       strncpy(m->HydFname,Tok[2],MAXFNAME);
    }
    else if (match(Tok[0],w_QUALITY))
@@ -1765,7 +1765,7 @@ int  optionchoice(OW_Project *m, int n)
          if (n >= 2) m->ExtraIter = atoi(Tok[2]);
          else m->ExtraIter = 0;
       }
-      else return(OW_ERR_SYNTAX);
+      else return(EN_ERR_SYNTAX);
    }
    else if (match(Tok[0],w_PATTERN))            /* Pattern option */
    {
@@ -1777,7 +1777,7 @@ int  optionchoice(OW_Project *m, int n)
 }                        /* end of optionchoice */
 
 
-int  optionvalue(OW_Project *m, int n)
+int  optionvalue(EN_Project *m, int n)
 /*
 **------------------------------------------------------------- 
 **  Input:   *line = line read from input file                   
@@ -1866,12 +1866,12 @@ int  optionvalue(OW_Project *m, int n)
    else if (match(Tok[0],w_MAXCHECK))    m->MaxCheck = (int)y;
    else if (match(Tok[0],w_EMITTER))     m->Qexp = 1.0/y;
    else if (match(Tok[0],w_DEMAND))      m->Dmult = y;
-   else return(OW_ERR_SYNTAX);
+   else return(EN_ERR_SYNTAX);
    return(0);
 }                        /* end of optionvalue */
 
 
-int  getpumpcurve(OW_Project *m, int n)
+int  getpumpcurve(EN_Project *m, int n)
 /*
 **--------------------------------------------------------
 **  Input:   n = number of parameters for pump curve
@@ -1967,7 +1967,7 @@ int  powercurve(double h0, double h1, double h2, double q1,
 }
 
 
-int  valvecheck(OW_Project *m, int type, int j1, int j2)
+int  valvecheck(EN_Project *m, int type, int j1, int j2)
 /*
 **--------------------------------------------------------------
 **  Input:   type = valve type                                   
@@ -2026,7 +2026,7 @@ int  valvecheck(OW_Project *m, int type, int j1, int j2)
 }                   /* End of valvecheck */
 
 
-void  changestatus(OW_Project *m, int j, char status, double y)
+void  changestatus(EN_Project *m, int j, char status, double y)
 /*
 **--------------------------------------------------------------
 **  Input:   j      = link index                                   

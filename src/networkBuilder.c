@@ -14,18 +14,18 @@
 #include "types.h"
 
 
-extern void initpointers(OW_Project *m); // epanet.c
-extern int  allocdata(OW_Project *m);
-extern void setdefaults(OW_Project *m);
-extern int  addpattern(OW_Project *m, char *id);
-extern void adjustdata(OW_Project *m);
-extern void initunits(OW_Project *m);
+extern void initpointers(EN_Project *m); // epanet.c
+extern int  allocdata(EN_Project *m);
+extern void setdefaults(EN_Project *m);
+extern int  addpattern(EN_Project *m, char *id);
+extern void adjustdata(EN_Project *m);
+extern void initunits(EN_Project *m);
 
-int DLLEXPORT OW_newNetwork(OW_Project **modelObj)
+int DLLEXPORT EN_newNetwork(EN_Project **modelObj)
 {
   
   *modelObj = 0;
-  OW_Project *m = calloc(1, sizeof(OW_Project));
+  EN_Project *m = calloc(1, sizeof(EN_Project));
   
   
   /* Set system flags */
@@ -56,18 +56,18 @@ int DLLEXPORT OW_newNetwork(OW_Project **modelObj)
 }
 
 // network creation api set
-int DLLEXPORT OW_startEditingNetwork(OW_Project *m)
+int DLLEXPORT EN_startEditingNetwork(EN_Project *m)
 {
   
   if (m->OpenHflag) {
-    OW_closeH(m);
+    EN_closeH(m);
   }
   
   
   return EN_OK;
 }
 
-int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
+int DLLEXPORT EN_addNode(EN_Project *m, EN_NodeType type, char *name)
 {
   
   Pdemand  demand;
@@ -75,7 +75,7 @@ int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
   ///////////////////////////////
   // add the node ID
   int index;
-  OW_getnodeindex(m, name, &index);
+  EN_getnodeindex(m, name, &index);
   if (index != 0) {
     return 203;
   }
@@ -147,11 +147,11 @@ int DLLEXPORT OW_addNode(OW_Project *m, EN_NodeType type, char *name)
   
 }
 
-int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upstreamNode, char* downstreamNode)
+int DLLEXPORT EN_addLink(EN_Project *m, EN_LinkType type, char *name, char *upstreamNode, char* downstreamNode)
 {
   
   int linkIndex;
-  OW_getlinkindex(m, name, &linkIndex);
+  EN_getlinkindex(m, name, &linkIndex);
   if (linkIndex != 0) {
     return 203;
   }
@@ -171,8 +171,8 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
   
   // find start/end link
   int n1_idx, n2_idx;
-  OW_getnodeindex(m, upstreamNode, &n1_idx);
-  OW_getnodeindex(m, downstreamNode, &n2_idx);
+  EN_getnodeindex(m, upstreamNode, &n1_idx);
+  EN_getnodeindex(m, downstreamNode, &n2_idx);
   
   strncpy(link->ID, name, MAXID);
   ENHashTableInsert(m->network.LinkHashTable, link->ID, l_idx);        /* see HASH.C */
@@ -219,7 +219,7 @@ int DLLEXPORT OW_addLink(OW_Project *m, EN_LinkType type, char *name, char *upst
   
 }
 
-int DLLEXPORT OW_stopEditingNetwork(OW_Project *m)
+int DLLEXPORT EN_stopEditingNetwork(EN_Project *m)
 {
   
   adjustdata(m); // fill in missing data with defaults

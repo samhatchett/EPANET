@@ -8,24 +8,24 @@ using namespace epanet;
 
 #define ENDL '\n'
 
-void _write_title(OW_Project* m, ostream& s);
-void _read_title(OW_Project* m, istream& s);
+void _write_title(EN_Project* m, ostream& s);
+void _read_title(EN_Project* m, istream& s);
 
-void _write_junctions(OW_Project* m, ostream& s);
+void _write_junctions(EN_Project* m, ostream& s);
 
-void _read_blank(OW_Project* m, istream& s);
-void _write_blank(OW_Project* m, ostream& s);
+void _read_blank(EN_Project* m, istream& s);
+void _write_blank(EN_Project* m, ostream& s);
 
 
 namespace epanet {
   class InpSection {
   public:
-    InpSection(string section_name, int section_type, function<void(OW_Project*,ostream&)> serializer_function, function<void(OW_Project*,istream&)> deserializer_function)
+    InpSection(string section_name, int section_type, function<void(EN_Project*,ostream&)> serializer_function, function<void(EN_Project*,istream&)> deserializer_function)
     : sectionStr(section_name), sectionType(section_type), serializer(serializer_function), deserializer(deserializer_function) { };
     string sectionStr;
     int sectionType;
-    function<void(OW_Project*,ostream&)> serializer;
-    function<void(OW_Project*,istream&)> deserializer;
+    function<void(EN_Project*,ostream&)> serializer;
+    function<void(EN_Project*,istream&)> deserializer;
   };
 }
 
@@ -53,7 +53,7 @@ ModelFile::ModelFile() : _model(NULL) {
   
 }
 
-ModelFile::ModelFile(OW_Project *model) : _model(model) {
+ModelFile::ModelFile(EN_Project *model) : _model(model) {
   
 };
 
@@ -61,14 +61,14 @@ ModelFile::ModelFile(istream& input) {
   this->_newModelFromStream(input);
 }
 
-OW_Project* ModelFile::to_model() {
+EN_Project* ModelFile::to_model() {
   return _model;
 }
 
 void ModelFile::_newModelFromStream(istream &stream) {
   
   int err;
-  err = OW_newModel(&_model);
+  err = EN_newModel(&_model);
   
 }
 

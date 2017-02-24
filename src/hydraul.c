@@ -94,10 +94,10 @@ AUTHOR:     L. Rossman
 //double RelaxFactor;                                                            //(2.00.11 - LR)
 
 /* Function to find flow coeffs. through open/closed valves */                 //(2.00.11 - LR)
-void valvecoeff(OW_Project *m, int k);                                                        //(2.00.11 - LR)
+void valvecoeff(EN_Project *m, int k);                                                        //(2.00.11 - LR)
 
 
-int  openhyd(OW_Project *m)
+int  openhyd(EN_Project *m)
 /*
  *--------------------------------------------------------------
  *  Input:   none     
@@ -118,7 +118,7 @@ int  openhyd(OW_Project *m)
 
 
 /*** Updated 3/1/01 ***/
-void inithyd(OW_Project *m, int initflag)
+void inithyd(EN_Project *m, int initflag)
 /*
 **--------------------------------------------------------------
 **  Input:   initflag > 0 if link flows should be re-initialized
@@ -196,7 +196,7 @@ void inithyd(OW_Project *m, int initflag)
 }
 
 
-int   runhyd(OW_Project *m, long *t)
+int   runhyd(EN_Project *m, long *t)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -242,7 +242,7 @@ int   runhyd(OW_Project *m, long *t)
 }                               /* end of runhyd */
 
 
-int  nexthyd(OW_Project *m, long *tstep)
+int  nexthyd(EN_Project *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -302,7 +302,7 @@ int  nexthyd(OW_Project *m, long *tstep)
 }
   
 
-void  closehyd(OW_Project *m)
+void  closehyd(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none     
@@ -316,7 +316,7 @@ void  closehyd(OW_Project *m)
 }
 
 
-int  allocmatrix(OW_Project *m)
+int  allocmatrix(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -346,7 +346,7 @@ int  allocmatrix(OW_Project *m)
 }                               /* end of allocmatrix */
 
 
-void  freematrix(OW_Project *m)
+void  freematrix(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -366,7 +366,7 @@ void  freematrix(OW_Project *m)
 }                               /* end of freematrix */
 
 
-void  initlinkflow(OW_Project *m, int i, char s, double k)
+void  initlinkflow(EN_Project *m, int i, char s, double k)
 /*
 **--------------------------------------------------------------------
 **  Input:   i = link index
@@ -394,7 +394,7 @@ void  initlinkflow(OW_Project *m, int i, char s, double k)
 
 
 /*** Updated 9/7/00 ***/
-void  setlinkflow(OW_Project *m, int k, double dh)
+void  setlinkflow(EN_Project *m, int k, double dh)
 /*
 **--------------------------------------------------------------
 **  Input:   k = link index
@@ -469,7 +469,7 @@ void  setlinkflow(OW_Project *m, int k, double dh)
 }
 
 
-void  setlinkstatus(OW_Project *m, int index, char value, char *s, double *k)
+void  setlinkstatus(EN_Project *m, int index, char value, char *s, double *k)
 /*----------------------------------------------------------------
 **  Input:   index  = link index
 **           value  = 0 (CLOSED) or 1 (OPEN)
@@ -513,7 +513,7 @@ void  setlinkstatus(OW_Project *m, int index, char value, char *s, double *k)
 }
 
 
-void  setlinksetting(OW_Project *m, int index, double value, char *s, double *k)
+void  setlinksetting(EN_Project *m, int index, double value, char *s, double *k)
 /*----------------------------------------------------------------
 **  Input:   index  = link index
 **           value  = pump speed or valve setting
@@ -563,7 +563,7 @@ void  setlinksetting(OW_Project *m, int index, double value, char *s, double *k)
 } 
 
 
-void  resistance(OW_Project *m, int k)
+void  resistance(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------------
 **  Input:   k = link index                                                      
@@ -620,7 +620,7 @@ void  resistance(OW_Project *m, int k)
 }
 
 
-void  demands(OW_Project *m)
+void  demands(EN_Project *m)
 /*
 **--------------------------------------------------------------------
 **  Input:   none                                                      
@@ -688,7 +688,7 @@ void  demands(OW_Project *m)
 }                        /* End of demands */
 
 
-int  controls(OW_Project *m)
+int  controls(EN_Project *m)
 /*
 **---------------------------------------------------------------------
 **  Input:   none                                                   
@@ -776,7 +776,7 @@ int  controls(OW_Project *m)
 }                        /* End of controls */
 
 
-long  timestep(OW_Project *m)
+long  timestep(EN_Project *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -821,7 +821,7 @@ long  timestep(OW_Project *m)
 }
 
 
-int   tanktimestep(OW_Project *m, long *tstep)
+int   tanktimestep(EN_Project *m, long *tstep)
 /*
 **-----------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -863,7 +863,7 @@ int   tanktimestep(OW_Project *m, long *tstep)
 }
 
 
-int   controltimestep(OW_Project *m, long *tstep)
+int   controltimestep(EN_Project *m, long *tstep)
 /*
 **------------------------------------------------------------------
 **  Input:   *tstep = current time step                                                
@@ -939,7 +939,7 @@ int   controltimestep(OW_Project *m, long *tstep)
 }                        /* End of timestep */
 
 
-void  ruletimestep(OW_Project *m, long *tstep)
+void  ruletimestep(EN_Project *m, long *tstep)
 /*
 **--------------------------------------------------------------
 **  Input:   *tstep = current time step (sec)                            
@@ -1007,7 +1007,7 @@ void  ruletimestep(OW_Project *m, long *tstep)
 }
    
 
-void  addenergy(OW_Project *mod, long hstep)
+void  addenergy(EN_Project *mod, long hstep)
 /*
 **-------------------------------------------------------------
 **  Input:   hstep = time step (sec)                            
@@ -1093,7 +1093,7 @@ void  addenergy(OW_Project *mod, long hstep)
 }                       /* End of pumpenergy */
 
 
-void  getenergy(OW_Project *m, int k, double *kw, double *eff)
+void  getenergy(EN_Project *m, int k, double *kw, double *eff)
 /*
 **----------------------------------------------------------------
 **  Input:   k    = link index                         
@@ -1143,7 +1143,7 @@ void  getenergy(OW_Project *m, int k, double *kw, double *eff)
 }
 
 
-void  tanklevels(OW_Project *m, long tstep)
+void  tanklevels(EN_Project *m, long tstep)
 /*
 **----------------------------------------------------------------
 **  Input:   tstep = current time step                         
@@ -1180,7 +1180,7 @@ void  tanklevels(OW_Project *m, long tstep)
 }                       /* End of tanklevels */
 
 
-double  tankvolume(OW_Project *m, int i, double h)
+double  tankvolume(EN_Project *m, int i, double h)
 /*
 **--------------------------------------------------------------------
 **  Input:   i = tank index                                         
@@ -1213,7 +1213,7 @@ double  tankvolume(OW_Project *m, int i, double h)
 }                       /* End of tankvolume */
 
 
-double  tankgrade(OW_Project *m, int i, double v)
+double  tankgrade(EN_Project *m, int i, double v)
 /*
 **-------------------------------------------------------------------
 **  Input:   i = tank index                                         
@@ -1247,7 +1247,7 @@ double  tankgrade(OW_Project *m, int i, double v)
 }                        /* End of tankgrade */
 
 
-int  netsolve(OW_Project *m, int *iter, double *relerr)
+int  netsolve(EN_Project *m, int *iter, double *relerr)
 /*
 **-------------------------------------------------------------------
 **  Input:   none                                                
@@ -1375,7 +1375,7 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
 
    /* Iterations ended. Report any errors. */
   if (errcode < 0) {
-    errcode = OW_ERR_INSUFFICIENT_MEMORY;      /* Memory allocation error */
+    errcode = EN_ERR_INSUFFICIENT_MEMORY;      /* Memory allocation error */
   }
    else if (errcode > 0) {
       writehyderr(m,m->hydraulics.solver.Order[errcode]);      /* Ill-conditioned eqns. error */
@@ -1390,7 +1390,7 @@ int  netsolve(OW_Project *m, int *iter, double *relerr)
 }                        /* End of netsolve */
 
 
-int  badvalve(OW_Project *m, int n)
+int  badvalve(EN_Project *m, int n)
 /*
 **-----------------------------------------------------------------
 **  Input:   n = node index                                                
@@ -1438,7 +1438,7 @@ int  badvalve(OW_Project *m, int n)
 }
    
 
-int  valvestatus(OW_Project *m)
+int  valvestatus(EN_Project *m)
 /*
 **-----------------------------------------------------------------
 **  Input:   none                                                
@@ -1500,7 +1500,7 @@ int  valvestatus(OW_Project *m)
 
 
 /*** Updated 9/7/00 ***/
-int  linkstatus(OW_Project *m)
+int  linkstatus(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1565,7 +1565,7 @@ int  linkstatus(OW_Project *m)
 }                        /* End of linkstatus */
 
 
-char  cvstatus(OW_Project *m, char s, double dh, double q)
+char  cvstatus(EN_Project *m, char s, double dh, double q)
 /*
 **--------------------------------------------------
 **  Input:   s  = current status
@@ -1596,7 +1596,7 @@ char  cvstatus(OW_Project *m, char s, double dh, double q)
 }
 
 
-char  pumpstatus(OW_Project *m, int k, double dh)
+char  pumpstatus(EN_Project *m, int k, double dh)
 /*
 **--------------------------------------------------
 **  Input:   k  = link index                         
@@ -1628,7 +1628,7 @@ char  pumpstatus(OW_Project *m, int k, double dh)
 }
 
 
-char  prvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
+char  prvstatus(EN_Project *m, int k, char s, double hset, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1699,7 +1699,7 @@ char  prvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
 }
 
 
-char  psvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
+char  psvstatus(EN_Project *m, int k, char s, double hset, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1750,7 +1750,7 @@ char  psvstatus(OW_Project *m, int k, char s, double hset, double h1, double h2)
 }
 
 
-char  fcvstatus(OW_Project *m, int k, char s, double h1, double h2)
+char  fcvstatus(EN_Project *m, int k, char s, double h1, double h2)
 /*
 **-----------------------------------------------------------
 **  Input:   k    = link index                                
@@ -1787,7 +1787,7 @@ char  fcvstatus(OW_Project *m, int k, char s, double h1, double h2)
 
 /*** Updated 9/7/00 ***/
 /*** Updated 11/19/01 ***/
-void  tankstatus(OW_Project *m, int k, int n1, int n2)
+void  tankstatus(EN_Project *m, int k, int n1, int n2)
 /*
 **----------------------------------------------------------------
 **  Input:   k  = link index                                     
@@ -1858,7 +1858,7 @@ void  tankstatus(OW_Project *m, int k, int n1, int n2)
 }                        /* End of tankstatus */
 
 
-int  pswitch(OW_Project *m)
+int  pswitch(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -1941,7 +1941,7 @@ int  pswitch(OW_Project *m)
 }                        /* End of pswitch */
 
 
-double newflows(OW_Project *m)
+double newflows(EN_Project *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -2027,7 +2027,7 @@ double newflows(OW_Project *m)
 }                        /* End of newflows */
 
 
-void   newcoeffs(OW_Project *m)
+void   newcoeffs(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none                                                
@@ -2049,7 +2049,7 @@ void   newcoeffs(OW_Project *m)
 }                        /* End of newcoeffs */
 
 
-void  linkcoeffs(OW_Project *m)
+void  linkcoeffs(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2167,7 +2167,7 @@ void  linkcoeffs(OW_Project *m)
 }                        /* End of linkcoeffs */
 
 
-void  nodecoeffs(OW_Project *m)
+void  nodecoeffs(EN_Project *m)
 /*
 **----------------------------------------------------------------
 **  Input:   none                                                
@@ -2189,7 +2189,7 @@ void  nodecoeffs(OW_Project *m)
 }                        /* End of nodecoeffs */
 
 
-void  valvecoeffs(OW_Project *m)
+void  valvecoeffs(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2218,7 +2218,7 @@ void  valvecoeffs(OW_Project *m)
 }                        /* End of valvecoeffs */
 
 
-void  emittercoeffs(OW_Project *m)
+void  emittercoeffs(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **   Input:   none                                                
@@ -2257,7 +2257,7 @@ void  emittercoeffs(OW_Project *m)
 }
 
 
-double  emitflowchange(OW_Project *m, int i)
+double  emitflowchange(EN_Project *m, int i)
 /*
 **--------------------------------------------------------------
 **   Input:   i = node index
@@ -2278,7 +2278,7 @@ double  emitflowchange(OW_Project *m, int i)
 }
 
 
-void  pipecoeff(OW_Project *m, int k)
+void  pipecoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2349,7 +2349,7 @@ void  pipecoeff(OW_Project *m, int k)
 }                        /* End of pipecoeff */
 
 
-double DWcoeff(OW_Project *m, int k, double *dfdq)
+double DWcoeff(EN_Project *m, int k, double *dfdq)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2413,7 +2413,7 @@ double DWcoeff(OW_Project *m, int k, double *dfdq)
 
 /*** Updated 10/25/00 ***/
 /*** Updated 12/29/00 ***/
-void  pumpcoeff(OW_Project *m, int k)
+void  pumpcoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2470,7 +2470,7 @@ void  pumpcoeff(OW_Project *m, int k)
 
 /*** Updated 10/25/00 ***/
 /*** Updated 12/29/00 ***/
-void  curvecoeff(OW_Project *m, int i, double q, double *h0, double *r)
+void  curvecoeff(EN_Project *m, int i, double q, double *h0, double *r)
 /*
 **-------------------------------------------------------------------
 **   Input:   i   = curve index                                        
@@ -2508,7 +2508,7 @@ void  curvecoeff(OW_Project *m, int i, double q, double *h0, double *r)
 }                       /* End of curvecoeff */
 
 
-void  gpvcoeff(OW_Project *m, int k)
+void  gpvcoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index
@@ -2546,7 +2546,7 @@ void  gpvcoeff(OW_Project *m, int k)
 }
  
 
-void  pbvcoeff(OW_Project *m, int k)
+void  pbvcoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2577,7 +2577,7 @@ void  pbvcoeff(OW_Project *m, int k)
 }                        /* End of pbvcoeff */
 
 
-void  tcvcoeff(OW_Project *m, int k)
+void  tcvcoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k = link index                                      
@@ -2603,7 +2603,7 @@ void  tcvcoeff(OW_Project *m, int k)
 }                        /* End of tcvcoeff */
 
 
-void  prvcoeff(OW_Project *m, int k, int n1, int n2)
+void  prvcoeff(EN_Project *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2651,7 +2651,7 @@ void  prvcoeff(OW_Project *m, int k, int n1, int n2)
 }                        /* End of prvcoeff */
 
 
-void  psvcoeff(OW_Project *m, int k, int n1, int n2)
+void  psvcoeff(EN_Project *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2698,7 +2698,7 @@ void  psvcoeff(OW_Project *m, int k, int n1, int n2)
 }                        /* End of psvcoeff */
 
 
-void  fcvcoeff(OW_Project *m, int k, int n1, int n2)
+void  fcvcoeff(EN_Project *m, int k, int n1, int n2)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   
@@ -2750,7 +2750,7 @@ void  fcvcoeff(OW_Project *m, int k, int n1, int n2)
 
 
 /*** New function added. ***/                                                  //(2.00.11 - LR)
-void valvecoeff(OW_Project *m, int k)
+void valvecoeff(EN_Project *m, int k)
 /*
 **--------------------------------------------------------------
 **   Input:   k    = link index                                   

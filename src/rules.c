@@ -79,24 +79,24 @@ char    *Value[]     = {"XXXX",   w_OPEN, w_CLOSED, w_ACTIVE,NULL};
 **   because some of them utilize the Premise and Action structures
 **   defined locally in this module.
 */
-void    newrule(OW_Project *m);
-int     newpremise(OW_Project *m, int);
-int     newaction(OW_Project *m);
-int     newpriority(OW_Project *m);
-int     evalpremises(OW_Project *m, int);
-void    updateactlist(OW_Project *m, int, struct Action *);
-int     checkaction(OW_Project *m, int, struct Action *);
-int     checkpremise(OW_Project *m, struct Premise *);
-int     checktime(OW_Project *m, struct Premise *);
-int     checkstatus(OW_Project *m, struct Premise *);
-int     checkvalue(OW_Project *m, struct Premise *);
-int     takeactions(OW_Project *m);
-void    clearactlist(OW_Project *m);
-void    clearrules(OW_Project *m);
-void    ruleerrmsg(OW_Project *m, int);
+void    newrule(EN_Project *m);
+int     newpremise(EN_Project *m, int);
+int     newaction(EN_Project *m);
+int     newpriority(EN_Project *m);
+int     evalpremises(EN_Project *m, int);
+void    updateactlist(EN_Project *m, int, struct Action *);
+int     checkaction(EN_Project *m, int, struct Action *);
+int     checkpremise(EN_Project *m, struct Premise *);
+int     checktime(EN_Project *m, struct Premise *);
+int     checkstatus(EN_Project *m, struct Premise *);
+int     checkvalue(EN_Project *m, struct Premise *);
+int     takeactions(EN_Project *m);
+void    clearactlist(EN_Project *m);
+void    clearrules(EN_Project *m);
+void    ruleerrmsg(EN_Project *m, int);
 
 
-void initrules(OW_Project *m)
+void initrules(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **    Initializes rule base.
@@ -109,7 +109,7 @@ void initrules(OW_Project *m)
 }
 
 
-void addrule(OW_Project *m, char *tok)
+void addrule(EN_Project *m, char *tok)
 /*
 **--------------------------------------------------------------
 **    Updates rule count if RULE keyword found in line of input.
@@ -121,7 +121,7 @@ void addrule(OW_Project *m, char *tok)
 }
 
 
-int  allocrules(OW_Project *m)
+int  allocrules(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **    Allocates memory for rule-based controls.
@@ -136,7 +136,7 @@ int  allocrules(OW_Project *m)
 }
 
 
-void freerules(OW_Project *m)
+void freerules(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **    Frees memory used for rule-based controls.
@@ -149,7 +149,7 @@ void freerules(OW_Project *m)
 }
 
 
-int checkrules(OW_Project *m, long dt)
+int checkrules(EN_Project *m, long dt)
 /*
 **-----------------------------------------------------
 **    Checks which rules should fire at current time.
@@ -196,7 +196,7 @@ int checkrules(OW_Project *m, long dt)
 }
 
 
-int  parseRuleData(OW_Project *m)
+int  parseRuleData(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **    Parses a line from [RULES] section of input.
@@ -216,7 +216,7 @@ int  parseRuleData(OW_Project *m)
    key = findmatch(m->Tok[0],Ruleword);
    switch (key)
    {
-      case -1:     err = OW_ERR_SYNTAX;      /* Unrecognized keyword */
+      case -1:     err = EN_ERR_SYNTAX;      /* Unrecognized keyword */
                    break;
       case r_RULE: m->network.Nrules++;
                    newrule(m);
@@ -262,7 +262,7 @@ int  parseRuleData(OW_Project *m)
                        m->RuleState = r_PRIORITY;
                        err = newpriority(m);
                        break;
-      default:         err = OW_ERR_SYNTAX;
+      default:         err = EN_ERR_SYNTAX;
    }
 
    /* Set RuleState to r_ERROR if errors found */
@@ -276,7 +276,7 @@ int  parseRuleData(OW_Project *m)
 }
 
 
-void  clearactlist(OW_Project *m)
+void  clearactlist(EN_Project *m)
 /*
 **----------------------------------------------------------
 **    Clears memory used for action list
@@ -295,7 +295,7 @@ void  clearactlist(OW_Project *m)
 }
 
 
-void  clearrules(OW_Project *m)
+void  clearrules(EN_Project *m)
 /*
 **-----------------------------------------------------------
 **    Clears memory used for premises & actions for all rules
@@ -334,7 +334,7 @@ void  clearrules(OW_Project *m)
 }
 
 
-void  newrule(OW_Project *m)
+void  newrule(EN_Project *m)
 /*
 **----------------------------------------------------------
 **    Adds new rule to rule base
@@ -352,7 +352,7 @@ void  newrule(OW_Project *m)
 }
 
 
-int  newpremise(OW_Project *mod, int logop)
+int  newpremise(EN_Project *mod, int logop)
 /*
 **--------------------------------------------------------------------
 **   Adds new premise to current rule.
@@ -370,7 +370,7 @@ int  newpremise(OW_Project *mod, int logop)
    struct Premise *p;
 
    /* Check for correct number of tokens */
-   if (mod->Ntokens != 5 && mod->Ntokens != 6) return(OW_ERR_SYNTAX);
+   if (mod->Ntokens != 5 && mod->Ntokens != 6) return(EN_ERR_SYNTAX);
 
    /* Find network object & id if present */
    elementType = findmatch(mod->Tok[1],Object);
@@ -379,14 +379,14 @@ int  newpremise(OW_Project *mod, int logop)
       j = 0;
       word = findmatch(mod->Tok[2],Varword);
       if (word != r_DEMAND && word != r_TIME && word != r_CLOCKTIME) {
-        return(OW_ERR_SYNTAX);
+        return(EN_ERR_SYNTAX);
       }
    }
    else
    {
       word = findmatch(mod->Tok[3],Varword);
       if (word < 0) {
-        return(OW_ERR_SYNTAX);
+        return(EN_ERR_SYNTAX);
       }
       switch (elementType)
       {
@@ -398,7 +398,7 @@ int  newpremise(OW_Project *mod, int logop)
          case r_PIPE:
          case r_PUMP:
          case r_VALVE:  k = r_LINK; break;
-         default: return(OW_ERR_SYNTAX);
+         default: return(EN_ERR_SYNTAX);
       }
       elementType = k;
       if (elementType == r_NODE)
@@ -415,9 +415,9 @@ int  newpremise(OW_Project *mod, int logop)
 
 /*** Updated 9/7/00 ***/
             case r_FILLTIME:
-            case r_DRAINTIME: if (j <= mod->network.Njuncs) return(OW_ERR_SYNTAX); break;
+            case r_DRAINTIME: if (j <= mod->network.Njuncs) return(EN_ERR_SYNTAX); break;
 
-            default: return(OW_ERR_SYNTAX);
+            default: return(EN_ERR_SYNTAX);
          }
       }
       else // type is link
@@ -433,7 +433,7 @@ int  newpremise(OW_Project *mod, int logop)
             case r_SETTING:
              break;
             default:
-             return(OW_ERR_SYNTAX);
+             return(EN_ERR_SYNTAX);
          }
       }
    }
@@ -447,7 +447,7 @@ int  newpremise(OW_Project *mod, int logop)
   
    k = findmatch(mod->Tok[m],Operator);
    if (k < 0) {
-     return(OW_ERR_SYNTAX);
+     return(EN_ERR_SYNTAX);
    }
    switch(k)
    {
@@ -496,7 +496,7 @@ int  newpremise(OW_Project *mod, int logop)
    p = (struct Premise *) malloc(sizeof(struct Premise));
   
    if (p == NULL) {
-     return(OW_ERR_INSUFFICIENT_MEMORY);
+     return(EN_ERR_INSUFFICIENT_MEMORY);
    }
   
    p->object = elementType;
@@ -519,7 +519,7 @@ int  newpremise(OW_Project *mod, int logop)
 }
 
 
-int  newaction(OW_Project *m)
+int  newaction(EN_Project *m)
 /*
 **----------------------------------------------------------
 **   Adds new action to current rule.
@@ -539,7 +539,7 @@ int  newaction(OW_Project *m)
   struct aRule *Rule = m->Rule;
   
    /* Check for correct number of tokens */
-   if (m->Ntokens != 6) return(OW_ERR_SYNTAX);
+   if (m->Ntokens != 6) return(EN_ERR_SYNTAX);
 
    /* Check that link exists */
    j = findlink(m,m->Tok[2]);
@@ -575,7 +575,7 @@ int  newaction(OW_Project *m)
    /* Create a new action structure */
    a = (struct Action *) malloc(sizeof(struct Action));
    if (a == NULL) {
-     return(OW_ERR_INSUFFICIENT_MEMORY);
+     return(EN_ERR_INSUFFICIENT_MEMORY);
    }
    a->link = j;
    a->status = s;
@@ -596,7 +596,7 @@ int  newaction(OW_Project *m)
 }
 
 
-int  newpriority(OW_Project *m)
+int  newpriority(EN_Project *m)
 /*
 **---------------------------------------------------
 **    Adds priority rating to current rule
@@ -612,7 +612,7 @@ int  newpriority(OW_Project *m)
 }
 
 
-int  evalpremises(OW_Project *m, int i)
+int  evalpremises(EN_Project *m, int i)
 /*
 **----------------------------------------------------------
 **    Checks if premises to rule i are true
@@ -644,7 +644,7 @@ int  evalpremises(OW_Project *m, int i)
 }
 
  
-int  checkpremise(OW_Project *m, struct Premise *p)
+int  checkpremise(EN_Project *m, struct Premise *p)
 /*
 **----------------------------------------------------------
 **    Checks if a particular premise is true
@@ -660,7 +660,7 @@ int  checkpremise(OW_Project *m, struct Premise *p)
 }
 
 
-int  checktime(OW_Project *m, struct Premise *p)
+int  checktime(EN_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on system time holds
@@ -715,7 +715,7 @@ int  checktime(OW_Project *m, struct Premise *p)
 }
 
 
-int  checkstatus(OW_Project *m, struct Premise *p)
+int  checkstatus(EN_Project *m, struct Premise *p)
 /*
 **------------------------------------------------------------
 **    Checks if condition on link status holds
@@ -742,7 +742,7 @@ int  checkstatus(OW_Project *m, struct Premise *p)
 }
 
 
-int  checkvalue(OW_Project *m, struct Premise *premise)
+int  checkvalue(EN_Project *m, struct Premise *premise)
 /*
 **----------------------------------------------------------
 **    Checks if numerical condition on a variable is true.
@@ -842,7 +842,7 @@ int  checkvalue(OW_Project *m, struct Premise *premise)
 }
 
 
-void  updateactlist(OW_Project *m, int i, struct Action *actions)
+void  updateactlist(EN_Project *m, int i, struct Action *actions)
 /*
 **---------------------------------------------------
 **    Adds rule's actions to action list
@@ -874,7 +874,7 @@ void  updateactlist(OW_Project *m, int i, struct Action *actions)
 }
 
 
-int  checkaction(OW_Project *m, int i, struct Action *a)
+int  checkaction(EN_Project *m, int i, struct Action *a)
 /*
 **-----------------------------------------------------------
 **    Checks if an action is already on the Action List
@@ -910,7 +910,7 @@ int  checkaction(OW_Project *m, int i, struct Action *a)
 }
 
 
-int  takeactions(OW_Project *m)
+int  takeactions(EN_Project *m)
 /*
 **-----------------------------------------------------------
 **    Implements actions on action list
@@ -987,7 +987,7 @@ int  takeactions(OW_Project *m)
 }
 
 
-void  ruleerrmsg(OW_Project *m, int err)
+void  ruleerrmsg(EN_Project *m, int err)
 /*
 **-----------------------------------------------------------
 **    Reports error message
@@ -1004,7 +1004,7 @@ void  ruleerrmsg(OW_Project *m, int err)
   
    switch (err)
    {
-      case OW_ERR_SYNTAX:   strcpy(fmt,R_ERR201);  break;
+      case EN_ERR_SYNTAX:   strcpy(fmt,R_ERR201);  break;
       case 202:   strcpy(fmt,R_ERR202);  break;
       case 203:   strcpy(fmt,R_ERR203);  break;
       case 204:   strcpy(fmt,R_ERR204);  break;

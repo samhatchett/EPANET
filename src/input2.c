@@ -56,7 +56,7 @@ extern char *SectTxt[];   /* Input section keywords            */
 extern char *RptSectTxt[];
 
 
-int  netsize(OW_Project *m)
+int  netsize(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -143,7 +143,7 @@ int  netsize(OW_Project *m)
 }                        /*  End of netsize  */
 
 
-int  readdata(OW_Project *m)
+int  readdata(EN_Project *m)
 /*
 **--------------------------------------------------------------
 **  Input:   none
@@ -219,7 +219,7 @@ int  readdata(OW_Project *m)
             }
             else
             {
-                inperrmsg(m,OW_ERR_SYNTAX,sect,line);
+                inperrmsg(m,EN_ERR_SYNTAX,sect,line);
                 errsum++;
                 break;
             }
@@ -260,7 +260,7 @@ int  readdata(OW_Project *m)
 }                        /*  End of readdata  */
 
 
-int  newline(OW_Project *m, int sect, char *line)
+int  newline(EN_Project *m, int sect, char *line)
 /*
 **--------------------------------------------------------------
 **  Input:   sect  = current section of input file
@@ -311,11 +311,11 @@ int  newline(OW_Project *m, int sect, char *line)
        case _VERTICES:    return(0);
        case _BACKDROP:    return(0);
    }
-   return(OW_ERR_SYNTAX);
+   return(EN_ERR_SYNTAX);
 }                        /* end of newline */
 
 
-int  getpumpparams(OW_Project *mod)
+int  getpumpparams(EN_Project *mod)
 /*
 **-------------------------------------------------------------
 **  Input:   none
@@ -422,7 +422,7 @@ int  getpumpparams(OW_Project *mod)
 }
 
 
-int   addnodeID(OW_Project *m, int n, char *id)
+int   addnodeID(EN_Project *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = node index
@@ -439,7 +439,7 @@ int   addnodeID(OW_Project *m, int n, char *id)
 }
 
 
-int   addlinkID(OW_Project *m, int n, char *id)
+int   addlinkID(EN_Project *m, int n, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   n = link index
@@ -456,7 +456,7 @@ int   addlinkID(OW_Project *m, int n, char *id)
 }
 
 
-int  addpattern(OW_Project *m, char *id)
+int  addpattern(EN_Project *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = pattern ID label
@@ -498,7 +498,7 @@ int  addpattern(OW_Project *m, char *id)
 }
 
 
-int  addcurve(OW_Project *m, char *id)
+int  addcurve(EN_Project *m, char *id)
 /*
 **-------------------------------------------------------------
 **  Input:   id = curve ID label
@@ -536,7 +536,7 @@ int  addcurve(OW_Project *m, char *id)
    return(0);
 }
 
-int  addcoord(OW_Project *m, char *id)
+int  addcoord(EN_Project *m, char *id)
 /*
  **-------------------------------------------------------------
  **  Input:   id = curve ID label
@@ -598,7 +598,7 @@ STmplist *findID(char *id, STmplist *list)
 }
 
 
-int  unlinked(OW_Project *m)
+int  unlinked(EN_Project *m)
 /*
 **--------------------------------------------------------------
 ** Input:   none                                                
@@ -640,7 +640,7 @@ int  unlinked(OW_Project *m)
 }                        /* End of unlinked */
 
 
-int     getpatterns(OW_Project *m)
+int     getpatterns(EN_Project *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -704,7 +704,7 @@ int     getpatterns(OW_Project *m)
 }
 
 
-int     getcurves(OW_Project *m)
+int     getcurves(EN_Project *m)
 /*
 **-----------------------------------------------------------
 **  Input:   none
@@ -777,7 +777,7 @@ int     getcurves(OW_Project *m)
    return(0);
 }
 
-int getcoords(OW_Project *m)
+int getcoords(EN_Project *m)
 /*
  **-----------------------------------------------------------
  **  Input:   none
@@ -1035,7 +1035,7 @@ int  getfloat(char *s, double *y)
 }
 
 
-int  setreport(OW_Project *m, char *s)
+int  setreport(EN_Project *m, char *s)
 /*
 **-----------------------------------------------------------
 **  Input:   *s = report format command 
@@ -1051,7 +1051,7 @@ int  setreport(OW_Project *m, char *s)
 }
 
 
-void  inperrmsg(OW_Project *m, int err, int sect, char *line)
+void  inperrmsg(EN_Project *m, int err, int sect, char *line)
 /*
 **-------------------------------------------------------------
 **  Input:   err     = error code
@@ -1074,7 +1074,7 @@ void  inperrmsg(OW_Project *m, int err, int sect, char *line)
 /* Copy error messge to string variable fmt */
    switch (err)
    {
-      case OW_ERR_SYNTAX:   strcpy(fmt,ERR201);  break;
+      case EN_ERR_SYNTAX:   strcpy(fmt,ERR201);  break;
       case 202:   strcpy(fmt,ERR202);  break;
       case 203:   strcpy(fmt,ERR203);  break;
       case 204:   strcpy(fmt,ERR204);  break;
@@ -1109,7 +1109,7 @@ void  inperrmsg(OW_Project *m, int err, int sect, char *line)
 
 /* Echo input line for syntax errors, and   */
 /* errors in CONTROLS and OPTIONS sections. */
-   if (sect == _CONTROLS || err == OW_ERR_SYNTAX || err == 213) writeline(m,line);
+   if (sect == _CONTROLS || err == EN_ERR_SYNTAX || err == 213) writeline(m,line);
    else writeline(m,"");
 }
 

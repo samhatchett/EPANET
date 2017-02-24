@@ -23,7 +23,7 @@ AUTHOR:     L. Rossman
 // The default global model object
 //
 
-OW_Project *en_defaultModel;
+EN_Project *en_defaultModel;
 
 
 

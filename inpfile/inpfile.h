@@ -24,13 +24,13 @@
 #endif
 
 
-#define OW_OK 0
-#define OW_ERR_CANT_OPEN_FILE 302
-#define OW_ERR_FILE_SEEK 310
+#define EN_OK 0
+#define EN_ERR_CANT_OPEN_FILE 302
+#define EN_ERR_FILE_SEEK 310
 
 
-int DLLEXPORT OW_loadInpFile(OW_Project *modelObj, const char *filename);
-int DLLEXPORT OW_saveInpFile(OW_Project *modelObj, const char *filename);
+int DLLEXPORT EN_loadInpFile(EN_Project *modelObj, const char *filename);
+int DLLEXPORT EN_saveInpFile(EN_Project *modelObj, const char *filename);
 
 
 

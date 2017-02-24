@@ -121,7 +121,7 @@ int _findmatch(char *line, char *keyword[]);
 int _match(char *str, char *substr);
 int _scanFileToSection(FILE *handle, section_t section, netsize_t netsize);
 
-int _getPatterns(OW_Project *modelObj, FILE *file);
+int _getPatterns(EN_Project *modelObj, FILE *file);
 int  _gettokens(char *s, char** Tok, int maxToks, char *comment);
 
 lineToken_t _newTokensFromLine(FILE *file);
@@ -129,7 +129,7 @@ int _freeTokens(lineToken_t line);
 
 
 
-int DLLEXPORT OW_loadInpFile(char *inpFile, OW_Project **modelObj)
+int DLLEXPORT EN_loadInpFile(char *inpFile, EN_Project **modelObj)
 {
   int err;
   
@@ -144,11 +144,11 @@ int DLLEXPORT OW_loadInpFile(char *inpFile, OW_Project **modelObj)
   FILE *inpFileHandle;
   if ((inpFileHandle = fopen(inpFile,"rt")) == NULL)
   {
-    return OW_ERR_CANT_OPEN_FILE;
+    return EN_ERR_CANT_OPEN_FILE;
   }
   
   err = _netsize(inpFileHandle, &theNetSize);
-  if (err != OW_OK) {
+  if (err != EN_OK) {
     return err;
   }
   
@@ -189,7 +189,7 @@ int DLLEXPORT OW_loadInpFile(char *inpFile, OW_Project **modelObj)
 
 int scanToSection(FILE *file, section_t section)
 {
-  return OW_OK;
+  return EN_OK;
 }
 
 
@@ -298,7 +298,7 @@ int _netsize(FILE *inpFile, netsize_t *netSize)
     if (errcode) break;
   }
   
-  return OW_OK;
+  return EN_OK;
   
 }
 
@@ -366,7 +366,7 @@ int _scanFileToSection(FILE *handle, section_t section, netsize_t netsize)
   
   
   else {
-    return OW_ERR_FILE_SEEK;
+    return EN_ERR_FILE_SEEK;
   }
   
   
@@ -424,13 +424,13 @@ int  _gettokens(char *s, char** Tok, int maxToks, char *comment)
 
 
 
-int _getPatterns(OW_Project *modelObj, FILE *file)
+int _getPatterns(EN_Project *modelObj, FILE *file)
 {
   
   
   
   
-  return OW_OK;
+  return EN_OK;
 }
 
 
@@ -440,7 +440,7 @@ int _getPatterns(OW_Project *modelObj, FILE *file)
 #pragma mark - SAVE FILE
 
 
-int OW_saveInpFile(OW_Project *modelObj, const char *filename) {
+int EN_saveInpFile(EN_Project *modelObj, const char *filename) {
   
 }
 
