@@ -382,7 +382,7 @@ extern "C" {
    @param binOutFile The path to the binary output file (will be created, optional)
    */
   int  DLLEXPORT EN_open(char *inpFile, EN_Project **modelObj, char *rptFile, char *binOutFile);
-  int  DLLEXPORT EN_saveinpfile(EN_Project *modelObj, const char *filename);
+  int  DLLEXPORT EN_saveinpfile(EN_Project *modelObj, char *filename);
   int  DLLEXPORT EN_close(EN_Project *modelObj);
   
   // Hydraulic solver

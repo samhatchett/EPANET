@@ -98,7 +98,7 @@ int  juncdata(EN_Project *m)
    Node[m->network.Njuncs].S   = NULL;
    Node[m->network.Njuncs].Ke  = 0.0;
    Node[m->network.Njuncs].Rpt = 0;
-  strcpy(Node[m->network.Njuncs].Comment, m->Comment);
+   strcpy(Node[m->network.Njuncs].Comment, m->Comment);
   
 
 /* Create a new demand record */

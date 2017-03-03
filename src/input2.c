@@ -893,8 +893,6 @@ int  match(char *str, char *substr)
 }                        /* end of match */
 
 
-/*** Updated 10/25/00 ***/
-/* The gettokens function has been totally re-written. */
 
 int  gettokens(char *s, char** Tok, int maxToks, char *comment)
 /*

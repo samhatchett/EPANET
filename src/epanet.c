@@ -246,7 +246,7 @@ int DLLEXPORT EN_open(char *inpFile, EN_Project **modelOut, char *rptFile, char 
   return (errcode);
 }
 
-int DLLEXPORT EN_saveinpfile(EN_Project *m, const char *filename)
+int DLLEXPORT EN_saveinpfile(EN_Project *m, char *filename)
 {
   if (!m->Openflag)
     return (102);
