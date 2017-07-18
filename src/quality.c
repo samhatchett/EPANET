@@ -718,16 +718,17 @@ void  updatesegs(EN_Project *m, long dt)
 
       /* Examine each segment of the link */
       seg = m->FirstSeg[k];
-      while (seg != NULL)
-      {
-
+      while (seg != NULL) {
             /* React segment over time dt */
-            cseg = seg->c;
+        
+            if (m->Qualflag == CHEM) {
+              cseg = seg->c;
+            }
+            
             seg->c = pipereact(m, k, seg->c, seg->v, dt);
 
             /* Accumulate volume-weighted reaction rate */
-            if (m->Qualflag == CHEM)
-            {
+            if (m->Qualflag == CHEM) {
                rsum += ABS((seg->c - cseg))*seg->v;
                vsum += seg->v;
             }
@@ -1779,12 +1780,14 @@ double  pipereact(EN_Project *m, int k, double c, double v, long dt)
 */
 {
    double cnew, dc, dcbulk, dcwall, rbulk, rwall;
-  
-  Slink *Link = m->network.Link;
 
    /* For water age (hrs), update concentration by timestep */
-   if (m->Qualflag == AGE) return(c+(double)dt/3600.0);
+  if (m->Qualflag == AGE) { 
+    return(c+(double)dt/3600.0);
+  }
 
+  Slink *Link = m->network.Link;
+  
    /* Otherwise find bulk & wall reaction rates */
    rbulk = bulkrate(m,c,Link[k].Kb,m->BulkOrder)*m->Bucf;
    rwall = wallrate(m,c,Link[k].Diam,Link[k].Kw,Link[k].Rc);
@@ -1794,8 +1797,7 @@ double  pipereact(EN_Project *m, int k, double c, double v, long dt)
    dcwall = rwall*(double)dt;
 
    /* Update cumulative mass reacted */
-   if (m->Htime >= m->Rstart)
-   {
+   if (m->Htime >= m->Rstart) {
       m->Wbulk += ABS(dcbulk)*v;
       m->Wwall += ABS(dcwall)*v;
    }
