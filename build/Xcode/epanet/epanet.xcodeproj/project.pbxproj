@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		220E6FB91B3355CB006CF6B2 /* en_legacy_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */; };
 		220E6FBA1B3355CB006CF6B2 /* en_legacy_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 220E6FB81B3355CB006CF6B2 /* en_legacy_api.c */; };
-		222CBF4C19F6E3D00049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
 		222CBF5519F6E4790049A22D /* inpfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF4B19F6E3D00049A22D /* inpfile.c */; };
 		222CBF5719F6FD2D0049A22D /* networkBuilder.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF5619F6FD2D0049A22D /* networkBuilder.c */; };
 		222CBF5819F6FD2D0049A22D /* networkBuilder.c in Sources */ = {isa = PBXBuildFile; fileRef = 222CBF5619F6FD2D0049A22D /* networkBuilder.c */; };
@@ -538,7 +537,6 @@
 				22322F861068369500641384 /* epanet.c in Sources */,
 				22322F881068369500641384 /* hash.c in Sources */,
 				22322F8A1068369500641384 /* hydraul.c in Sources */,
-				222CBF4C19F6E3D00049A22D /* inpfile.c in Sources */,
 				22322F8B1068369500641384 /* inpfile.c in Sources */,
 				22322F8C1068369500641384 /* input1.c in Sources */,
 				22322F8D1068369500641384 /* input2.c in Sources */,

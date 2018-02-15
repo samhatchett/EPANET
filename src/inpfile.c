@@ -65,6 +65,11 @@ void  saveauxdata(EN_Project *m, FILE *f)                                       
    rewind(m->InFile);
    while (fgets(line,MAXLINE,m->InFile) != NULL)
    {
+     // strip carriage return from incoming string
+     size_t crlfpos = strcspn(line,"\r\n");
+     line[crlfpos] = '\n';
+     line[crlfpos+1] = '\0';
+     
    /* Check if line begins with a new section heading */
       strcpy(s,line);
       tok = strtok(s,SEPSTR);
@@ -82,7 +87,8 @@ void  saveauxdata(EN_Project *m, FILE *f)                                       
                case _VERTICES:
                case _LABELS:
                case _BACKDROP:
-               case _TAGS: fprintf(f, "%s", line);                             //(2.00.12 - LR)
+               case _TAGS:
+                fprintf(f, "%s", line);                             //(2.00.12 - LR)
             }
             continue;
          }
@@ -103,6 +109,7 @@ void  saveauxdata(EN_Project *m, FILE *f)                                       
 }
 
 
+
 ////  This function was heavily modified.  ////                                //(2.00.12 - LR)
 
 int  saveinpfile(EN_Project *m, char *fname)
@@ -115,7 +122,6 @@ int  saveinpfile(EN_Project *m, char *fname)
    int     i,j,n;
    double  d,kc,ke,km,ucf;
    char    s[MAXLINE+1], s1[MAXLINE+1], s2[MAXLINE+1];
-   Pdemand demand;
    Psource source;
    FILE    *f;
 
@@ -301,13 +307,7 @@ int  saveinpfile(EN_Project *m, char *fname)
    ucf = m->Ucf[DEMAND];
    for (i=1; i <= m->network.Njuncs; i++)
    {
-      for (demand = m->network.Node[i].D; demand != NULL; demand = demand->next)
-      {
-         sprintf(s," %-31s %14.6E", m->network.Node[i].ID, ucf*demand->Base);
-         if ((j = demand->Pat) > 0) sprintf(s1,"   %s", m->network.Pattern[j].ID);
-         else strcpy(s1,"");
-         fprintf(f,"\n%s %s",s,s1);
-      }
+     writeNodeDemands(m, f, m->network.Node[i].D, m->network.Node[i].ID, s, s1, ucf);
    }
 
 /* Write [EMITTERS] section */
@@ -636,8 +636,24 @@ int  saveinpfile(EN_Project *m, char *fname)
 
 /* Close the new input file */
 
-   fprintf(f, "\n[END]");
+   fprintf(f, "[END]");
    fclose(f);
    return(0);
 }
 
+void  writeNodeDemands(EN_Project *m, FILE *f, Pdemand demand, char* ID, char* s, char* s1, double ucf) {
+  /* recursively write node demands from the bottom of the stack (1st) to the top (last) */
+  
+  if (demand->next != NULL) {
+    /* next demand element */
+    writeNodeDemands(m, f, demand->next, ID, s, s1, ucf);
+  }
+  
+  /* write current demand info */
+  sprintf(s," %-31s %14.6E", ID, ucf*demand->Base);
+  int j;
+  if ((j = demand->Pat) > 0) sprintf(s1,"   %s", m->network.Pattern[j].ID);
+  else strcpy(s1,"");
+  fprintf(f,"\n%s %s",s,s1);
+  return;
+}

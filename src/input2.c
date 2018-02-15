@@ -188,7 +188,11 @@ int  readdata(EN_Project *m)
    /* Read each line from input file. */
       while (fgets(line,MAXLINE,m->InFile) != NULL)
       {
-
+        // strip carriage return from incoming string
+        size_t crlfpos = strcspn(line,"\r\n");
+        line[crlfpos] = '\n';
+        line[crlfpos+1] = '\0';
+        
       /* Make copy of line and scan for tokens */
          strcpy(wline,line);
         m->Comment[0] = '\0';
@@ -276,7 +280,9 @@ int  newline(EN_Project *m, int sect, char *line)
        case _TITLE:       if (m->Ntitle < 3)
                           {
                              n = (int)strlen(line);
-                             if (line[n-1] == 10) line[n-1] = ' ';
+                            if (line[n-1] == 10) {
+                              line[n-1] = '\0';
+                            }
                              strncpy(m->Title[m->Ntitle],line,MAXMSG);
                              m->Ntitle++;
                           }

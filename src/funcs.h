@@ -287,5 +287,5 @@ int     saveepilog(EN_Project *m);                 /* Saves output file epilog  
 
 /* ------------ INPFILE.C --------------*/
 int     saveinpfile(EN_Project *m, char *);              /* Saves network to text file  */
-
+void    writeNodeDemands(EN_Project *m, FILE *f, Pdemand demand, char* ID, char* s, char* s1, double ucf); /* recursively write node demands */
 #endif
