@@ -835,6 +835,126 @@ int DLLEXPORT EN_getcontrol(EN_Project *m, int controlIndex, int *controlType, i
   return EN_OK;
 }
 
+/**
+ @brief adds a new simple control to a project
+ @param m The model object pointer
+ @param type type of control (see EN_ControlType)
+ @param linkIndex index of link being controlled
+ @param setting link control setting (e.g., pump speed)
+ @param nodeIndex index of node controlling a link (for level controls)
+ @param level control activation level (pressure for junction nodes, water level for tank nodes or time value for time-based control)
+ @param[out] index the index of the new control
+ @return EN_OK if ok, other code as appropriate.
+ */
+int DLLEXPORT EN_addcontrol(EN_Project *m, int type, int linkIndex, double setting,
+                            int nodeIndex, double level, int *index)
+{
+    EN_Network *net = &m->network;
+    
+    char status = ACTIVE;
+    int  n;
+    long t = 0;
+    double s = setting, lvl = level;
+    double *Ucf = m->Ucf;
+    Scontrol *control;
+    
+    
+    // Check that project exists
+    if (!m->Openflag) return 102;
+    
+    // Check that controlled link exists
+    if (linkIndex <= 0 || linkIndex > net->Nlinks) return 204;
+    
+    // Cannot control check valve
+    if (net->Link[linkIndex].Type == CV) return 207;
+    
+    // Check for valid parameters
+    if (type < 0 || type > EN_TIMEOFDAY) return 251;
+    if (type == EN_LOWLEVEL || type == EN_HILEVEL)
+    {
+        if (nodeIndex < 1 || nodeIndex > net->Nnodes) return 203;
+    }
+    else nodeIndex = 0;
+    if (s < 0.0 || lvl < 0.0) return 202;
+    
+    // Adjust units of control parameters
+    switch (net->Link[linkIndex].Type)
+    {
+        case PRV:
+        case PSV:
+        case PBV:
+            s /= Ucf[PRESSURE];
+            break;
+        case FCV:
+            s /= Ucf[FLOW];
+            break;
+        case GPV:
+            if (s == 0.0) status = CLOSED;
+            else if (s == 1.0) status = OPEN;
+            else return 202;
+            s = net->Link[linkIndex].Kc;
+            break;
+        case PIPE:
+        case PUMP:
+            status = OPEN;
+            if (s == 0.0) status = CLOSED;
+        default:
+            break;
+    }
+    
+    if (type == LOWLEVEL || type == HILEVEL)
+    {
+        if (nodeIndex > net->Njuncs) lvl = net->Node[nodeIndex].El + level / Ucf[ELEV];
+        else lvl = net->Node[nodeIndex].El + level / Ucf[PRESSURE];
+    }
+    if (type == TIMER) t = (long)ROUND(lvl);
+    if (type == TIMEOFDAY) t = (long)ROUND(lvl) % SECperDAY;
+    
+    // Expand project's array of controls
+    n = net->Ncontrols + 1;
+    net->Control = (Scontrol *)realloc(net->Control, (n + 1) * sizeof(Scontrol));
+    
+    // Set properties of the new control
+    control = &net->Control[n];
+    control->isEnabled = EN_ENABLE;
+    control->Type = (char)type;
+    control->Link = linkIndex;
+    control->Node = nodeIndex;
+    control->Status = status;
+    control->Setting = s;
+    control->Grade = lvl;
+    control->Time = t;
+    
+    // Update number of controls
+    net->Ncontrols = n;
+    m->MaxControls = n;
+    
+    // Replace the control's index
+    *index = n;
+    return EN_OK;
+}
+
+/**
+ @brief Deletes a simple control from a project
+ @param m The model object pointer
+ @param Index The index of the control in question
+ @return EN_OK if ok, other code as appropriate.
+ */
+int DLLEXPORT EN_deletecontrol(EN_Project *m, int index)
+{
+    EN_Network *net = &m->network;
+    int i;
+    
+    if (index <= 0 || index > net->Ncontrols) return 241;
+    for (i = index; i <= net->Ncontrols - 1; i++)
+    {
+        net->Control[i] = net->Control[i + 1];
+    }
+    net->Ncontrols--;
+    net->Control = (Scontrol *)realloc(net->Control, (net->Ncontrols + 1) * sizeof(Scontrol));
+    return EN_OK;
+}
+
 int DLLEXPORT EN_getRuleName(EN_Project *m, int ruleIndex, char *id)
 {
   strcpy(id, "");

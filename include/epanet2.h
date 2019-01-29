@@ -434,7 +434,8 @@ extern "C" {
   int  DLLEXPORT EN_setControlEnabled(EN_Project *modelObj, int controlIndex, int enable);
   int  DLLEXPORT EN_setcontrol(EN_Project *modelObj, int cindex, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level);
   int  DLLEXPORT EN_getcontrol(EN_Project *modelObj, int controlIndex, int *controlType, int *linkIdx, EN_API_FLOAT_TYPE *setting, int *nodeIdx, EN_API_FLOAT_TYPE *level);
-  
+  int  DLLEXPORT EN_addcontrol(EN_Project *modelObj, int ctype, int lindex, EN_API_FLOAT_TYPE setting, int nindex, EN_API_FLOAT_TYPE level, int *cindex);
+  int  DLLEXPORT EN_deletecontrol(EN_Project *modelObj, int cindex);
   int  DLLEXPORT EN_ruleEnabled(EN_Project *modelObj, int ruleIndex);
   int  DLLEXPORT EN_setRuleEnabled(EN_Project *modelObj, int ruleIndex, int enable);
   int  DLLEXPORT EN_getRuleName(EN_Project *modelObj, int ruleIndex, char* id);
