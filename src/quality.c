@@ -65,6 +65,7 @@ AUTHOR:     L. Rossman
 #include "mempool.h"
 
 #define   QZERO  1.e-6  /* Equivalent to zero flow -- reference QZERO in hydraul.c */
+#define   VSEGNEW 1.0   /* Segment volume threshold where new segment may be created */
 
 /*
 ** Macros to identify upstream & downstream nodes of a link
@@ -767,6 +768,26 @@ void  removesegs(EN_Project *m, int k)
     m->LastSeg[k] = NULL;
 }
 
+int  countsegs(EN_Project *m, int k)
+/*
+ **-------------------------------------------------------------
+ **   Input:   k = link index
+ **   Output:  # segments in the link
+ **   Purpose: counts segments (for debugging support)
+ **-------------------------------------------------------------
+ */
+{
+  int nsegs = 0;
+  Pseg seg;
+  seg = m->FirstSeg[k];
+  while (seg != NULL)
+  {
+    seg = seg->prev;
+    nsegs++;
+  }
+  return nsegs;
+}
+
 
 void  addseg(EN_Project *m, int k, double v, double c)
 /*
@@ -1134,8 +1155,9 @@ void release(EN_Project *m, long dt)
       /* differs from that of the flow released from node.*/
       if ( (seg = m->LastSeg[k]) != NULL)
       {
-         /* Quality of seg close to that of node */
-         if (ABS(seg->c - c) < m->Ctol)
+         /* Quality of seg close to that of node                                */
+         /* or volume of seg does not meet threshold for new segment creation   */
+         if (ABS(seg->c - c) < m->Ctol || seg->v < VSEGNEW)
          {
             seg->c = (seg->c*seg->v + c*v) / (seg->v + v);                     //(2.00.11 - LR)
             seg->v += v;
