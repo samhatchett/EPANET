@@ -60,7 +60,7 @@ int  juncdata(EN_Project *m)
 **--------------------------------------------------------------
 */
 {
-   int      n, p = 0;
+   int      n, p = 0, iJunction, iNode;
    double    el,y = 0.0;
    Pdemand  demand;
    STmplist *pat;
@@ -71,8 +71,8 @@ int  juncdata(EN_Project *m)
    if (m->network.Nnodes == m->MaxNodes)
      return(200);
   
-   m->network.Njuncs++;
-   m->network.Nnodes++;
+  iJunction = ++(m->network.Njuncs);
+  iNode = ++(m->network.Nnodes);
   
    if (!addnodeID(m, m->network.Njuncs, m->Tok[0]))
      return(215);
@@ -93,22 +93,24 @@ int  juncdata(EN_Project *m)
    }
 
 /* Save junction data */
-   Node[m->network.Njuncs].El  = el;
-   Node[m->network.Njuncs].C0  = 0.0;
-   Node[m->network.Njuncs].S   = NULL;
-   Node[m->network.Njuncs].Ke  = 0.0;
-   Node[m->network.Njuncs].Rpt = 0;
-   strcpy(Node[m->network.Njuncs].Comment, m->Comment);
+   Node[iJunction].El  = el;
+   Node[iJunction].C0  = 0.0;
+   Node[iJunction].S   = NULL;
+   Node[iJunction].Ke  = 0.0;
+   Node[iJunction].Rpt = 0;
+   strcpy(Node[iJunction].Comment, m->Comment);
   
 
 /* Create a new demand record */
    demand = (struct Sdemand *) malloc(sizeof(struct Sdemand));
-   if (demand == NULL) return(101);
+   if (demand == NULL) {
+      return(101);
+   }
    demand->Base = y;
    demand->Pat = p;
-   demand->next = Node[m->network.Njuncs].D;
-   Node[m->network.Njuncs].D = demand;
-   m->hydraulics.NodeDemand[m->network.Njuncs] = y;
+   demand->next = Node[iJunction].D;
+   Node[iJunction].D = demand;
+   m->hydraulics.NodeDemand[iJunction] = y;
 
   return(0);
 }                        /* end of juncdata */

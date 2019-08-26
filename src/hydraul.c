@@ -45,9 +45,9 @@ AUTHOR:     L. Rossman
      writehydwarn() -- see REPORT.C
 *******************************************************************
 */
-
-//#define __APPLE_GCD__
-#ifdef __APPLE_GCD__
+//#ifdef __APPLE__
+#ifdef __NODONTPLEASE__APPLE__
+  #define __APPLE_GCD__
   #include <dispatch/dispatch.h>
   #define LOOP_CONTINUE return;
 #else
@@ -2144,23 +2144,6 @@ void  linkcoeffs(EN_Project *m)
         double rhs = (m->hydraulics.solver.P[k] * m->hydraulics.NodeHead[n2]);
         m->hydraulics.solver.F[row1] += rhs;
       }
-     
-     // check for nans
-     int nank;
-     for (nank=1; nank <= m->network.Nnodes; nank++)
-     {
-       double f = m->hydraulics.solver.F[nank];
-       //fprintf(stdout, "%f", f);
-       if (isnan(f)) {
-         // is nan
-         //fprintf(stdout, "  <------------   nan");
-       }
-       if (isinf(f)) {
-         // is nan
-         //fprintf(stdout, "  <------------  INF");
-       }
-       //fprintf(stdout, "\n");
-     }
      
    }
 

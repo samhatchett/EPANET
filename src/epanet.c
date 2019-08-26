@@ -1496,12 +1496,12 @@ int DLLEXPORT EN_getnodevalue(EN_Project *m, int index, int code, EN_API_FLOAT_T
   case EN_QUALITY:
     v = m->NodeQual[index] * m->Ucf[QUALITY];
     break;
-
-    /*** New parameters added for retrieval begins here   ***/ //(2.00.12 -
-  // LR)
-  /*** (Thanks to Nicolas Basile of Ecole Polytechnique ***/
-  /***  de Montreal for suggesting some of these.)      ***/
-
+      
+  // get tank inlet quality
+  case EN_INLETQUALITY:
+    v = m->MassIn[index] / m->VolIn[index] * m->Ucf[QUALITY];
+    break;
+      
   case EN_TANKDIAM:
     v = 0.0;
     if (index > m->network.Njuncs) {

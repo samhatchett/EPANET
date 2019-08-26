@@ -58,6 +58,7 @@
 #define EN_INITVOLUME   14
 #define EN_MIXMODEL     15
 #define EN_MIXZONEVOL   16
+#define EN_INLETQUALITY 26
 
 #define EN_TANKDIAM     17
 #define EN_MINVOLUME    18
