@@ -1500,6 +1500,13 @@ int DLLEXPORT EN_getnodevalue(EN_Project *m, int index, int code, EN_API_FLOAT_T
   // get tank inlet quality
   case EN_INLETQUALITY:
     v = m->MassIn[index] / m->VolIn[index] * m->Ucf[QUALITY];
+    *value = (EN_API_FLOAT_TYPE)v;
+    if (m->VolIn[index] > 0) {
+      return EN_OK;
+    }
+    else {
+      return EN_ERR_ILLEGAL_NUMERIC_VALUE;
+    }
     break;
       
   case EN_TANKDIAM:
