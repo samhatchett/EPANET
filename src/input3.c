@@ -169,7 +169,8 @@ int  tankdata(EN_Project *m)
       if (n == 3)                            /* Pattern supplied  */
       {
          t = findID(Tok[2], m->Patlist);
-         if (t == NULL) return(205);
+         if (t == NULL)
+           return(205);
          p = t->i;
       }
    }
@@ -431,13 +432,15 @@ int  pumpdata(EN_Project *mod)
       else if (match(Tok[m-1],w_HEAD))      /* Custom pump curve      */
       {
          t = findID(Tok[m],mod->Curvelist);
-         if (t == NULL) return(206);
+         if (t == NULL)
+           return(206);
          Pump[Npumps].Hcurve = t->i;
       }
       else if (match(Tok[m-1],w_PATTERN))   /* Speed/status pattern */
       {
          t = findID(Tok[m],mod->Patlist);
-         if (t == NULL) return(205);
+         if (t == NULL)
+           return(205);
          Pump[Npumps].Upat = t->i;
       }
       else if (match(Tok[m-1],w_SPEED))     /* Speed setting */
@@ -518,7 +521,8 @@ int  valvedata(EN_Project *m)
    if (type == GPV)                          /* Headloss curve for GPV */
    {
       t = findID(Tok[5],m->Curvelist);
-      if (t == NULL) return(206);
+      if (t == NULL)
+        return(206);
       setting = t->i;
 
 /*** Updated 9/7/00 ***/
@@ -587,7 +591,8 @@ int  patterndata(EN_Project *m)
           strcmp(Tok[0],PrevPat->ID) == 0
       ) p = PrevPat;
    else p = findID(Tok[0],m->Patlist);
-   if (p == NULL) return(205);
+   if (p == NULL)
+     return(205);
    for (i=1; i<=n; i++)               /* Add multipliers to list */
    {
        if (!getfloat(Tok[i],&x)) return(202);
@@ -629,7 +634,8 @@ int  curvedata(EN_Project *m)
           strcmp(Tok[0],PrevCurve->ID) == 0
       ) c = PrevCurve;
    else c = findID(Tok[0],m->Curvelist);
-   if (c == NULL) return(205);
+   if (c == NULL)
+     return(205);
 
    /* Check for valid data */
    if (!getfloat(Tok[1],&x)) return(202);
@@ -681,7 +687,8 @@ int  coordata(EN_Project *m)
 	else c = findID(Tok[0],m->Coordlist);
   
   //	c = findID(Tok[0],Coordlist);
-	if (c == NULL) return(205);
+	if (c == NULL)
+    return(205);
   
 	/* Check for valid data */
 	if (!getfloat(Tok[1],&x)) return(202);
@@ -753,7 +760,8 @@ int  demanddata(EN_Project *m)
    if (n >= 3)
    {
       pat = findID(Tok[2],m->Patlist);
-      if (pat == NULL)  return(205);
+      if (pat == NULL)
+        return(205);
       p = pat->i;
    }
 
@@ -838,7 +846,8 @@ int  controldata(EN_Project *m)
       if (type == PUMP) setting = 0.0;
       if (type == GPV)  setting = Link[k].Kc;
    }
-   else if (type == GPV) return(206);
+   else if (type == GPV)
+     return(206);
    else if (!getfloat(Tok[2],&setting)) return(202);
 
 /*** Updated 3/1/01 ***/

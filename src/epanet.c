@@ -1499,14 +1499,10 @@ int DLLEXPORT EN_getnodevalue(EN_Project *m, int index, int code, EN_API_FLOAT_T
       
   // get tank inlet quality
   case EN_INLETQUALITY:
-    v = m->MassIn[index] / m->VolIn[index] * m->Ucf[QUALITY];
-    *value = (EN_API_FLOAT_TYPE)v;
-    if (m->VolIn[index] > 0) {
-      return EN_OK;
-    }
-    else {
+    if (m->VolIn[index] <= 0) {
       return EN_ERR_ILLEGAL_NUMERIC_VALUE;
     }
+    v = m->MassIn[index] / m->VolIn[index] * m->Ucf[QUALITY];
     break;
       
   case EN_TANKDIAM:
@@ -1885,10 +1881,8 @@ int DLLEXPORT EN_getcurve(EN_Project *m, int curveIndex, char *id, int *nValues,
   EN_API_FLOAT_TYPE *pointY = calloc(nPoints, sizeof(EN_API_FLOAT_TYPE));
   int iPoint;
   for (iPoint = 0; iPoint < nPoints; iPoint++) {
-    double x = curve.X[iPoint] * m->Ucf[LENGTH];
-    double y = curve.Y[iPoint] * m->Ucf[VOLUME];
-    pointX[iPoint] = (EN_API_FLOAT_TYPE)x;
-    pointY[iPoint] = (EN_API_FLOAT_TYPE)y;
+    pointX[iPoint] = (EN_API_FLOAT_TYPE)curve.X[iPoint];
+    pointY[iPoint] = (EN_API_FLOAT_TYPE)curve.Y[iPoint];
   }
 
   strncpy(id, curve.ID, MAXID);
@@ -2096,6 +2090,7 @@ int  DLLEXPORT EN_setlinkcomment(EN_Project *m, int linkIndex, const char *comme
     return (203);
   
   strncpy(m->network.Link[linkIndex].Comment, comment, MAXMSG);
+  m->network.Link[linkIndex].Comment[MAXMSG-1] = '\0';
   return EN_OK;
 }
 
